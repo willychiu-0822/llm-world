@@ -3,12 +3,13 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "exports": { ".": "./src/index.ts" },
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
     "generate": "drizzle-kit generate",
-    "migrate": "tsx src/migrate-cli.ts",
-    "seed:demo": "tsx src/seed-demo-cli.ts"
+    "migrate": "tsx src/migrate-cli.ts"
   },
   "dependencies": {
     "@lj/core": "workspace:*",

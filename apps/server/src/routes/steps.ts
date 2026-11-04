@@ -60,15 +60,15 @@ export function notificationRoutes(ctx: AppContext) {
 
 export function discoveryRoutes(ctx: AppContext) {
   const r = Router();
-  r.use(requireUser);
-  r.get("/discoveries", h(async (req, res) => res.json(await listDiscoveries(ctx, req.user!.id))));
+  r.get("/discoveries", requireUser, h(async (req, res) => res.json(await listDiscoveries(ctx, req.user!.id))));
   r.post(
     "/discoveries/:id/read",
+    requireUser,
     h(async (req, res) => {
       await readDiscovery(ctx, req.user!.id, String(req.params.id));
       res.status(204).end();
     }),
   );
-  r.get("/mirror", h(async (req, res) => res.json(await getMirror(ctx, req.user!.id))));
+  r.get("/mirror", requireUser, h(async (req, res) => res.json(await getMirror(ctx, req.user!.id))));
   return r;
 }

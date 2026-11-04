@@ -3,6 +3,8 @@ import helmet from "helmet";
 import { loadSession } from "./auth/session";
 import type { AppContext } from "./context";
 import { errorHandler } from "./http/errors";
+import { serveWeb } from "./web";
+import { APP_NAME } from "@lj/core";
 import { authRoutes } from "./routes/auth";
 import { mcpRoutes } from "./mcp/route";
 import { oauthRoutes } from "./oauth/routes";
@@ -19,6 +21,9 @@ export function createApp(ctx: AppContext) {
   app.use(express.json({ limit: "100kb" }));
   app.use(express.urlencoded({ extended: false }));
   app.use(loadSession(ctx));
+  app.get("/api/config", (_req, res) =>
+    res.json({ appName: APP_NAME, devLogin: ctx.config.devLogin, googleLogin: Boolean(ctx.config.google.clientId), mcpUrl: `${ctx.config.baseUrl}/mcp` }),
+  );
   app.use(authRoutes(ctx));
   const oauth = oauthRoutes(ctx);
   app.use(oauth.router);
@@ -32,6 +37,7 @@ export function createApp(ctx: AppContext) {
   app.use("/api/provider", providerRoutes(ctx));
   app.use("/api/admin", adminRoutes(ctx));
   app.use("/api", (_req, res) => res.status(404).json({ error: { code: "not_found", message: "route not found" } }));
+  serveWeb(app, ctx.config.webDist);
   app.use(errorHandler);
   return app;
 }
