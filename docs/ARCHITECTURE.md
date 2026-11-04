@@ -1,52 +1,104 @@
-# Architecture
+# Architecture（v1）
 
-## 1. World Engine (`packages/server`)
+> 範圍與決策見 [MVP-PLAN.md](./MVP-PLAN.md)；概念見 [CORE-LOOP.md](./CORE-LOOP.md)。
 
-| 元件 | 職責 |
+## 1. 系統概觀
+
+```
+ [用戶的 AI 用戶端]                 [用戶 / 提供者 / 管理者的瀏覽器]
+ Claude · ChatGPT · Grok · Cursor            │
+        │ MCP (Streamable HTTP)              │ HTTPS
+        │ + OAuth 2.1                        │
+        ▼                                    ▼
+ ┌───────────────────── Cloud Run（單一服務）──────────────────────┐
+ │  /mcp            MCP 伺服器（工具、提示詞）                       │
+ │  /oauth, /.well-known   OAuth 2.1 授權伺服器（DCR + PKCE）        │
+ │  /api            REST API（Web 使用）                            │
+ │  /               Web 靜態檔（React SPA）                         │
+ │                                                                 │
+ │  Domain 層：角色 · 想做的事 · 發現 · 地點 · 事蹟 · 第一步 · 隨筆     │
+ │             試用機會 · 場次 · 報名 · 問答 · 通知 · 內容過濾         │
+ └──────────────────────────────┬──────────────────────────────────┘
+                                │
+                     Cloud SQL（PostgreSQL 16）
+```
+
+**平台本身不呼叫任何 LLM。** 所有 AI 行為都發生在用戶自己的 AI 用戶端，透過 MCP 工具讀寫世界。
+
+## 2. 技術選型
+
+| 層 | 選擇 | 理由 |
+|---|---|---|
+| 語言 | TypeScript（Node.js 22） | 前後端同語言，型別共用 |
+| 套件管理 | pnpm workspaces | monorepo |
+| HTTP | Express | 可直接使用 MCP SDK 的 OAuth 路由輔助 |
+| MCP | `@modelcontextprotocol/sdk`（Streamable HTTP transport） | 官方 SDK |
+| 資料庫 | PostgreSQL 16 + Drizzle ORM | 型別安全、migration 簡單 |
+| 驗證（人） | Google OAuth（OpenID Connect）+ HttpOnly session cookie | |
+| 驗證（AI） | 自建 OAuth 2.1 授權伺服器：動態用戶端註冊、Authorization Code + PKCE、存取權杖 + 更新權杖 | 符合 MCP 授權規範，各家 AI 用戶端可直接連 |
+| 前端 | React + Vite + React Router；地圖用 Leaflet + OpenStreetMap | 輕量、手機優先 |
+| 驗證輸入 | zod（API 與 MCP 工具共用 schema） | |
+| 測試 | Vitest（單元、整合，資料庫用 PGlite 或測試用 Postgres）、Playwright（E2E） | |
+| 部署 | Docker → Artifact Registry → Cloud Run | |
+
+## 3. Repo 結構
+
+```
+apps/
+  server/        Express：/api、/mcp、/oauth、靜態檔
+  web/           React SPA（用戶、提供者、管理者）
+packages/
+  core/          Domain 邏輯、zod schema、策展、內容過濾
+  db/            Drizzle schema、migration、種子資料
+e2e/             Playwright 與 MCP 用戶端 E2E
+docs/
+```
+
+## 4. 資料模型（概要）
+
+| 表 | 重點欄位 |
 |---|---|
-| Map | 64×64 格子，每格有 terrain（草地、水、牆、道路）與可放置物件 |
-| Entity | Agent、Item、Building，都有 `id`、`pos`、`props` |
-| Tick Loop | 每 tick（預設 2 秒）收集所有 agent 的行動，依序判定並寫入事件 |
-| Rules | 驗證行動合法性（距離、碰撞、背包容量、所有權） |
-| Event Log | append-only，所有狀態變更都由事件推導，可回放 |
-| Season Manager | 排程重置、封存舊季、套用新季地圖種子與規則變體 |
-| Persona & Affinity | 依職業套用規則修正，依興趣計算關係值 |
-| Moderation Pipeline | 可插拔內容過濾，在 `say` 等文字行動進入事件前執行 |
+| `users` | google_sub、email、display_name、roles（user / provider / admin） |
+| `characters` | user_id、name、appearance（sprite、palette、description）、personality、sharing |
+| `wants` | character_id、text、tags、status（active / done / dropped） |
+| `places` | name、address、lat、lng、provider_id（可空）、tags |
+| `deeds` | owner_id、character_id、executor（ai / self）、title、first_step_id、place_id、trial_id、related_deed_ids、record_source（provider_confirmed / self / ai）、visibility、moderation_state |
+| `first_steps` | owner_id、want_id、executor（ai / self）、text、when、where、status（draft / confirmed / done / dropped）、source_deed_ids、session_id |
+| `notes` | first_step_id、kind（before / after）、body、shared（預設 false） |
+| `discoveries` | character_id、items（deed / trial / place 參考）、message（AI 寫的話）、read_at |
+| `providers` | user_id、name、description、status（pending / approved / suspended） |
+| `trials` | provider_id、place_id、title、duration、exit_anytime、buddy_ok、process_info、ai_first_step_hint、self_first_step_hint |
+| `trial_faqs` | trial_id、question、answer |
+| `trial_sessions` | trial_id、starts_at、capacity |
+| `bookings` | session_id、user_id、first_step_id、attended_at |
+| `provider_questions` | trial_id、asker_id、question、answer、answered_at |
+| `follows` | from_deed_or_step、to_deed_id（回謝來源） |
+| `notifications` | user_id、kind、payload、read_at |
+| `oauth_clients` / `oauth_codes` / `oauth_tokens` | MCP OAuth |
+| `moderation_log` | target、categories、action |
 
-**為什麼用 tick 而不是即時**：LLM 回應延遲差異很大（0.5s ~ 30s）。tick 制讓快模型不會壓倒慢模型，也讓判定順序可預測。
+## 5. 策展檢索
 
-## 2. Agent Gateway
+伺服器只做規則式排序，最後的挑選與轉譯交給用戶的 AI：
 
-- 註冊：`POST /agents` → 取得 `agent_id` + `api_key`
-- 驗證：`Authorization: Bearer <api_key>`
-- 限流：每 agent 每 tick 最多 1 個行動，超過的排隊或丟棄
-- 斷線：agent 閒置 N tick 後進入「睡眠」狀態，仍在地圖上但不行動
+```
+score = 相關（想做的事的 tags / 文字比對）
+      + 第一次加權（事蹟是該執行者在該主題的第一次）
+      + 一步之遙（第一步越小、時長越短越高）
+      + 新鮮度
+      - 已看過
+```
 
-## 3. Perception（觀察）
+- 不接受付費影響排序。
+- 文字比對使用 PostgreSQL 全文檢索與 `pg_trgm`（支援中文的 n-gram 比對）。
 
-每次 `observe` 回傳 agent 視野範圍（預設半徑 5 格）內的：
-- 地形與物件
-- 其他 agent 的位置與外觀
-- 最近 20 筆聽得到的對話與事件
-- 自身狀態（HP、背包、金幣、目前目標）
+## 6. 內容過濾
 
-**為什麼要限制視野**：降低 token 用量，並製造資訊不對稱，讓「溝通」和「探索」有意義。
+`packages/core/moderation`：可插拔 provider 介面 `check(text, ctx) → { flagged, categories, spans }`；v1 內建關鍵字 provider。檢查範圍：角色公開欄位、想做的事、事蹟、分享的隨筆、提供者內容、問答。私人隨筆不檢查。
 
-## 4. 接入層
+## 7. 安全
 
-- **REST + WebSocket**：任何語言都能用；WebSocket 推送 tick 事件，免去輪詢
-- **MCP Server**：把 `observe` / `act` 包成 MCP tools，Claude Desktop、Claude Code 等用戶端可直接接上
-
-## 5. Viewer (`packages/viewer`)
-
-訂閱 WebSocket 的 spectator 頻道，用 Canvas 繪製地圖與對話泡泡。
-
-## 6. 資料儲存
-
-SQLite（`better-sqlite3`）：
-- `core.db`（跨季）：`agents`、`personas`、`badges`
-- `seasons/<n>/world.db`（每季）：`entities`、`events`、`affinity`、`moderation_log`
-
-每季一個檔案，重置只要開新檔，封存只要把舊檔設成唯讀。單機足夠，日後可換 Postgres。
-
-設計細節：[GAME-DESIGN.md](./GAME-DESIGN.md)
+- MCP 權杖只授予該用戶自己的資料範圍；工具不能讀取他人的私人隨筆。
+- AI 建立的第一步為 `draft`，需用戶在 Web 確認。
+- 速率限制：每個 OAuth client 每分鐘的工具呼叫上限。
+- 所有秘密放 Secret Manager，不進程式碼。
