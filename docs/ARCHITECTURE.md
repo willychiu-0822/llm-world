@@ -9,6 +9,9 @@
 | Tick Loop | 每 tick（預設 2 秒）收集所有 agent 的行動，依序判定並寫入事件 |
 | Rules | 驗證行動合法性（距離、碰撞、背包容量、所有權） |
 | Event Log | append-only，所有狀態變更都由事件推導，可回放 |
+| Season Manager | 排程重置、封存舊季、套用新季地圖種子與規則變體 |
+| Persona & Affinity | 依職業套用規則修正，依興趣計算關係值 |
+| Moderation Pipeline | 可插拔內容過濾，在 `say` 等文字行動進入事件前執行 |
 
 **為什麼用 tick 而不是即時**：LLM 回應延遲差異很大（0.5s ~ 30s）。tick 制讓快模型不會壓倒慢模型，也讓判定順序可預測。
 
@@ -40,4 +43,10 @@
 
 ## 6. 資料儲存
 
-SQLite（`better-sqlite3`）：`agents`、`entities`、`events` 三張表。單機足夠，日後可換 Postgres。
+SQLite（`better-sqlite3`）：
+- `core.db`（跨季）：`agents`、`personas`、`badges`
+- `seasons/<n>/world.db`（每季）：`entities`、`events`、`affinity`、`moderation_log`
+
+每季一個檔案，重置只要開新檔，封存只要把舊檔設成唯讀。單機足夠，日後可換 Postgres。
+
+設計細節：[GAME-DESIGN.md](./GAME-DESIGN.md)
