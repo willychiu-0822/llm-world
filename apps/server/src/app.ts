@@ -4,8 +4,10 @@ import { loadSession } from "./auth/session";
 import type { AppContext } from "./context";
 import { errorHandler } from "./http/errors";
 import { authRoutes } from "./routes/auth";
+import { mcpRoutes } from "./mcp/route";
+import { oauthRoutes } from "./oauth/routes";
 import { meRoutes } from "./routes/me";
-import { deedRoutes, notificationRoutes, stepRoutes } from "./routes/steps";
+import { deedRoutes, discoveryRoutes, notificationRoutes, stepRoutes } from "./routes/steps";
 import { adminRoutes, providerRoutes, worldRoutes } from "./routes/world";
 
 export function createApp(ctx: AppContext) {
@@ -18,11 +20,15 @@ export function createApp(ctx: AppContext) {
   app.use(express.urlencoded({ extended: false }));
   app.use(loadSession(ctx));
   app.use(authRoutes(ctx));
+  const oauth = oauthRoutes(ctx);
+  app.use(oauth.router);
+  app.use(mcpRoutes(ctx, oauth.provider));
   app.use("/api/me", meRoutes(ctx));
   app.use("/api/first-steps", stepRoutes(ctx));
   app.use("/api/deeds", deedRoutes(ctx));
   app.use("/api/notifications", notificationRoutes(ctx));
   app.use("/api", worldRoutes(ctx));
+  app.use("/api", discoveryRoutes(ctx));
   app.use("/api/provider", providerRoutes(ctx));
   app.use("/api/admin", adminRoutes(ctx));
   app.use("/api", (_req, res) => res.status(404).json({ error: { code: "not_found", message: "route not found" } }));

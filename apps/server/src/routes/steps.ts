@@ -4,6 +4,8 @@ import { requireUser } from "../auth/session";
 import type { AppContext } from "../context";
 import { h } from "../http/errors";
 import { getDeedView, setDeedVisibility } from "../services/deeds";
+import { listDiscoveries, readDiscovery } from "../services/discover";
+import { getMirror } from "../services/mirror";
 import { listNotifications, readAllNotifications } from "../services/notifications";
 import { completeSelfStep, confirmStep, createStep, dropStep, getSuggestions, listSteps, stepIcs, upsertNote } from "../services/steps";
 
@@ -53,5 +55,20 @@ export function notificationRoutes(ctx: AppContext) {
       res.status(204).end();
     }),
   );
+  return r;
+}
+
+export function discoveryRoutes(ctx: AppContext) {
+  const r = Router();
+  r.use(requireUser);
+  r.get("/discoveries", h(async (req, res) => res.json(await listDiscoveries(ctx, req.user!.id))));
+  r.post(
+    "/discoveries/:id/read",
+    h(async (req, res) => {
+      await readDiscovery(ctx, req.user!.id, String(req.params.id));
+      res.status(204).end();
+    }),
+  );
+  r.get("/mirror", h(async (req, res) => res.json(await getMirror(ctx, req.user!.id))));
   return r;
 }
