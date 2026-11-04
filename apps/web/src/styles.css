@@ -136,8 +136,10 @@ main.page { width: 100%; max-width: 1080px; margin: 0 auto; padding: 20px 16px 9
 }
 .panel.soft { background: var(--paper-2); box-shadow: none; }
 .panel.hero { background: linear-gradient(160deg, var(--butter-soft), var(--card)); }
-.card-link { text-decoration: none; display: block; transition: transform 0.12s ease; }
-.card-link:hover { transform: translateY(-2px) rotate(-0.3deg); }
+.card-link { text-decoration: none; display: block; }
+.card-link > * { transition: transform 0.12s ease; }
+.card-link:hover > * { transform: translateY(-2px) rotate(-0.3deg); }
+@media (prefers-reduced-motion: reduce) { .card-link:hover > * { transform: none; } }
 
 .btn {
   font: inherit; font-weight: 700; cursor: pointer;

@@ -47,7 +47,7 @@ export function RequireLogin({ children }: { children: ReactNode }) {
 export function DeedCard({ deed }: { deed: Deed }) {
   return (
     <Link to={`/deeds/${deed.id}`} className="card-link">
-      <article className="panel stack" style={{ gap: 8 }}>
+      <div className="panel stack" style={{ gap: 8 }}>
         <div className="row">
           <Avatar appearance={deed.character?.appearance} name={deed.character?.name ?? "鎮民"} size={44} />
           <div className="grow">
@@ -62,7 +62,7 @@ export function DeedCard({ deed }: { deed: Deed }) {
         <p style={{ fontWeight: 700 }}>「{deed.title}」</p>
         {deed.summary && <p className="muted">{deed.summary.length > 80 ? `${deed.summary.slice(0, 80)}…` : deed.summary}</p>}
         <small>{timeAgo(deed.createdAt)}</small>
-      </article>
+      </div>
     </Link>
   );
 }
@@ -70,7 +70,7 @@ export function DeedCard({ deed }: { deed: Deed }) {
 export function TrialCard({ trial }: { trial: Trial }) {
   return (
     <Link to={`/trials/${trial.id}`} className="card-link">
-      <article className="panel stack" style={{ gap: 6, background: "var(--butter-soft)" }}>
+      <div className="panel stack" style={{ gap: 6, background: "var(--butter-soft)" }}>
         <div className="row wrap" style={{ gap: 6 }}>
           <span className="tag tag-first">試用機會</span>
           {trial.isDemo && <span className="tag tag-demo">示範</span>}
@@ -81,7 +81,7 @@ export function TrialCard({ trial }: { trial: Trial }) {
           {trial.buddyOk ? "・可以帶朋友" : ""}
           {trial.whenText ? `・${trial.whenText}` : ""}
         </small>
-      </article>
+      </div>
     </Link>
   );
 }
