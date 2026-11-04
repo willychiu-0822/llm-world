@@ -1,4 +1,4 @@
-import { connect, runMigrations } from "@lj/db";
+import { connect, migrateWithLock } from "@lj/db";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -12,8 +12,8 @@ if (!config.webDist) {
   const guess = [path.resolve(here, "../../web/dist"), path.resolve(here, "../web")].find((p) => existsSync(path.join(p, "index.html")));
   if (guess) config.webDist = guess;
 }
-const handle = connect(config.databaseUrl);
-if (process.env.SKIP_MIGRATIONS !== "true") await runMigrations(handle.db);
+const handle = connect(config.databaseUrl, { max: Number(process.env.DB_POOL_MAX ?? 5) });
+if (process.env.SKIP_MIGRATIONS !== "true") await migrateWithLock(config.databaseUrl);
 const app = createApp(createContext({ db: handle.db, config }));
 const server = app.listen(config.port, () => {
   console.log(`龍角鎮 listening on :${config.port} (${config.env}) base=${config.baseUrl} web=${config.webDist ?? "none"}`);

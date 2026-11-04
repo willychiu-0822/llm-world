@@ -1,0 +1,13 @@
+# 共用設定。先複製成 config.local.sh 再修改，或直接用環境變數覆寫。
+: "${PROJECT_ID:?請設定 PROJECT_ID（GCP 專案 ID）}"
+REGION="${REGION:-asia-east1}"
+SERVICE="${SERVICE:-longjiao}"
+AR_REPO="${AR_REPO:-longjiao}"
+SQL_INSTANCE="${SQL_INSTANCE:-longjiao-pg}"
+SQL_TIER="${SQL_TIER:-db-f1-micro}"
+DB_NAME="${DB_NAME:-longjiao}"
+DB_USER="${DB_USER:-longjiao}"
+RUN_SA_NAME="${RUN_SA_NAME:-longjiao-run}"
+RUN_SA="${RUN_SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
+IMAGE_BASE="${REGION}-docker.pkg.dev/${PROJECT_ID}/${AR_REPO}/app"
+SQL_CONNECTION="${PROJECT_ID}:${REGION}:${SQL_INSTANCE}"

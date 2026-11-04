@@ -1,0 +1,45 @@
+name: Deploy
+
+# 在 main 的 CI 全部通過後，自動部署到 Cloud Run。
+# 需要先執行 deploy/gcp/setup.sh 與 deploy/gcp/github-wif.sh，並設定 repo 的 Actions variables（見 docs/DEPLOYMENT.md）。
+on:
+  workflow_run:
+    workflows: [CI]
+    branches: [main]
+    types: [completed]
+  workflow_dispatch:
+
+concurrency: deploy-production
+
+jobs:
+  deploy:
+    if: ${{ vars.GCP_PROJECT_ID != '' && (github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+      REGION: ${{ vars.GCP_REGION || 'asia-east1' }}
+      GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
+      ADMIN_EMAILS: ${{ vars.ADMIN_EMAILS }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SA }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: Build and push image
+        run: |
+          TAG="$(git rev-parse --short HEAD)"
+          IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/longjiao/app:${TAG}"
+          gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
+          docker build -t "$IMAGE" .
+          docker push "$IMAGE"
+          echo "TAG=$TAG" >> "$GITHUB_ENV"
+      - name: Deploy to Cloud Run
+        run: SKIP_BUILD=true TAG="$TAG" bash deploy/gcp/deploy.sh

@@ -16,7 +16,7 @@
     "test:e2e": "playwright test",
     "db:generate": "pnpm --filter @lj/db generate",
     "db:migrate": "pnpm --filter @lj/db migrate",
-    "seed:demo": "pnpm --filter @lj/server exec tsx src/seed-demo.ts"
+    "seed:demo": "pnpm --filter @lj/server exec tsx --env-file-if-exists=../../.env src/seed-demo.ts"
   },
   "devDependencies": {
     "@modelcontextprotocol/sdk": "1.32.2",
