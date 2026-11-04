@@ -198,6 +198,7 @@ export const providerQuestions = pgTable("provider_questions", {
   askerUserId: text("asker_user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   firstStepId: text("first_step_id").references(() => firstSteps.id, { onDelete: "set null" }),
   question: text("question").notNull(),
+  source: text("source").notNull().default("forwarded"), // forwarded | faq
   answer: text("answer"),
   answeredAt: ts("answered_at"),
   createdAt: createdAt(),

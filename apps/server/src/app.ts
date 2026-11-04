@@ -6,6 +6,7 @@ import { errorHandler } from "./http/errors";
 import { authRoutes } from "./routes/auth";
 import { meRoutes } from "./routes/me";
 import { deedRoutes, notificationRoutes, stepRoutes } from "./routes/steps";
+import { adminRoutes, providerRoutes, worldRoutes } from "./routes/world";
 
 export function createApp(ctx: AppContext) {
   const app = express();
@@ -21,6 +22,9 @@ export function createApp(ctx: AppContext) {
   app.use("/api/first-steps", stepRoutes(ctx));
   app.use("/api/deeds", deedRoutes(ctx));
   app.use("/api/notifications", notificationRoutes(ctx));
+  app.use("/api", worldRoutes(ctx));
+  app.use("/api/provider", providerRoutes(ctx));
+  app.use("/api/admin", adminRoutes(ctx));
   app.use("/api", (_req, res) => res.status(404).json({ error: { code: "not_found", message: "route not found" } }));
   app.use(errorHandler);
   return app;

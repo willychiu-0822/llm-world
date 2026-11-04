@@ -1,5 +1,5 @@
 {
-  "id": "bf06006c-5c90-42d4-9ad7-d185481e4611",
+  "id": "91b08a1c-cfee-4d82-877c-803f7d46bb32",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1539,6 +1539,13 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "source": {
+          "name": "source",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'forwarded'"
         },
         "answer": {
           "name": "answer",

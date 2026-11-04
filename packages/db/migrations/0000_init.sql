@@ -176,6 +176,7 @@ CREATE TABLE "provider_questions" (
 	"asker_user_id" text NOT NULL,
 	"first_step_id" text,
 	"question" text NOT NULL,
+	"source" text DEFAULT 'forwarded' NOT NULL,
 	"answer" text,
 	"answered_at" timestamp with time zone,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL

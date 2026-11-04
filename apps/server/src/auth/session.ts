@@ -12,9 +12,12 @@ export interface SessionUser {
   roles: string[];
 }
 
-declare module "express-serve-static-core" {
-  interface Request {
-    user?: SessionUser;
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Express {
+    interface Request {
+      user?: SessionUser;
+    }
   }
 }
 

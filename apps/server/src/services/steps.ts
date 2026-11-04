@@ -42,12 +42,19 @@ async function validateSources(ctx: AppContext, userId: string, ids: string[]) {
   return unique;
 }
 
-async function book(ctx: AppContext, userId: string, step: StepRow) {
-  if (!step.sessionId || step.executor !== "self") return;
-  const [session] = await ctx.db.select().from(trialSessions).where(eq(trialSessions.id, step.sessionId));
+async function checkBookable(ctx: AppContext, userId: string, sessionId: string) {
+  const [session] = await ctx.db.select().from(trialSessions).where(eq(trialSessions.id, sessionId));
   if (!session) throw notFound("session");
   const [taken] = await ctx.db.select({ c: count() }).from(bookings).where(eq(bookings.sessionId, session.id));
   if (taken.c >= session.capacity) throw new AppError("conflict", "session is full");
+  const [mine] = await ctx.db.select({ id: bookings.id }).from(bookings).where(and(eq(bookings.sessionId, session.id), eq(bookings.userId, userId)));
+  if (mine) throw new AppError("conflict", "already booked");
+  return session;
+}
+
+async function book(ctx: AppContext, userId: string, step: StepRow) {
+  if (!step.sessionId || step.executor !== "self") return;
+  const session = await checkBookable(ctx, userId, step.sessionId);
   const inserted = await ctx.db
     .insert(bookings)
     .values({ id: newId("bkg"), sessionId: session.id, userId, firstStepId: step.id })
@@ -85,6 +92,7 @@ export async function createStep(
     trialId = s.trialId;
   }
   if (trialId) await getUsableTrial(ctx, trialId);
+  if (input.sessionId && input.executor === "self" && opts.proposedBy === "user") await checkBookable(ctx, userId, input.sessionId);
   const text = await moderate(ctx, input.text, { userId, targetType: "first_step" });
   const now = ctx.now();
   const status = opts.proposedBy === "ai" ? "draft" : "confirmed";
@@ -109,7 +117,14 @@ export async function createStep(
     })
     .returning();
   if (input.noteBefore) await upsertNote(ctx, userId, step.id, "before", { body: input.noteBefore, shared: false });
-  if (status === "confirmed") await onConfirmed(ctx, step);
+  if (status === "confirmed") {
+    try {
+      await onConfirmed(ctx, step);
+    } catch (e) {
+      await ctx.db.delete(firstSteps).where(eq(firstSteps.id, step.id));
+      throw e;
+    }
+  }
   return stepDto(step);
 }
 
