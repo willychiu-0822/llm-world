@@ -1,4 +1,4 @@
-# Core Loop：系統架構模型（v3，概念層）
+# Core Loop：系統架構模型（v4，概念層）
 
 > 本文件只定義**概念與結構**，不定義具體功能、介面或玩法。
 
@@ -205,7 +205,83 @@ A 在任一層的行動 → 自動留下痕跡
 
 原則：**AI 是潤滑劑，不是終點。** 真人供給占比應隨時間上升。
 
-## 6. 系統守則
+### 5.8 第一步提供者
+
+現實中提供「試一次」機會的人或單位（教室、教練、社團、場館等）。
+
+| 角色 | 給出 | 得到 |
+|---|---|---|
+| 使用者 | 出席、經驗、證明 | 低風險的第一步 |
+| 提供者 | 試用機會、過程資訊、自己的 agent | 有興趣且已暖身的新人 |
+| 前一步使用者 | 同行、證明 | 被需要 |
+| AI agent | 媒合、轉譯 | — |
+
+```
+提供者的試用機會與 agent → 成為世界中的地點、情境、角色
+  → 使用者在世界中接觸、心動、預演
+  → 現實中試一次 → 留下證明 → 更多人敢去 → 需求增加
+  → 更多提供者加入 → 世界更豐富 → ...
+```
+
+**提供者的供給本身就是世界的內容**：營運方不需要自己製作內容。
+
+## 6. 角色與轉移：從世界到生活
+
+### 6.1 角色：可以完全不同的「可能的自己」
+
+使用者自訂角色的外觀、個性、能力，可以與真實的自己完全不同。
+
+| 依據 | 內容 | 設計含義 |
+|---|---|---|
+| 可能自我（Markus & Nurius, 1986） | 「想成為的自己」會驅動行為，但前提是看起來做得到、而且連著具體計畫 | 角色必須連著第一步，否則只是幻想 |
+| 普羅透斯效應（Yee & Bailenson, 2007） | 角色特質會改變人的行為，而且會延續到線下 | 角色不只是外觀，而是行為的暗示 |
+| 固定角色治療（Kelly） | 讓人扮演一個新角色約兩週，以此探索新的行為方式 | 「完全不同的角色」有臨床先例 |
+
+**角色是一張許可證**：「是我的角色想試，不是我」，可以降低被評價的恐懼。所以角色和自己差距越大，越需要角色當作掩護。
+
+### 6.2 轉移階梯
+
+```
+旁觀 → 預演 → 承諾 → 觸發 → 扮演 → 帶回 → 融合
+(世界)  (世界)  (橋)    (生活)  (生活)  (橋)    (自我)
+```
+
+| 階段 | 概念 | 依據 |
+|---|---|---|
+| **旁觀** | 看自己的角色在世界中做 | 替代經驗（Bandura） |
+| **預演** | 在世界中走過**過程**：怎麼去、誰在那裡、前十分鐘會發生什麼 | 過程模擬比結果想像更能提升意圖與行動（Pham & Taylor；Armitage & Reidy） |
+| **承諾** | 把一次嘗試變成「何時、何地、做什麼」的計畫 | 若-則計畫，94 項測試平均 d = .65（Gollwitzer & Sheeran, 2006） |
+| **觸發** | 在對的時間與地點，被溫和地提醒 | B = MAP：提示（Prompt） |
+| **扮演** | 以角色的身分去做這一次 | 固定角色治療；角色作為許可證 |
+| **帶回** | 真實經驗以最低成本回到世界 | 痕跡、見證 |
+| **融合** | 角色與自己的「重疊」被看見並增加 | 人從自己做過的事推論自己是誰（自我知覺） |
+
+**每一階都可以停下或退回**。沒去不會受罰，只會重新安排或換一個第一步。
+
+### 6.3 提供者在轉移中的作用
+
+- **提供過程資訊**：讓「預演」的內容是真實的，降低不確定感。
+- **提供者的 agent 住在世界裡**：使用者的角色可以先在世界中認識提供者，現實中第一次見面時，對方就不是陌生人。
+- **確認出席**：讓「帶回」不需要使用者額外操作。
+
+### 6.4 生活紀錄的角色
+
+紀錄只做兩件事：**找到對的時機**、**降低帶回的成本**。紀錄不拿來計分或排名。
+
+| 方向 | 紀錄來源（皆為選用） | 服務的階段 |
+|---|---|---|
+| 生活 → 平台 | 日曆（空檔、計畫） | 承諾、觸發 |
+| | 位置（靠近相關地點、到場） | 觸發、帶回 |
+| | 健康 / 運動 App | 帶回 |
+| | 照片或一句話 | 帶回 |
+| | 提供者的出席確認 | 帶回 |
+| 平台 → 生活 | **重疊圖**：角色的特質中，哪些你已經在生活中做過 | 融合 |
+| | **校準紀錄**：預期與實際的對照 | 扮演（降低下一次的恐懼） |
+| | **足跡**：真實去過的地方與遇過的人 | 融合 |
+
+**隱私原則**：原始紀錄只留在使用者端，由使用者自己的 agent 讀取；世界伺服器只收到「有去」、「去過哪類地方」等抽象結果。
+
+## 7. 系統守則
 
 1. **入口是樂趣**：任何入口層的機制都不能以「改變」作為訴求。
 2. **每層都是終點**：停留在任何一層都是完整的體驗。
@@ -217,8 +293,12 @@ A 在任一層的行動 → 自動留下痕跡
 8. **不以點數為核心貨幣**。
 9. **永遠可以拒絕、可以退回**。
 10. **AI 讓位**。
+11. **世界不是廣告**：推薦依使用者的興趣決定，不依提供者是否付費。
+12. **角色是可能，不是應該**：不把角色與自己的差距呈現成「不足」。
+13. **試一次不綁約**：提供者不得在試用後強迫推銷。
+14. **紀錄是鏡子，不是計分板**。
 
-## 7. 系統健康指標
+## 8. 系統健康指標
 
 | 指標 | 意義 |
 |---|---|
@@ -229,6 +309,9 @@ A 在任一層的行動 → 自動留下痕跡
 | 回謝率 | 給予者是否得到回饋 |
 | L4 自發比例 | 改變是否作為副產品出現 |
 | 真人供給占比 | AI 是否逐步讓位 |
+| 預演 → 承諾 → 出席轉換率 | 轉移階梯在哪一階卡住 |
+| 二次參與率 | 試一次之後，是否自發地再去 |
+| 重疊增加速度 | 角色是否真的被帶進生活 |
 
 ## 參考
 
@@ -241,3 +324,9 @@ A 在任一層的行動 → 自動留下痕跡
 - Bandura. Sources of self-efficacy. [連結](https://www.simplypsychology.org/self-efficacy.html)
 - Epley & Schroeder (2014). Mistakenly seeking solitude. [連結](https://www.chicagobooth.edu/media-relations-and-communications/press-releases/mom-was-wrong-you-should-talk-to-strangers)
 - Deci, Koestner & Ryan (1999)（經次級來源整理，引用前需核對原文）. [連結](https://yukaichou.com/behavioral-analysis/overjustification-effect-lepper-greene-intrinsic-motivation/)
+- Markus & Nurius (1986). Possible selves. [連結](https://psychologyfanatic.com/possible-selves)
+- Yee & Bailenson (2007). The Proteus effect. [連結](https://vhil.stanford.edu/publications/avatars-and-agents/proteus-effect-implications-transformed-digital-self-representation)
+- Kelly. Fixed-role therapy. [連結](https://www.pcp-net.org/encyclopaedia/fixed-role-ther.html)
+- Gollwitzer & Sheeran (2006). Implementation intentions meta-analysis. [連結](https://kops.uni-konstanz.de/entities/publication/2e749bfb-8533-437c-8203-7e788c910c5f)
+- Hagger 等：Imagery, visualization and mental simulation interventions. [連結](https://www.cambridge.org/core/books/handbook-of-behavior-change/imagery-visualization-and-mental-simulation-interventions/4580EBF3CFAC648BEF620CD075A85FCC)
+- Use of mental simulations to change theory of planned behaviour variables（Armitage & Reidy）. [連結](https://shura.shu.ac.uk/5075/)
