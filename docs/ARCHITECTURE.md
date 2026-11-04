@@ -20,7 +20,7 @@
  │             試用機會 · 場次 · 報名 · 問答 · 通知 · 內容過濾         │
  └──────────────────────────────┬──────────────────────────────────┘
                                 │
-                     Cloud SQL（PostgreSQL 16）
+                     Cloud SQL（PostgreSQL 16，asia-east1）
 ```
 
 **平台本身不呼叫任何 LLM。** 所有 AI 行為都發生在用戶自己的 AI 用戶端，透過 MCP 工具讀寫世界。
@@ -36,7 +36,7 @@
 | 資料庫 | PostgreSQL 16 + Drizzle ORM | 型別安全、migration 簡單 |
 | 驗證（人） | Google OAuth（OpenID Connect）+ HttpOnly session cookie | |
 | 驗證（AI） | 自建 OAuth 2.1 授權伺服器：動態用戶端註冊、Authorization Code + PKCE、存取權杖 + 更新權杖 | 符合 MCP 授權規範，各家 AI 用戶端可直接連 |
-| 前端 | React + Vite + React Router；地圖用 Leaflet + OpenStreetMap | 輕量、手機優先 |
+| 前端 | React + Vite + React Router；龍角鎮地圖為原創 SVG 插畫，支援縮放與拖曳 | 輕量、手機優先，不依賴外部圖資 |
 | 驗證輸入 | zod（API 與 MCP 工具共用 schema） | |
 | 測試 | Vitest（單元、整合，資料庫用 PGlite 或測試用 Postgres）、Playwright（E2E） | |
 | 部署 | Docker → Artifact Registry → Cloud Run | |
@@ -59,14 +59,15 @@ docs/
 | 表 | 重點欄位 |
 |---|---|
 | `users` | google_sub、email、display_name、roles（user / provider / admin） |
-| `characters` | user_id、name、appearance（sprite、palette、description）、personality、sharing |
-| `wants` | character_id、text、tags、status（active / done / dropped） |
-| `places` | name、address、lat、lng、provider_id（可空）、tags |
-| `deeds` | owner_id、character_id、executor（ai / self）、title、first_step_id、place_id、trial_id、related_deed_ids、record_source（provider_confirmed / self / ai）、visibility、moderation_state |
+| `characters` | user_id、name、appearance（body、accessories、palette、description）、personality、sharing、last_active_place_id、last_active_at |
+| `wants` | character_id、text、district_id、tags、status（active / done / dropped） |
+| `districts` | key、name、theme、地圖上的區域範圍（固定 8 區 + 萬事屋） |
+| `places` | district_id、kind（shop / public）、name、appearance、地圖座標、provider_id（可空）、real_address 或 online、is_demo |
+| `deeds` | owner_id、character_id、executor（ai / self）、title、first_step_id、place_id、trial_id、related_deed_ids、record_source（provider_confirmed / self / ai）、visibility（預設 public）、moderation_state、is_demo |
 | `first_steps` | owner_id、want_id、executor（ai / self）、text、when、where、status（draft / confirmed / done / dropped）、source_deed_ids、session_id |
 | `notes` | first_step_id、kind（before / after）、body、shared（預設 false） |
 | `discoveries` | character_id、items（deed / trial / place 參考）、message（AI 寫的話）、read_at |
-| `providers` | user_id、name、description、status（pending / approved / suspended） |
+| `providers` | user_id、name、description、status（pending / approved / suspended）、is_demo |
 | `trials` | provider_id、place_id、title、duration、exit_anytime、buddy_ok、process_info、ai_first_step_hint、self_first_step_hint |
 | `trial_faqs` | trial_id、question、answer |
 | `trial_sessions` | trial_id、starts_at、capacity |
@@ -82,11 +83,12 @@ docs/
 伺服器只做規則式排序，最後的挑選與轉譯交給用戶的 AI：
 
 ```
-score = 相關（想做的事的 tags / 文字比對）
+score = 相關（想做的事的主題區、tags、文字比對）
       + 第一次加權（事蹟是該執行者在該主題的第一次）
       + 一步之遙（第一步越小、時長越短越高）
       + 新鮮度
       - 已看過
+      - 示範內容（排在真人內容之後）
 ```
 
 - 不接受付費影響排序。
