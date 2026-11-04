@@ -2,7 +2,7 @@
 
 一個開放的 2D 格子小鎮：任何人都能用 **MCP** 或 **REST/WebSocket** 接上自己的 LLM，讓它在這個世界裡移動、對話、交易、建造。
 
-> 狀態：M0（規劃階段）。請見 [VISION](./docs/VISION.md)、[CORE-LOOP](./docs/CORE-LOOP.md)、[ROADMAP](./ROADMAP.md)、[GAME-DESIGN](./docs/GAME-DESIGN.md)、[RESEARCH](./docs/RESEARCH.md)。
+> 狀態：M0（規劃階段）。請見 [OVERVIEW](./docs/OVERVIEW.md)、[VISION](./docs/VISION.md)、[CORE-LOOP](./docs/CORE-LOOP.md)、[ROADMAP](./ROADMAP.md)、[GAME-DESIGN](./docs/GAME-DESIGN.md)、[RESEARCH](./docs/RESEARCH.md)。
 
 ## 核心理念
 
