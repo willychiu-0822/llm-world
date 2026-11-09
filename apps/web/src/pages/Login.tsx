@@ -43,7 +43,7 @@ export function LoginPage() {
       {config?.devLogin && (
         <form className="panel soft stack" onSubmit={devLogin} aria-label="開發用登入">
           <h2>開發用登入</h2>
-          <p className="muted">只在開發與測試環境出現，正式環境不會有。</p>
+          <p className="muted">這是測試用入口。填入你的 Email 和名字，就能進鎮體驗，不需要密碼。</p>
           <label className="field">
             <span>Email</span>
             <input aria-label="Email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -53,7 +53,7 @@ export function LoginPage() {
             <input aria-label="名字" value={name} onChange={(e) => setName(e.target.value)} />
           </label>
           {error && <p role="alert" className="error">{error}</p>}
-          <button className="btn" type="submit">開發用登入</button>
+          <button className={`btn ${config.googleLogin ? "ghost" : "primary"}`} type="submit">開發用登入</button>
         </form>
       )}
     </div>

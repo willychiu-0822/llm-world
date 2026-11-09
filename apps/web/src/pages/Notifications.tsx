@@ -49,7 +49,7 @@ export function NotificationsPage() {
     <div className="stack" style={{ maxWidth: 760, margin: "0 auto" }}>
       <h1>通知</h1>
       <ErrorBox error={error} />
-      {!data?.length ? <Empty>還沒有通知。</Empty> : (
+      {!data?.length ? <Empty>還沒有通知。先到<Link to="/">地圖</Link>看看鎮民的故事，有新消息時會在這裡告訴你。</Empty> : (
         <ul className="plain">
           {data.map((n) => {
             const d = describe(n);

@@ -1,5 +1,6 @@
 import { DISTRICTS, PALETTE } from "@lj/core";
 import { useState, type FormEvent } from "react";
+import { Link } from "react-router-dom";
 import { DistrictTag, Empty, ErrorBox, Loading } from "../components/Bits";
 import { api } from "../lib/api";
 import { formatDateTime } from "../lib/format";
@@ -76,7 +77,7 @@ function Apply({ onDone }: { onDone(): void }) {
   );
 }
 
-function ShopForm({ onDone }: { onDone(): void }) {
+function ShopForm({ onDone, primary }: { onDone(): void; primary: boolean }) {
   const [f, setF] = useState({ districtKey: "music", name: "", description: "", roofColor: PALETTE[1] as string, realAddress: "", online: false });
   const { error, run } = useAction();
   const submit = (e: FormEvent) => {
@@ -97,12 +98,12 @@ function ShopForm({ onDone }: { onDone(): void }) {
       <label className="check"><input type="checkbox" checked={f.online} onChange={(e) => setF({ ...f, online: e.target.checked })} />線上活動（沒有實體地點）</label>
       {!f.online && <label className="field"><span>實際地址（參加者要去的地方）</span><input aria-label="實際地址" value={f.realAddress} onChange={(e) => setF({ ...f, realAddress: e.target.value })} maxLength={200} /></label>}
       {error && <p role="alert" className="error">{error}</p>}
-      <button className="btn" type="submit">開店</button>
+      <button className={`btn ${primary ? "primary" : "ghost"}`} type="submit">開店</button>
     </form>
   );
 }
 
-function TrialForm({ shops, onDone }: { shops: Shop[]; onDone(): void }) {
+function TrialForm({ shops, onDone, primary }: { shops: Shop[]; onDone(): void; primary: boolean }) {
   const [f, setF] = useState({ placeId: shops[0]?.id ?? "", title: "", description: "", durationMin: 60, exitAnytime: true, buddyOk: true, whenText: "", processInfo: "", aiFirstStepHint: "", selfFirstStepHint: "" });
   const { error, run } = useAction();
   const t = (k: keyof typeof f) => (e: { target: { value: string } }) => setF({ ...f, [k]: e.target.value });
@@ -129,7 +130,7 @@ function TrialForm({ shops, onDone }: { shops: Shop[]; onDone(): void }) {
         <label className="field grow"><span>建議的本人第一步</span><input aria-label="建議的本人第一步" value={f.selfFirstStepHint} onChange={t("selfFirstStepHint")} placeholder="報名這週的場次" maxLength={200} /></label>
       </div>
       {error && <p role="alert" className="error">{error}</p>}
-      <button className="btn" type="submit">上架</button>
+      <button className={`btn ${primary ? "primary" : "ghost"}`} type="submit">上架</button>
     </form>
   );
 }
@@ -210,7 +211,7 @@ function Questions({ reloadDash }: { reloadDash(): void }) {
   return (
     <section className="panel stack">
       <h2>大家的 AI 問的問題</h2>
-      {!pending.length ? <Empty>目前沒有待回答的問題。</Empty> : (
+      {!pending.length ? <Empty>目前沒有待回答的問題。可以先到<a href="#provider-trials">試用機會</a>，把第一次參加會做什麼寫清楚。</Empty> : (
         <ul className="plain">
           {pending.map((q) => (
             <li key={q.id} className="panel soft stack" style={{ gap: 6 }}>
@@ -235,6 +236,7 @@ function Signals() {
     <section className="panel stack">
       <h2>需求訊號與回謝</h2>
       <p className="muted">全部匿名。這些是大家真實的好奇和擔心。</p>
+      {!data.length && <Empty>還沒有需求訊號。先<a href="#provider-trials">上架試用機會</a>，讓鎮民找到你的店。</Empty>}
       {data.map((s) => (
         <article key={s.trialId} className="panel soft stack" style={{ gap: 6 }}>
           <strong>{s.title}</strong>
@@ -274,6 +276,7 @@ export function ProviderPage() {
       <section className="panel stack" style={{ maxWidth: 680, margin: "0 auto" }}>
         <h1>{data.provider.name}</h1>
         <p>{data.provider.status === "pending" ? "申請審核中，核准後會通知你。" : "這個提供者帳號目前已停權，如有疑問請聯絡管理者。"}</p>
+        <Link className="btn primary" to="/">先回地圖逛逛</Link>
       </section>
     );
   return (
@@ -282,15 +285,15 @@ export function ProviderPage() {
         <h1>{data.provider.name}</h1>
         <p className="muted">把第一次辦好，就是你在龍角鎮唯一的行銷。{data.unansweredQuestions > 0 && <strong> 有 {data.unansweredQuestions} 個問題等你回答。</strong>}</p>
       </section>
-      <section className="stack">
+      <section className="stack" id="provider-shops">
         <h2>我的店</h2>
         {data.shops.length > 0 && <div className="grid">{data.shops.map((s) => <article key={s.id} className="panel"><div className="row wrap"><DistrictTag k={s.districtKey} /><strong className="grow">{s.name}</strong></div><small>{s.online ? "線上" : s.realAddress}</small></article>)}</div>}
-        <ShopForm onDone={reload} />
+        <ShopForm onDone={reload} primary={!data.shops.length} />
       </section>
-      <section className="stack">
+      <section className="stack" id="provider-trials">
         <h2>試用機會</h2>
         {data.trials.map((t) => <TrialBox key={t.id} trial={t} reload={reload} />)}
-        {data.shops.length ? <TrialForm shops={data.shops} onDone={reload} /> : <p className="muted">先開一間店，才能上架試用機會。</p>}
+        {data.shops.length ? <TrialForm shops={data.shops} onDone={reload} primary={!data.trials.length} /> : <p className="muted">先開一間店，才能上架試用機會。</p>}
       </section>
       <Questions reloadDash={reload} />
       <Signals />

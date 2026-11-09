@@ -1,0 +1,35 @@
+
+> llm-world@ test /workspace/codex-burn/uat-llmworld
+> vitest run
+
+
+ RUN  v3.2.7 /workspace/codex-burn/uat-llmworld
+
+ ✓ |server| src/routes/__tests__/steps.test.ts (11 tests) 884ms
+ ✓ |server| src/routes/__tests__/provider.test.ts (7 tests) 912ms
+ ✓ |server| src/mcp/mcp.test.ts (11 tests) 962ms
+   ✓ MCP tools > runs Xiaoan's AI loop: discover, ask, bring back, propose, and complete a confirmed AI step  324ms
+ ✓ |server| src/routes/__tests__/discover.test.ts (5 tests) 580ms
+ ✓ |server| src/seed/seed.test.ts (2 tests) 577ms
+   ✓ demo content > purges demo content and keeps real deeds that used demo shops  303ms
+ ✓ |server| src/auth/auth.test.ts (12 tests) 422ms
+ ✓ |server| src/routes/__tests__/town.test.ts (4 tests) 320ms
+ ✓ |server| src/routes/__tests__/character.test.ts (5 tests) 262ms
+ ✓ |server| src/routes/__tests__/session.test.ts (3 tests) 157ms
+ ✓ |server| src/routes/__tests__/config.test.ts (3 tests) 141ms
+ ✓ |db| src/db.test.ts (4 tests) 87ms
+ ✓ |db| src/migrate.test.ts (1 test) 50ms
+ ✓ |core| src/curation.test.ts (8 tests) 7ms
+ ✓ |core| src/moderation.test.ts (7 tests) 8ms
+ ✓ |core| src/text.test.ts (5 tests) 4ms
+ ✓ |core| src/ics.test.ts (4 tests) 3ms
+ ✓ |web| src/components/StepForm.test.tsx (4 tests) 469ms
+ ✓ |web| src/components/TownMap.test.tsx (3 tests) 157ms
+ ✓ |web| src/components/Avatar.test.tsx (3 tests) 65ms
+ ✓ |web| src/lib/api.test.ts (3 tests) 9ms
+
+ Test Files  20 passed (20)
+      Tests  105 passed (105)
+   Start at  04:47:05
+   Duration  20.43s (transform 685ms, setup 491ms, collect 9.10s, tests 6.08s, environment 1.17s, prepare 985ms)
+

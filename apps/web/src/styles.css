@@ -102,7 +102,7 @@ small, .muted { color: var(--muted); }
 .nav a { text-decoration: none; padding: 6px 12px; border-radius: 999px; position: relative; }
 .nav a.active, .nav a:hover { background: var(--paper-2); }
 .badge { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--rose); color: #4a2d2f; font-size: 12px; font-weight: 700; margin-left: 4px; }
-main.page { width: 100%; max-width: 1080px; margin: 0 auto; padding: 20px 16px 96px; flex: 1; }
+main.page { width: 100%; max-width: 1080px; margin: 0 auto; padding: 20px 16px calc(96px + env(safe-area-inset-bottom)); flex: 1; }
 .tabbar { display: none; }
 
 @media (max-width: 720px) {
@@ -245,3 +245,8 @@ td, th { text-align: left; padding: 6px 8px; border-bottom: 1px dashed var(--lin
 
 .mobile-login { display: none; }
 @media (max-width: 720px) { .mobile-login { display: inline-flex; margin-left: auto; } }
+
+.text-link { border: 0; padding: 0; background: transparent; color: inherit; font: inherit; text-decoration: underline; cursor: pointer; }
+@media (max-width: 720px) {
+  html { scroll-padding-top: 76px; scroll-padding-bottom: calc(90px + env(safe-area-inset-bottom)); }
+}

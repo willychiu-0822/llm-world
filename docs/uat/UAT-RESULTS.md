@@ -31,3 +31,5 @@
 - 2026-11-10 04:07：P2-6 / UAT-11、UAT-16 已修：按路由 lazy import（含 Admin、Provider、Character 與現有 SVG TownMap；此版本未使用 Leaflet），build 明確設 production，移除 Google Fonts 外站依賴。TDD：735245 bytes 失敗→最大 334936 bytes 通過；外部字型雙裝置 red→green。全 E2E 30/30（含原三人物×雙裝置及新手 console=0）、單元105/105、typecheck與build成功。證據 p2-6-green-{bundle,e2e,unit}.log、build.log、evidence/*-UAT-16-local-fonts.png。一次並行 build 清空 dist 造成 server ENOENT，測試仍30/30；後續完整回歸將採序列 build/E2E，消除此執行干擾。P2-5 commit c1442ab。
 
 - 2026-11-10 04:07：P0 公開站唯讀檢查：127.0.0.1:5200/healthz=200；公開首頁 curl TLS unexpected EOF（HTTP 000），web 工具也無法存取。未啟動或重啟5200，未修改 /workspace/deploy、tunnel 或 relay。公開首頁200與公開閉環仍 blocked，由 Product Builder 依部署權限接續查驗。
+
+- 2026-11-10 04:47：UAT-14a～14d 新手 UI 已修：空狀態連到地圖、步驟或 AI；第一次角色儲存→寫願望→找靈感依序只突出一個操作；步驟列表只有一個主要操作，展開完成時以完成為主且可取消；測試登入可照說明填寫。提供者審核等待可回地圖，開店/上架依進度突出；管理頁空狀態可繼續。TDD：入口缺失、多個主要操作、測試登入無突出操作 red→green；雙裝置8/8，typecheck成功。首次測試 helper 錯把桌面隱藏tabbar當作可見navigation等待，已改為檢查實際tabbar元素的boundingBox；UAT-14a重跑仍因鏡子缺入口而失敗，證據uat-14a-red-e2e.log。截圖 evidence/*-UAT-14*.png。P2-6 commit a36d7d3。

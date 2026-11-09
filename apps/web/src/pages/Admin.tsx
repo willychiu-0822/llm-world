@@ -54,7 +54,7 @@ export function AdminPage() {
       </section>
       <section className="panel stack">
         <h2>提供者</h2>
-        {!providers.data ? <Loading /> : !providers.data.length ? <Empty>還沒有提供者。</Empty> : (
+        {!providers.data ? <Loading /> : !providers.data.length ? <Empty>還沒有提供者申請。先<Link to="/">回地圖看看小鎮</Link>，有申請時再到這裡審核。</Empty> : (
           <table>
             <thead><tr><th>名稱</th><th>Email</th><th>狀態</th><th /></tr></thead>
             <tbody>
@@ -75,7 +75,7 @@ export function AdminPage() {
       </section>
       <section className="panel stack">
         <h2>內容過濾紀錄</h2>
-        {!mods.data ? <Loading /> : !mods.data.length ? <Empty>沒有紀錄。</Empty> : (
+        {!mods.data ? <Loading /> : !mods.data.length ? <Empty>目前沒有需要處理的內容。可以<Link to="/">回地圖逛逛</Link>。</Empty> : (
           <table>
             <thead><tr><th>時間</th><th>類型</th><th>內容</th><th>處理</th></tr></thead>
             <tbody>{mods.data.map((x) => <tr key={x.id}><td>{formatDateTime(x.createdAt)}</td><td>{x.targetType}</td><td>{x.excerpt}</td><td>{x.action}（{x.categories.join("、")}）</td></tr>)}</tbody>

@@ -1,0 +1,122 @@
+
+> llm-world@ test:e2e /workspace/codex-burn/uat-llmworld
+> playwright test e2e/ui-polish.spec.ts -g UAT-14d
+
+[WebServer] e2e database reset
+[WebServer] 
+[WebServer] > @lj/web@0.0.0 build /workspace/codex-burn/uat-llmworld/apps/web
+[WebServer] > NODE_ENV=production vite build
+[WebServer] 
+[WebServer] vite v7.3.7 building client environment for production...
+[WebServer] transforming...
+[WebServer] ✓ 85 modules transformed.
+[WebServer] rendering chunks...
+[WebServer] computing gzip size...
+[WebServer] dist/index.html                          1.22 kB │ gzip:   0.78 kB
+[WebServer] dist/assets/index-DlO0mi1S.css          10.74 kB │ gzip:   3.22 kB
+[WebServer] dist/assets/Place-BsRE8MoU.js            1.44 kB │ gzip:   0.76 kB
+[WebServer] dist/assets/Me-XJO760Ce.js               1.75 kB │ gzip:   0.97 kB
+[WebServer] dist/assets/Discoveries-BFV_0cUC.js      1.93 kB │ gzip:   1.04 kB
+[WebServer] dist/assets/Notifications-BBd11HN7.js    2.14 kB │ gzip:   1.17 kB
+[WebServer] dist/assets/Connect-BDeEnkrv.js          2.45 kB │ gzip:   1.37 kB
+[WebServer] dist/assets/Trial-D5A3OtWy.js            2.57 kB │ gzip:   1.26 kB
+[WebServer] dist/assets/Mirror-C1WGaxdy.js           3.21 kB │ gzip:   1.36 kB
+[WebServer] dist/assets/Deed-BCxKKPOa.js             3.53 kB │ gzip:   1.60 kB
+[WebServer] dist/assets/Admin-BICLzO-b.js            4.42 kB │ gzip:   1.73 kB
+[WebServer] dist/assets/Character-CrcZElmo.js        6.13 kB │ gzip:   2.45 kB
+[WebServer] dist/assets/NewStep-DFakCMui.js          7.46 kB │ gzip:   3.06 kB
+[WebServer] dist/assets/Steps-B2-Ctqwg.js            7.77 kB │ gzip:   3.00 kB
+[WebServer] dist/assets/TownMap-DGKbSCNI.js         12.23 kB │ gzip:   4.66 kB
+[WebServer] dist/assets/Provider-DUSwCqSU.js        14.67 kB │ gzip:   4.42 kB
+[WebServer] dist/assets/index-BN_agATQ.js          335.01 kB │ gzip: 103.24 kB
+[WebServer] ✓ built in 1.63s
+[WebServer] 龍角鎮 listening on :4131 (development) base=http://localhost:4131 web=/workspace/codex-burn/uat-llmworld/apps/web/dist
+
+Running 2 tests using 1 worker
+
+(node:133) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 [desktop] › e2e/ui-polish.spec.ts:79:1 › UAT-14d 提供者與管理者的等待畫面和空狀態有下一步 (11.0s)
+(node:308) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  2 [mobile] › e2e/ui-polish.spec.ts:79:1 › UAT-14d 提供者與管理者的等待畫面和空狀態有下一步 (11.0s)
+
+
+  1) [desktop] › e2e/ui-polish.spec.ts:79:1 › UAT-14d 提供者與管理者的等待畫面和空狀態有下一步 ─────────────────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('link', { name: '先回地圖逛逛' })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('link', { name: '先回地圖逛逛' }) with timeout 10000ms
+      - waiting for getByRole('link', { name: '先回地圖逛逛' })
+
+
+      82 |   await page.goto("/provider");
+      83 |   await expect(page.getByText(/申請審核中/)).toBeVisible();
+    > 84 |   await expect(page.getByRole("link", { name: "先回地圖逛逛" })).toBeVisible();
+         |                                                            ^
+      85 |   await layoutAndEvidence(page, "UAT-14d-provider-pending");
+      86 |   await json(page.request.post("/api/auth/dev-login", { data: { email: "admin@e2e.test" } }));
+      87 |   await page.goto("/admin");
+        at /workspace/codex-burn/uat-llmworld/e2e/ui-polish.spec.ts:84:60
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/ui-polish-UAT-14d-提供者與管理者的等待畫面和空狀態有下一步-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/ui-polish-UAT-14d-提供者與管理者的等待畫面和空狀態有下一步-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ui-polish-UAT-14d-提供者與管理者的等待畫面和空狀態有下一步-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ui-polish-UAT-14d-提供者與管理者的等待畫面和空狀態有下一步-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [mobile] › e2e/ui-polish.spec.ts:79:1 › UAT-14d 提供者與管理者的等待畫面和空狀態有下一步 ──────────────────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('link', { name: '先回地圖逛逛' })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('link', { name: '先回地圖逛逛' }) with timeout 10000ms
+      - waiting for getByRole('link', { name: '先回地圖逛逛' })
+
+
+      82 |   await page.goto("/provider");
+      83 |   await expect(page.getByText(/申請審核中/)).toBeVisible();
+    > 84 |   await expect(page.getByRole("link", { name: "先回地圖逛逛" })).toBeVisible();
+         |                                                            ^
+      85 |   await layoutAndEvidence(page, "UAT-14d-provider-pending");
+      86 |   await json(page.request.post("/api/auth/dev-login", { data: { email: "admin@e2e.test" } }));
+      87 |   await page.goto("/admin");
+        at /workspace/codex-burn/uat-llmworld/e2e/ui-polish.spec.ts:84:60
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/ui-polish-UAT-14d-提供者與管理者的等待畫面和空狀態有下一步-mobile/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/ui-polish-UAT-14d-提供者與管理者的等待畫面和空狀態有下一步-mobile/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ui-polish-UAT-14d-提供者與管理者的等待畫面和空狀態有下一步-mobile/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ui-polish-UAT-14d-提供者與管理者的等待畫面和空狀態有下一步-mobile/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    [desktop] › e2e/ui-polish.spec.ts:79:1 › UAT-14d 提供者與管理者的等待畫面和空狀態有下一步 ──────────────────────────
+    [mobile] › e2e/ui-polish.spec.ts:79:1 › UAT-14d 提供者與管理者的等待畫面和空狀態有下一步 ───────────────────────────
+ ELIFECYCLE  Command failed with exit code 1.

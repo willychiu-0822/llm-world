@@ -1,10 +1,10 @@
 {
   "project": "llm-world 龍角鎮 v1 MVP",
-  "updated": "2026-11-10 04:07",
-  "cases": 33,
-  "pass": 30,
+  "updated": "2026-11-10 04:47",
+  "cases": 40,
+  "pass": 38,
   "fail": 0,
-  "blocked": 3,
+  "blocked": 2,
   "ready_for_user_test": false,
-  "notes": "P2-6 已修：最大chunk334936 bytes；E2E30/30、單元105/105、typecheck/build成功。UI打磨與探索待驗；P0本機5200健康200，公開網址TLS失敗，受禁止部署操作限制，待Product Builder查驗。"
+  "notes": "P2-1～P2-7及P1-1～P1-4已修。UI雙裝置8/8，前次全E2E30/30，完整38案回歸與探索待跑。P0本機5200健康200，公開網址無法連線；未操作部署。"
 }

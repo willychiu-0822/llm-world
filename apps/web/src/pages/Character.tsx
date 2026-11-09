@@ -1,12 +1,13 @@
 import { ACCESSORIES, ACCESSORY_LABELS, BODY_LABELS, BODY_SHAPES, DEFAULT_APPEARANCE, DISTRICTS, PALETTE, type Appearance } from "@lj/core";
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { Link } from "react-router-dom";
 import { Avatar } from "../components/Avatar";
 import { DistrictTag } from "../components/Bits";
 import { api } from "../lib/api";
 import { useSession } from "../lib/session";
 
 export function CharacterPage() {
-  const { me, reload, toast } = useSession();
+  const { me, reload } = useSession();
   const [name, setName] = useState(me?.character?.name ?? "");
   const [appearance, setAppearance] = useState<Appearance>((me?.character?.appearance as Appearance) ?? DEFAULT_APPEARANCE);
   const [personality, setPersonality] = useState(me?.character?.personality ?? "");
@@ -16,6 +17,7 @@ export function CharacterPage() {
   const wantInput = useRef<HTMLInputElement>(null);
   const [saved, setSaved] = useState(false);
   const [nextWant, setNextWant] = useState(false);
+  const [wantAdded, setWantAdded] = useState(false);
   const [district, setDistrict] = useState("music");
 
   useEffect(() => {
@@ -53,7 +55,8 @@ export function CharacterPage() {
       await api("/api/me/wants", { method: "POST", body: { text: want, districtKey: district } });
       setWant("");
       await reload();
-      toast("記下來了");
+      setWantAdded(true);
+      setNextWant(false);
     } catch (err) {
       setError((err as Error).message);
     }
@@ -127,7 +130,7 @@ export function CharacterPage() {
           允許別人的 AI 角色引用我分享的隨筆（回答他們的問題）
         </label>
         {error && <p role="alert" className="error">{error}</p>}
-        <button className="btn primary" type="submit">儲存角色</button>
+        <button className={`btn ${nextWant || wantAdded ? "ghost" : "primary"}`} type="submit">儲存角色</button>
       </form>
 
       <section className="panel stack">
@@ -153,8 +156,9 @@ export function CharacterPage() {
           <select aria-label="主題區" value={district} onChange={(e) => setDistrict(e.target.value)} style={{ flex: 1, minWidth: 120 }}>
             {DISTRICTS.map((d) => <option key={d.key} value={d.key}>{d.name}（{d.theme}）</option>)}
           </select>
-          <button className="btn" type="submit">寫下來</button>
+          <button className={`btn ${nextWant ? "primary" : "ghost"}`} type="submit">寫下來</button>
         </form>
+        {wantAdded && <div className="notice stack" role="status"><p>記下來了！去看看鎮民的故事，找一個你也想試的小小第一步。</p><Link className="btn primary" to="/#map">去地圖找靈感</Link></div>}
       </section>
     </div>
   );

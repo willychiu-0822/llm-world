@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { DeedCard, DistrictTag, Empty, ErrorBox, Loading, TrialCard } from "../components/Bits";
 import type { Deed, Trial } from "../lib/types";
 import { useFetch } from "../lib/useFetch";
@@ -44,7 +44,7 @@ export function PlacePage() {
       )}
       <section className="stack">
         <h2>在這裡發生的事蹟</h2>
-        {data.deeds.length ? <div className="grid">{data.deeds.map((d) => <DeedCard key={d.id} deed={d} />)}</div> : <Empty>這裡還沒有事蹟。也許你會是第一個？</Empty>}
+        {data.deeds.length ? <div className="grid">{data.deeds.map((d) => <DeedCard key={d.id} deed={d} />)}</div> : <Empty>這裡還沒有事蹟。先<Link to="/">回地圖找靈感</Link>，看看其他地方的故事吧。</Empty>}
       </section>
     </div>
   );

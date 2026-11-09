@@ -49,7 +49,7 @@ export function MirrorPage() {
 
       <section className="panel stack">
         <h2>足跡</h2>
-        {data.footprints.length === 0 ? <Empty>還沒有足跡。</Empty> : (
+        {data.footprints.length === 0 ? <Empty>還沒有足跡。<Link to="/steps">去我的步驟</Link>，完成一件小事，就會在這裡留下足跡。</Empty> : (
           <div className="chips">
             {data.footprints.map((f) => (
               <Link key={f.placeId} to={`/places/${f.placeId}`} className="chip" style={{ background: DISTRICT_BY_KEY[f.districtKey as DistrictKey]?.color }}>
@@ -62,7 +62,7 @@ export function MirrorPage() {
 
       <section className="panel stack">
         <h2>做之前／做之後</h2>
-        {data.notePairs.length === 0 ? <Empty>寫下做之前和做之後的隨筆，就會出現在這裡。不寫也沒關係。</Empty> : (
+        {data.notePairs.length === 0 ? <Empty>寫下做之前和做之後的隨筆，就會出現在這裡。不寫也沒關係。<Link to="/steps">到我的步驟寫一點</Link>。</Empty> : (
           <ul className="plain">
             {data.notePairs.map((p) => (
               <li key={p.stepId} className="stack" style={{ gap: 6 }}>
