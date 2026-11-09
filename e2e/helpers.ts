@@ -1,26 +1,27 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-import { expect, request, test, type APIRequestContext, type Browser, type Page } from "@playwright/test";
+import { expect, request, test as base, type APIRequestContext, type Browser, type Page } from "@playwright/test";
 import pg from "pg";
 import { mkdir } from "node:fs/promises";
 import { createHash, randomBytes } from "node:crypto";
 
 export const BASE = `http://localhost:${process.env.E2E_PORT ?? 4131}`;
-// Tests run serially. Isolate every scenario, including the second viewport run.
-test.afterEach(async ({ browser }) => {
-  for (const [i, ctx] of browser.contexts().entries()) {
-    for (const [j, page] of ctx.pages().entries()) {
-      if (!page.isClosed()) await evidence(page, `${test.info().file.split("/").pop()?.replace(".spec.ts", "")}-${i}-${j}`);
+// An auto fixture applies to every importing spec, even when Playwright reuses a worker.
+export const test = base.extend<{ isolateUat: void }>({
+  isolateUat: [async ({ browser, page: _page }, use) => {
+    const url = process.env.E2E_DATABASE_URL ?? "postgres://postgres:postgres@127.0.0.1:5433/longjiao_laned_e2e";
+    if (new URL(url).pathname !== "/longjiao_laned_e2e") throw new Error("Only the session D E2E database may be reset");
+    const db = new pg.Client({ connectionString: url });
+    await db.connect();
+    try { await db.query("DELETE FROM users"); } finally { await db.end(); }
+    await use();
+    for (const [i, ctx] of browser.contexts().entries()) {
+      for (const [j, page] of ctx.pages().entries()) {
+        if (!page.isClosed() && page.url() !== "about:blank") await evidence(page, `${test.info().file.split("/").pop()?.replace(".spec.ts", "")}-${i}-${j}`);
+      }
+      await ctx.close();
     }
-  }
-});
-
-test.beforeEach(async () => {
-  const url = process.env.E2E_DATABASE_URL ?? "postgres://postgres:postgres@127.0.0.1:5433/longjiao_laned_e2e";
-  if (new URL(url).pathname !== "/longjiao_laned_e2e") throw new Error("Only the session D E2E database may be reset");
-  const db = new pg.Client({ connectionString: url });
-  await db.connect();
-  try { await db.query("DELETE FROM users"); } finally { await db.end(); }
+  }, { auto: true }],
 });
 
 export async function evidence(page: Page, name: string) {
