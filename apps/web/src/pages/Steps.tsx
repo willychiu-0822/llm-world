@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { Empty, ErrorBox, ExecutorTag, Loading } from "../components/Bits";
-import { api } from "../lib/api";
+import { api, ApiError } from "../lib/api";
 import { formatDateTime } from "../lib/format";
 import { useSession } from "../lib/session";
 import type { Step } from "../lib/types";
@@ -19,12 +19,22 @@ function NoteEditor({ step, kind, onSaved }: { step: Step; kind: "before" | "aft
   const [open, setOpen] = useState(false);
   const [body, setBody] = useState(cur?.body ?? "");
   const [shared, setShared] = useState(cur?.shared ?? false);
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
   const label = kind === "before" ? "做之前的隨筆" : "做之後的隨筆";
   const save = async (e: FormEvent) => {
     e.preventDefault();
-    await api(`/api/first-steps/${step.id}/notes/${kind}`, { method: "PUT", body: { body, shared } });
-    setOpen(false);
-    onSaved();
+    setError("");
+    setSaving(true);
+    try {
+      await api(`/api/first-steps/${step.id}/notes/${kind}`, { method: "PUT", body: { body, shared } });
+      setOpen(false);
+      onSaved();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "連線暫時中斷，請稍後再試");
+    } finally {
+      setSaving(false);
+    }
   };
   if (!open)
     return (
@@ -35,13 +45,14 @@ function NoteEditor({ step, kind, onSaved }: { step: Step; kind: "before" | "aft
       </div>
     );
   return (
-    <form className={`${kind === "before" ? "before" : "after"} stack`} style={{ gap: 6 }} onSubmit={save}>
+    <form className={`${kind === "before" ? "before" : "after"} stack`} style={{ gap: 6 }} onSubmit={save} aria-busy={saving}>
       <label className="field">
         <span>{label}</span>
-        <textarea aria-label={label} value={body} onChange={(e) => setBody(e.target.value)} rows={3} maxLength={2000} />
+        <textarea aria-label={label} value={body} onChange={(e) => setBody(e.target.value)} rows={3} maxLength={2000} disabled={saving} />
       </label>
-      <label className="check"><input type="checkbox" checked={shared} onChange={(e) => setShared(e.target.checked)} />分享到事蹟，讓後來的人看到</label>
-      <div className="row"><button className="btn small" type="submit">儲存</button><button className="btn small ghost" type="button" onClick={() => setOpen(false)}>取消</button></div>
+      <label className="check"><input type="checkbox" checked={shared} onChange={(e) => setShared(e.target.checked)} disabled={saving} />分享到事蹟，讓後來的人看到</label>
+      {error && <p role="alert" className="error">還沒存好：{error}。內容還在，可以再按一次儲存。</p>}
+      <div className="row"><button className="btn small" type="submit" disabled={saving}>儲存</button><button className="btn small ghost" type="button" disabled={saving} onClick={() => { setError(""); setOpen(false); }}>取消</button></div>
     </form>
   );
 }

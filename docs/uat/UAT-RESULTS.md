@@ -97,3 +97,5 @@ UAT-STATUS計數：44次瀏覽器案例執行（22案×雙裝置）＋1個公開
 - 2026-11-10 07:50：UAT-19/19b、UAT-20新發現：雙裝置6/6 red（round2-recovery-red.log）。來源改私人或建議503仍顯示表單且無回復入口；隨筆PUT503沒有頁內錯誤且有未處理ApiError。已拆為content-recovery與note-recovery兩個spec，以便逐項修復提交；斷言保持。來源修復定向驗證中。
 
 - 2026-11-10 07:56：UAT-19/19b 已修：來源事蹟／試用機會／建議任一載入失敗時先顯示中文說明，提供回地圖與再試一次，不呈現必定失敗的表單。TDD雙裝置4 red→4 green；新增真實私人來源、失效試用連結、建議503後重試，斷言來源參考保留。證據round2-source-green.log、evidence/*-UAT-19*.png。UAT-20兩案仍待修驗證，公開站blocked。
+
+- 2026-11-10 07:57：UAT-20 已修：隨筆儲存失敗顯示中文頁內錯誤，保留原文與分享選擇；儲存期間停用欄位及操作，避免重複提交。TDD雙裝置2 red→2 green；做之前私人、做之後分享兩路徑均驗證重試真實DB寫入、各恰2次請求、pageerror=0。證據round2-note-green.log、evidence/*-UAT-20-*.png。UAT-19修復commit 64398ef。已知程式問題修完，將重跑完整驗收；公開站仍blocked。
