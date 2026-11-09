@@ -1,0 +1,261 @@
+
+> llm-world@ test:e2e /workspace/codex-burn/uat-llmworld
+> playwright test e2e/p1-1.spec.ts e2e/p1-2.spec.ts e2e/p1-3.spec.ts e2e/p1-4.spec.ts
+
+[WebServer] e2e database reset
+[WebServer] 
+[WebServer] > @lj/web@0.0.0 build /workspace/codex-burn/uat-llmworld/apps/web
+[WebServer] > vite build
+[WebServer] 
+[WebServer] vite v7.3.7 building client environment for production...
+[WebServer] transforming...
+[WebServer] ✓ 84 modules transformed.
+[WebServer] rendering chunks...
+[WebServer] computing gzip size...
+[WebServer] dist/index.html                   1.49 kB │ gzip:   0.88 kB
+[WebServer] dist/assets/index-BDZLmpgl.css    9.63 kB │ gzip:   2.96 kB
+[WebServer] dist/assets/index-CZVnFv9C.js   732.23 kB │ gzip: 189.66 kB
+[WebServer] 
+[WebServer] (!) Some chunks are larger than 500 kB after minification. Consider:
+[WebServer] - Using dynamic import() to code-split the application
+[WebServer] - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+[WebServer] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+[WebServer] ✓ built in 2.25s
+[WebServer] 龍角鎮 listening on :4131 (development) base=http://localhost:4131 web=/workspace/codex-burn/uat-llmworld/apps/web/dist
+
+Running 8 tests using 1 worker
+
+(node:144) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 [desktop] › e2e/p1-1.spec.ts:4:1 › UAT-02 P1-1 Google login stays hidden while config loads and unavailable start explains why (16.1s)
+(node:335) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  2 [desktop] › e2e/p1-2.spec.ts:4:1 › UAT-03 P1-2 完成後立刻看得到剛完成的步驟與事蹟 (4.0s)
+(node:510) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  3 [desktop] › e2e/p1-3.spec.ts:4:1 › UAT-04 P1-3 角色選項手機至少三欄且儲存在兩點五個螢幕內 (1.0s)
+  ✓  4 [desktop] › e2e/p1-4.spec.ts:4:1 › UAT-05 P1-4 前人第一步引用文字有完整寬度 (897ms)
+(node:723) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  5 [mobile] › e2e/p1-1.spec.ts:4:1 › UAT-02 P1-1 Google login stays hidden while config loads and unavailable start explains why (15.8s)
+(node:915) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  6 [mobile] › e2e/p1-2.spec.ts:4:1 › UAT-03 P1-2 完成後立刻看得到剛完成的步驟與事蹟 (4.0s)
+(node:1090) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  7 [mobile] › e2e/p1-3.spec.ts:4:1 › UAT-04 P1-3 角色選項手機至少三欄且儲存在兩點五個螢幕內 (27ms)
+(node:1176) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  8 [mobile] › e2e/p1-4.spec.ts:4:1 › UAT-05 P1-4 前人第一步引用文字有完整寬度 (1.2s)
+
+
+  1) [desktop] › e2e/p1-1.spec.ts:4:1 › UAT-02 P1-1 Google login stays hidden while config loads and unavailable start explains why 
+
+    Error: expect(page).toHaveURL(expected) failed
+
+    Expected pattern: /\/login\?error=google_unavailable/
+    Received string:  "https://accounts.google.com/signin/oauth/error?authError=Cg9pbnZhbGlkX3JlcXVlc3QSJU1pc3NpbmcgcmVxdWlyZWQgcGFyYW1ldGVyOiBjbGllbnRfaWQaN2h0dHBzOi8vZGV2ZWxvcGVycy5nb29nbGUuY29tL2lkZW50aXR5L3Byb3RvY29scy9vYXV0aDIgkAM&flowName=GeneralOAuthLite&client_id&as=S1681116578:1794242526879019&aes=AVQXgOA_uHnAJ0aajgJDTi4n3XxJ"
+    Timeout: 10000ms
+
+    Call log:
+      - Expect "toHaveURL" with timeout 10000ms
+        24 × locator resolved to <html dir="ltr" lang="zh-TW">…</html>
+           - unexpected value "https://accounts.google.com/signin/oauth/error?authError=Cg9pbnZhbGlkX3JlcXVlc3QSJU1pc3NpbmcgcmVxdWlyZWQgcGFyYW1ldGVyOiBjbGllbnRfaWQaN2h0dHBzOi8vZGV2ZWxvcGVycy5nb29nbGUuY29tL2lkZW50aXR5L3Byb3RvY29scy9vYXV0aDIgkAM&flowName=GeneralOAuthLite&client_id&as=S1681116578:1794242526879019&aes=AVQXgOA_uHnAJ0aajgJDTi4n3XxJ"
+
+
+      15 |   await expect(page.getByRole("button", { name: "開發用登入" })).toBeVisible();
+      16 |   await page.goto("/auth/google/start?next=/mirror");
+    > 17 |   await expect(page).toHaveURL(/\/login\?error=google_unavailable/);
+         |                      ^
+      18 |   await expect(page.getByText(/Google 登入尚未開放/)).toBeVisible();
+      19 |   await evidence(page, "UAT-02-google-unavailable");
+      20 | });
+        at /workspace/codex-burn/uat-llmworld/e2e/p1-1.spec.ts:17:22
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/p1-1-UAT-02-P1-1-Google-lo-6244c-vailable-start-explains-why-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/p1-1-UAT-02-P1-1-Google-lo-6244c-vailable-start-explains-why-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/p1-1-UAT-02-P1-1-Google-lo-6244c-vailable-start-explains-why-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/p1-1-UAT-02-P1-1-Google-lo-6244c-vailable-start-explains-why-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [desktop] › e2e/p1-2.spec.ts:4:1 › UAT-03 P1-2 完成後立刻看得到剛完成的步驟與事蹟 ──────────────────────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('link', { name: '看看這個事蹟' })
+    Expected: visible
+    Timeout: 3000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('link', { name: '看看這個事蹟' }) with timeout 3000ms
+      - waiting for getByRole('link', { name: '看看這個事蹟' })
+
+
+      10 |   await expect(page.getByRole("heading", { name: "「第一次試著唱一首歌」" })).toBeVisible({ timeout: 3000 });
+      11 |   const link = page.getByRole("link", { name: "看看這個事蹟" });
+    > 12 |   await expect(link).toBeVisible({ timeout: 3000 });
+         |                      ^
+      13 |   await expect(page.getByRole("tab", { name: /完成了/ })).toHaveAttribute("aria-selected", "true");
+      14 |   await evidence(page, "UAT-03-completed-step");
+      15 |   await link.click();
+        at /workspace/codex-burn/uat-llmworld/e2e/p1-2.spec.ts:12:22
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/p1-2-UAT-03-P1-2-完成後立刻看得到剛完成的步驟與事蹟-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/p1-2-UAT-03-P1-2-完成後立刻看得到剛完成的步驟與事蹟-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/p1-2-UAT-03-P1-2-完成後立刻看得到剛完成的步驟與事蹟-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/p1-2-UAT-03-P1-2-完成後立刻看得到剛完成的步驟與事蹟-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [mobile] › e2e/p1-1.spec.ts:4:1 › UAT-02 P1-1 Google login stays hidden while config loads and unavailable start explains why 
+
+    Error: expect(page).toHaveURL(expected) failed
+
+    Expected pattern: /\/login\?error=google_unavailable/
+    Received string:  "https://accounts.google.com/signin/oauth/error?authError=Cg9pbnZhbGlkX3JlcXVlc3QSJU1pc3NpbmcgcmVxdWlyZWQgcGFyYW1ldGVyOiBjbGllbnRfaWQaN2h0dHBzOi8vZGV2ZWxvcGVycy5nb29nbGUuY29tL2lkZW50aXR5L3Byb3RvY29scy9vYXV0aDIgkAM&flowName=GeneralOAuthLite&client_id&as=S1161454744:1794242551856384&aes=AVQXgOA_uHnAJ0aajgJDTi4n3XxJ"
+    Timeout: 10000ms
+
+    Call log:
+      - Expect "toHaveURL" with timeout 10000ms
+        24 × locator resolved to <html dir="ltr" lang="zh-TW">…</html>
+           - unexpected value "https://accounts.google.com/signin/oauth/error?authError=Cg9pbnZhbGlkX3JlcXVlc3QSJU1pc3NpbmcgcmVxdWlyZWQgcGFyYW1ldGVyOiBjbGllbnRfaWQaN2h0dHBzOi8vZGV2ZWxvcGVycy5nb29nbGUuY29tL2lkZW50aXR5L3Byb3RvY29scy9vYXV0aDIgkAM&flowName=GeneralOAuthLite&client_id&as=S1161454744:1794242551856384&aes=AVQXgOA_uHnAJ0aajgJDTi4n3XxJ"
+
+
+      15 |   }
+      16 |   await expect(page.getByRole("button", { name: "開發用登入" })).toBeVisible();
+    > 17 |   await page.goto("/auth/google/start?next=/mirror");
+         |                      ^
+      18 |   await expect(page).toHaveURL(/\/login\?error=google_unavailable/);
+      19 |   await expect(page.getByText(/Google 登入尚未開放/)).toBeVisible();
+      20 |   await evidence(page, "UAT-02-google-unavailable");
+        at /workspace/codex-burn/uat-llmworld/e2e/p1-1.spec.ts:17:22
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/p1-1-UAT-02-P1-1-Google-lo-6244c-vailable-start-explains-why-mobile/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/p1-1-UAT-02-P1-1-Google-lo-6244c-vailable-start-explains-why-mobile/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/p1-1-UAT-02-P1-1-Google-lo-6244c-vailable-start-explains-why-mobile/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/p1-1-UAT-02-P1-1-Google-lo-6244c-vailable-start-explains-why-mobile/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [mobile] › e2e/p1-2.spec.ts:4:1 › UAT-03 P1-2 完成後立刻看得到剛完成的步驟與事蹟 ───────────────────────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('link', { name: '看看這個事蹟' })
+    Expected: visible
+    Timeout: 3000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('link', { name: '看看這個事蹟' }) with timeout 3000ms
+      - waiting for getByRole('link', { name: '看看這個事蹟' })
+
+
+      10 |   await page.getByRole("button", { name: "完成", exact: true }).click();
+      11 |   await expect(page.getByRole("heading", { name: "「第一次試著唱一首歌」" })).toBeVisible({ timeout: 3000 });
+    > 12 |   const link = page.getByRole("link", { name: "看看這個事蹟" });
+         |                      ^
+      13 |   await expect(link).toBeVisible({ timeout: 3000 });
+      14 |   await expect(page.getByRole("tab", { name: /完成了/ })).toHaveAttribute("aria-selected", "true");
+      15 |   await evidence(page, "UAT-03-completed-step");
+        at /workspace/codex-burn/uat-llmworld/e2e/p1-2.spec.ts:12:22
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/p1-2-UAT-03-P1-2-完成後立刻看得到剛完成的步驟與事蹟-mobile/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/p1-2-UAT-03-P1-2-完成後立刻看得到剛完成的步驟與事蹟-mobile/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/p1-2-UAT-03-P1-2-完成後立刻看得到剛完成的步驟與事蹟-mobile/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/p1-2-UAT-03-P1-2-完成後立刻看得到剛完成的步驟與事蹟-mobile/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) [mobile] › e2e/p1-3.spec.ts:4:1 › UAT-04 P1-3 角色選項手機至少三欄且儲存在兩點五個螢幕內 ───────────────────────────
+
+    TimeoutError: browserType.launch: Timeout 180000ms exceeded.
+    Call log:
+      - <launching> /opt/google/chrome/chrome --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-KcOC4J --remote-debugging-pipe --no-startup-window
+      - <launched> pid=1103
+      - [pid=1103][err] [1110/004248.188809:WARNING:chrome/app/chrome_main_linux.cc:84] Read channel stable from /opt/google/chrome/CHROME_VERSION_EXTRA
+      - [pid=1103][err] [1103:1103:1110/004248.193663:ERROR:third_party/crashpad/crashpad/util/file/file_io_posix.cc:208] open /home/box/.config/google-chrome/Crash Reports/settings.dat: Read-only file system (30)
+      - [pid=1103][err] [1103:1103:1110/004248.193696:ERROR:third_party/crashpad/crashpad/util/file/file_io_posix.cc:208] open /home/box/.config/google-chrome/Crash Reports/settings.dat: Read-only file system (30)
+      - [pid=1103][err] [1103:1121:1110/004248.203536:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Failed to connect to socket /run/dbus/system_bus_socket: No such file or directory
+      - [pid=1103][err] [1103:1121:1110/004248.203577:ERROR:dbus/bus.cc:405] Failed to connect to the bus: Failed to connect to socket /tmp/xdg-runtime-box-2/bus: No such file or directory
+
+
+    Error Context: test-results/p1-3-UAT-04-P1-3-角色選項手機至少三欄且儲存在兩點五個螢幕內-mobile/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/p1-3-UAT-04-P1-3-角色選項手機至少三欄且儲存在兩點五個螢幕內-mobile/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/p1-3-UAT-04-P1-3-角色選項手機至少三欄且儲存在兩點五個螢幕內-mobile/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) [mobile] › e2e/p1-4.spec.ts:4:1 › UAT-05 P1-4 前人第一步引用文字有完整寬度 ──────────────────────────────────
+
+    Error: expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 12
+    Received:    7.5830078125
+
+      10 |   await expect(card).toBeVisible();
+      11 |   if (test.info().project.name === "mobile") {
+    > 12 |     const size = await card.locator(".grow").evaluate(n => ({ width: n.getBoundingClientRect().width, fontSize: parseFloat(getComputedStyle(n).fontSize) }));
+         |                                        ^
+      13 |     expect(size.width / size.fontSize).toBeGreaterThanOrEqual(12);
+      14 |     expect((await card.boundingBox())!.height).toBeLessThan(200);
+      15 |   }
+        at /workspace/codex-burn/uat-llmworld/e2e/p1-4.spec.ts:12:40
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/p1-4-UAT-05-P1-4-前人第一步引用文字有完整寬度-mobile/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/p1-4-UAT-05-P1-4-前人第一步引用文字有完整寬度-mobile/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/p1-4-UAT-05-P1-4-前人第一步引用文字有完整寬度-mobile/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/p1-4-UAT-05-P1-4-前人第一步引用文字有完整寬度-mobile/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6 failed
+    [desktop] › e2e/p1-1.spec.ts:4:1 › UAT-02 P1-1 Google login stays hidden while config loads and unavailable start explains why 
+    [desktop] › e2e/p1-2.spec.ts:4:1 › UAT-03 P1-2 完成後立刻看得到剛完成的步驟與事蹟 ───────────────────────────────
+    [mobile] › e2e/p1-1.spec.ts:4:1 › UAT-02 P1-1 Google login stays hidden while config loads and unavailable start explains why 
+    [mobile] › e2e/p1-2.spec.ts:4:1 › UAT-03 P1-2 完成後立刻看得到剛完成的步驟與事蹟 ────────────────────────────────
+    [mobile] › e2e/p1-3.spec.ts:4:1 › UAT-04 P1-3 角色選項手機至少三欄且儲存在兩點五個螢幕內 ────────────────────────────
+    [mobile] › e2e/p1-4.spec.ts:4:1 › UAT-05 P1-4 前人第一步引用文字有完整寬度 ───────────────────────────────────
+  2 passed (10.5m)
+ ELIFECYCLE  Command failed with exit code 1.

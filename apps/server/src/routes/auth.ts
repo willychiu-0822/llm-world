@@ -17,6 +17,11 @@ export function authRoutes(ctx: AppContext) {
   const redirectUri = `${ctx.config.baseUrl}/auth/google/callback`;
 
   r.get("/auth/google/start", (req, res) => {
+    if (!ctx.config.google.clientId) {
+      const q = new URLSearchParams({ error: "google_unavailable", next: safeNext(req.query.next) });
+      res.redirect(302, `/login?${q}`);
+      return;
+    }
     const state = randomToken(16);
     const next = safeNext(req.query.next);
     setCookie(res, STATE_COOKIE, `${state}|${encodeURIComponent(next)}`, cookieOptions(ctx, 600));

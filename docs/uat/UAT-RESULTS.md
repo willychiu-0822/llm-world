@@ -9,3 +9,5 @@
 - UAT-16 新發現（待 P2-6 一併驗證）：index.html 的外部 Google Fonts 可能延遲 load 事件；一次手機 Leo 在已呈現登入畫面仍等待 load，環境暫停後超時。登入 helper 改等 DOMContentLoaded 再等真實表單，不移除原斷言。
 
 - 2026-11-10 00:41：P2-7 / UAT-01、12、13：測試基礎已完成；原人物情境桌面＋手機 6/6 pass，新手閉環因 P2-2/P2-3 暫 fixme 2；基準單元 100/100、typecheck 0 錯誤。證據 evidence/{desktop,mobile}-{leo,mia,xiaoan}-*.png；p2-7-e2e.log。
+
+- 2026-11-10 00:53：P1-1 / UAT-02 已修：config 未到不顯示 Google；未設定 client 導回中文說明且保留 next。TDD：後端 red 1/12、閃現 red 1 按鈕→green；雙裝置 E2E 2/2、全單元 101/101。證據 evidence/*-UAT-02-google-unavailable.png、p1-1-{red,green}-*.log。P2-7 commits b3d7f01、6186d19。

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { login, useTestApp } from "../test/helpers";
 
 describe("auth", () => {
-  const env = useTestApp();
+  const env = useTestApp({ google: { clientId: "test-client", clientSecret: "test-client-secret" } });
 
   it("rejects /api/me without a session", async () => {
     const res = await request(env.app).get("/api/me");
@@ -90,5 +90,16 @@ describe("auth without dev login", () => {
   it("hides the dev login endpoint", async () => {
     const res = await request(env.app).post("/api/auth/dev-login").send({ email: "a@example.com" });
     expect(res.status).toBe(404);
+  });
+});
+
+
+describe("P1-1 Google login without configuration", () => {
+  const env = useTestApp({ google: { clientId: "", clientSecret: "" } });
+  it("returns to login with an explanation instead of redirecting to Google", async () => {
+    const res = await request(env.app).get("/auth/google/start?next=/mirror");
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toBe("/login?error=google_unavailable&next=%2Fmirror");
+    expect(res.headers["set-cookie"]).toBeUndefined();
   });
 });

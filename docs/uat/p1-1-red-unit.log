@@ -1,0 +1,42 @@
+
+ RUN  v3.2.7 /workspace/codex-burn/uat-llmworld
+
+ ❯ |server| src/auth/auth.test.ts (12 tests | 1 failed) 815ms
+   ✓ auth > rejects /api/me without a session 68ms
+   ✓ auth > dev login creates a user and a session 78ms
+   ✓ auth > logging in twice reuses the same user 63ms
+   ✓ auth > gives the admin role to ADMIN_EMAILS 45ms
+   ✓ auth > logout ends the session 45ms
+   ✓ auth > deleting the account removes the user 73ms
+   ✓ auth > google start redirects to Google with state 41ms
+   ✓ auth > google callback signs in through the injected verifier and redirects to next 102ms
+   ✓ auth > google callback rejects a wrong state 43ms
+   ✓ auth > only allows relative next paths 53ms
+   ✓ auth without dev login > hides the dev login endpoint 55ms
+   × P1-1 Google login without configuration > returns to login with an explanation instead of redirecting to Google 49ms
+     → expected 'https://accounts.google.com/o/oauth2/…' to be '/login?error=google_unavailable&next=…' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |server| src/auth/auth.test.ts > P1-1 Google login without configuration > returns to login with an explanation instead of redirecting to Google
+AssertionError: expected 'https://accounts.google.com/o/oauth2/…' to be '/login?error=google_unavailable&next=…' // Object.is equality
+
+Expected: "/login?error=google_unavailable&next=%2Fmirror"
+Received: "https://accounts.google.com/o/oauth2/v2/auth?client_id=&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fauth%2Fgoogle%2Fcallback&response_type=code&scope=openid+email+profile&state=5srkhYiG0sEwHOh-lW5tnA&prompt=select_account"
+
+ ❯ src/auth/auth.test.ts:102:34
+    100|     const res = await request(env.app).get("/auth/google/start?next=/m…
+    101|     expect(res.status).toBe(302);
+    102|     expect(res.headers.location).toBe("/login?error=google_unavailable…
+       |                                  ^
+    103|     expect(res.headers["set-cookie"]).toBeUndefined();
+    104|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 11 passed (12)
+   Start at  00:22:34
+   Duration  2.74s (transform 404ms, setup 0ms, collect 1.66s, tests 815ms, environment 0ms, prepare 84ms)
+
