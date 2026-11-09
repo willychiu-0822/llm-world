@@ -1,30 +1,31 @@
-import type React from "react";
+import { lazy, Suspense, type ReactElement } from "react";
 import { Route, Routes } from "react-router-dom";
-import { RequireLogin } from "./components/Bits";
+import { Loading, RequireLogin } from "./components/Bits";
 import { Layout } from "./components/Layout";
-import { AdminPage } from "./pages/Admin";
-import { CharacterPage } from "./pages/Character";
-import { ConnectPage } from "./pages/Connect";
-import { DeedPage } from "./pages/Deed";
-import { DiscoveriesPage } from "./pages/Discoveries";
 import { HomePage } from "./pages/Home";
 import { PrivacyPage, TermsPage } from "./pages/Legal";
 import { LoginPage } from "./pages/Login";
-import { MePage } from "./pages/Me";
-import { MirrorPage } from "./pages/Mirror";
-import { NewStepPage } from "./pages/NewStep";
-import { NotificationsPage } from "./pages/Notifications";
-import { PlacePage } from "./pages/Place";
-import { ProviderPage } from "./pages/Provider";
-import { StepsPage } from "./pages/Steps";
-import { TrialPage } from "./pages/Trial";
 
-const guard = (el: React.ReactElement) => <RequireLogin>{el}</RequireLogin>;
+const AdminPage = lazy(() => import("./pages/Admin").then(m => ({ default: m.AdminPage })));
+const CharacterPage = lazy(() => import("./pages/Character").then(m => ({ default: m.CharacterPage })));
+const ConnectPage = lazy(() => import("./pages/Connect").then(m => ({ default: m.ConnectPage })));
+const DeedPage = lazy(() => import("./pages/Deed").then(m => ({ default: m.DeedPage })));
+const DiscoveriesPage = lazy(() => import("./pages/Discoveries").then(m => ({ default: m.DiscoveriesPage })));
+const MePage = lazy(() => import("./pages/Me").then(m => ({ default: m.MePage })));
+const MirrorPage = lazy(() => import("./pages/Mirror").then(m => ({ default: m.MirrorPage })));
+const NewStepPage = lazy(() => import("./pages/NewStep").then(m => ({ default: m.NewStepPage })));
+const NotificationsPage = lazy(() => import("./pages/Notifications").then(m => ({ default: m.NotificationsPage })));
+const PlacePage = lazy(() => import("./pages/Place").then(m => ({ default: m.PlacePage })));
+const ProviderPage = lazy(() => import("./pages/Provider").then(m => ({ default: m.ProviderPage })));
+const StepsPage = lazy(() => import("./pages/Steps").then(m => ({ default: m.StepsPage })));
+const TrialPage = lazy(() => import("./pages/Trial").then(m => ({ default: m.TrialPage })));
+
+const guard = (el: ReactElement) => <RequireLogin>{el}</RequireLogin>;
 
 export function App() {
   return (
     <Layout>
-      <Routes>
+      <Suspense fallback={<Loading />}><Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/places/:id" element={<PlacePage />} />
@@ -43,7 +44,7 @@ export function App() {
         <Route path="/provider" element={guard(<ProviderPage />)} />
         <Route path="/admin" element={guard(<AdminPage />)} />
         <Route path="*" element={<p className="empty">這條路還沒蓋好。回到<a href="/">地圖</a>看看吧。</p>} />
-      </Routes>
+      </Routes></Suspense>
     </Layout>
   );
 }

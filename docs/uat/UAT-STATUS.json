@@ -1,10 +1,10 @@
 {
   "project": "llm-world 龍角鎮 v1 MVP",
-  "updated": "2026-11-10 03:09",
-  "cases": 8,
-  "pass": 6,
+  "updated": "2026-11-10 04:07",
+  "cases": 33,
+  "pass": 30,
   "fail": 0,
-  "blocked": 2,
+  "blocked": 3,
   "ready_for_user_test": false,
-  "notes": "P2-5 / UAT-10 已修：手機訪客 header 顯示登入按鈕，登入狀態載入後才顯示。TDD desktop pass/mobile red 隱藏→green 雙裝置2/2，可點到登入表單。證據 evidence/*-UAT-10-header-login.png。P2-4 commit 9b6e5ac。"
+  "notes": "P2-6 已修：最大chunk334936 bytes；E2E30/30、單元105/105、typecheck/build成功。UI打磨與探索待驗；P0本機5200健康200，公開網址TLS失敗，受禁止部署操作限制，待Product Builder查驗。"
 }

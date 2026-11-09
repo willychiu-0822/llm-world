@@ -1,0 +1,16 @@
+index-Cromhi2L.js: 733590 bytes
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: P2-6: index-Cromhi2L.js must be smaller than 400 kB
+    at file:///workspace/codex-burn/uat-llmworld/scripts/check-web-chunks.mjs:8:3 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v24.22.1

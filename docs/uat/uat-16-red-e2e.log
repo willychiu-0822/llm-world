@@ -1,0 +1,136 @@
+
+> llm-world@ test:e2e /workspace/codex-burn/uat-llmworld
+> playwright test e2e/p2-6.spec.ts
+
+[WebServer] e2e database reset
+[WebServer] 
+[WebServer] > @lj/web@0.0.0 build /workspace/codex-burn/uat-llmworld/apps/web
+[WebServer] > vite build
+[WebServer] 
+[WebServer] vite v7.3.7 building client environment for production...
+[WebServer] transforming...
+[WebServer] ✓ 84 modules transformed.
+[WebServer] rendering chunks...
+[WebServer] computing gzip size...
+[WebServer] dist/index.html                   1.49 kB │ gzip:   0.88 kB
+[WebServer] dist/assets/index-SJ5S_ApP.css   10.46 kB │ gzip:   3.16 kB
+[WebServer] dist/assets/index-BQU7n3g1.js   735.25 kB │ gzip: 190.54 kB
+[WebServer] 
+[WebServer] (!) Some chunks are larger than 500 kB after minification. Consider:
+[WebServer] - Using dynamic import() to code-split the application
+[WebServer] - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+[WebServer] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+[WebServer] ✓ built in 1.78s
+[WebServer] 龍角鎮 listening on :4131 (development) base=http://localhost:4131 web=/workspace/codex-burn/uat-llmworld/apps/web/dist
+
+Running 2 tests using 1 worker
+
+(node:132) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 [desktop] › e2e/p2-6.spec.ts:4:1 › UAT-16 P2-6 首頁載入與截圖不依賴外部字型服務 (1.4s)
+(node:288) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  2 [mobile] › e2e/p2-6.spec.ts:4:1 › UAT-16 P2-6 首頁載入與截圖不依賴外部字型服務 (990ms)
+
+
+  1) [desktop] › e2e/p2-6.spec.ts:4:1 › UAT-16 P2-6 首頁載入與截圖不依賴外部字型服務 ───────────────────────────────
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 16
+
+    - Array []
+    + Array [
+    +   "https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap",
+    +   "https://fonts.gstatic.com/s/notosanstc/v40/-nF7OG829Oofr2wohFbTp9iFOkMQAewlpbGXhhyYs0QF3kPVyLylzU95vTq1Ltj5xQez1g.120.woff2",
+    +   "https://fonts.gstatic.com/s/notosanstc/v40/-nF7OG829Oofr2wohFbTp9iFOkMQAewlpbGXhhyYs0QF3kPVyLylzU95vTq1Ltj5xQez1g.123.woff2",
+    +   "https://fonts.gstatic.com/s/notosanstc/v40/-nF7OG829Oofr2wohFbTp9iFOkMQAewlpbGXhhyYs0QF3kPVyLylzU95vTq1Ltj5xQez1g.116.woff2",
+    +   "https://fonts.gstatic.com/s/notosanstc/v40/-nF7OG829Oofr2wohFbTp9iFOkMQAewlpbGXhhyYs0QF3kPVyLylzU95vTq1Ltj5xQez1g.122.woff2",
+    +   "https://fonts.gstatic.com/s/notosanstc/v40/-nF7OG829Oofr2wohFbTp9iFOkMQAewlpbGXhhyYs0QF3kPVyLylzU95vTq1Ltj5xQez1g.121.woff2",
+    +   "https://fonts.gstatic.com/s/notosanstc/v40/-nF7OG829Oofr2wohFbTp9iFOkMQAewlpbGXhhyYs0QF3kPVyLylzU95vTq1Ltj5xQez1g.119.woff2",
+    +   "https://fonts.gstatic.com/s/notosanstc/v40/-nF7OG829Oofr2wohFbTp9iFOkMQAewlpbGXhhyYs0QF3kPVyLylzU95vTq1Ltj5xQez1g.117.woff2",
+    +   "https://fonts.gstatic.com/s/notosanstc/v40/-nF7OG829Oofr2wohFbTp9iFOkMQAewlpbGXhhyYs0QF3kPVyLylzU95vTq1Ltj5xQez1g.115.woff2",
+    +   "https://fonts.gstatic.com/s/notosanstc/v40/-nF7OG829Oofr2wohFbTp9iFOkMQAewlpbGXhhyYs0QF3kPVyLylzU95vTq1Ltj5xQez1g.113.woff2",
+    +   "https://fonts.gstatic.com/s/notosanstc/v40/-nF7OG829Oofr2wohFbTp9iFOkMQAewlpbGXhhyYs0QF3kPVyLylzU95vTq1Ltj5xQez1g.108.woff2",
+    +   "https://fonts.gstatic.com/s/notosanstc/v40/-nF7OG829Oofr2wohFbTp9i1OCEK.woff2",
+    +   "https://fonts.gstatic.com/s/notosanstc/v40/-nF7OG829Oofr2wohFbTp9iFOkMQAewlpbGXhhyYs0QF3kPVyLylzU95vTq1Ltj5xQez1g.114.woff2",
+    +   "https://fonts.gstatic.com/s/notosanstc/v40/-nF7OG829Oofr2wohFbTp9iFOkMQAewlpbGXhhyYs0QF3kPVyLylzU95vTq1Ltj5xQez1g.111.woff2",
+    + ]
+
+       7 |   await page.goto("/", { waitUntil: "domcontentloaded" });
+       8 |   await expect(page.getByRole("heading", { name: "歡迎來到龍角鎮" })).toBeVisible();
+    >  9 |   expect(fonts).toEqual([]);
+         |                 ^
+      10 |   await evidence(page, "UAT-16-local-fonts");
+      11 | });
+      12 |
+        at /workspace/codex-burn/uat-llmworld/e2e/p2-6.spec.ts:9:17
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/p2-6-UAT-16-P2-6-首頁載入與截圖不依賴外部字型服務-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/p2-6-UAT-16-P2-6-首頁載入與截圖不依賴外部字型服務-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/p2-6-UAT-16-P2-6-首頁載入與截圖不依賴外部字型服務-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/p2-6-UAT-16-P2-6-首頁載入與截圖不依賴外部字型服務-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [mobile] › e2e/p2-6.spec.ts:4:1 › UAT-16 P2-6 首頁載入與截圖不依賴外部字型服務 ────────────────────────────────
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 17
+
+    - Array []
+    + Array [
+    +   "https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap",
+    +   "https://fonts.gstatic.com/s/notosanstc/v40/-nF7OG829Oofr2wohFbTp9iFOkMQAewlpbGXhhyYs0QF3kPVyLylzU95vTq1Ltj5xQez1g.120.woff2",
+    +   "https://fonts.gstatic.com/s/notosanstc/v40/-nF7OG829Oofr2wohFbTp9iFOkMQAewlpbGXhhyYs0QF3kPVyLylzU95vTq1Ltj5xQez1g.116.woff2",
+    +   "https://fonts.gstatic.com/s/notosanstc/v40/-nF7OG829Oofr2wohFbTp9iFOkMQAewlpbGXhhyYs0QF3kPVyLylzU95vTq1Ltj5xQez1g.121.woff2",
+    +   "https://fonts.gstatic.com/s/notosanstc/v40/-nF7OG829Oofr2wohFbTp9iFOkMQAewlpbGXhhyYs0QF3kPVyLylzU95vTq1Ltj5xQez1g.123.woff2",
+    +   "https://fonts.gstatic.com/s/notosanstc/v40/-nF7OG829Oofr2wohFbTp9iFOkMQAewlpbGXhhyYs0QF3kPVyLylzU95vTq1Ltj5xQez1g.122.woff2",
+    +   "https://fonts.gstatic.com/s/notosanstc/v40/-nF7OG829Oofr2wohFbTp9iFOkMQAewlpbGXhhyYs0QF3kPVyLylzU95vTq1Ltj5xQez1g.119.woff2",
+    +   "https://fonts.gstatic.com/s/notosanstc/v40/-nF7OG829Oofr2wohFbTp9iFOkMQAewlpbGXhhyYs0QF3kPVyLylzU95vTq1Ltj5xQez1g.117.woff2",
+    +   "https://fonts.gstatic.com/s/notosanstc/v40/-nF7OG829Oofr2wohFbTp9iFOkMQAewlpbGXhhyYs0QF3kPVyLylzU95vTq1Ltj5xQez1g.115.woff2",
+    +   "https://fonts.gstatic.com/s/notosanstc/v40/-nF7OG829Oofr2wohFbTp9iFOkMQAewlpbGXhhyYs0QF3kPVyLylzU95vTq1Ltj5xQez1g.113.woff2",
+    +   "https://fonts.gstatic.com/s/notosanstc/v40/-nF7OG829Oofr2wohFbTp9iFOkMQAewlpbGXhhyYs0QF3kPVyLylzU95vTq1Ltj5xQez1g.108.woff2",
+    +   "https://fonts.gstatic.com/s/notosanstc/v40/-nF7OG829Oofr2wohFbTp9i1OCEK.woff2",
+    +   "https://fonts.gstatic.com/s/notosanstc/v40/-nF7OG829Oofr2wohFbTp9iFOkMQAewlpbGXhhyYs0QF3kPVyLylzU95vTq1Ltj5xQez1g.111.woff2",
+    +   "https://fonts.gstatic.com/s/notosanstc/v40/-nF7OG829Oofr2wohFbTp9iFOkMQAewlpbGXhhyYs0QF3kPVyLylzU95vTq1Ltj5xQez1g.118.woff2",
+    +   "https://fonts.gstatic.com/s/notosanstc/v40/-nF7OG829Oofr2wohFbTp9iFOkMQAewlpbGXhhyYs0QF3kPVyLylzU95vTq1Ltj5xQez1g.114.woff2",
+    + ]
+
+       7 |   await page.goto("/", { waitUntil: "domcontentloaded" });
+       8 |   await expect(page.getByRole("heading", { name: "歡迎來到龍角鎮" })).toBeVisible();
+    >  9 |   expect(fonts).toEqual([]);
+         |                 ^
+      10 |   await evidence(page, "UAT-16-local-fonts");
+      11 | });
+      12 |
+        at /workspace/codex-burn/uat-llmworld/e2e/p2-6.spec.ts:9:17
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/p2-6-UAT-16-P2-6-首頁載入與截圖不依賴外部字型服務-mobile/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/p2-6-UAT-16-P2-6-首頁載入與截圖不依賴外部字型服務-mobile/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/p2-6-UAT-16-P2-6-首頁載入與截圖不依賴外部字型服務-mobile/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/p2-6-UAT-16-P2-6-首頁載入與截圖不依賴外部字型服務-mobile/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    [desktop] › e2e/p2-6.spec.ts:4:1 › UAT-16 P2-6 首頁載入與截圖不依賴外部字型服務 ────────────────────────────────
+    [mobile] › e2e/p2-6.spec.ts:4:1 › UAT-16 P2-6 首頁載入與截圖不依賴外部字型服務 ─────────────────────────────────
+ ELIFECYCLE  Command failed with exit code 1.

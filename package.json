@@ -14,6 +14,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:bundles": "pnpm --filter @lj/web build && node scripts/check-web-chunks.mjs",
     "db:generate": "pnpm --filter @lj/db generate",
     "db:migrate": "pnpm --filter @lj/db migrate",
     "seed:demo": "pnpm --filter @lj/server exec tsx --env-file-if-exists=../../.env src/seed-demo.ts"

@@ -1,0 +1,40 @@
+vite v7.3.7 building client environment for production...
+transforming...
+✓ 84 modules transformed.
+rendering chunks...
+[
+  { id: 'react-dom/cjs/react-dom-client.production.js', size: 644593 },
+  { id: 'zod/v3/types.js', size: 115365 },
+  {
+    id: 'react-router/dist/development/chunk-4WY6JWTD.mjs',
+    size: 75627
+  },
+  {
+    id: '/workspace/codex-burn/uat-llmworld/apps/web/src/pages/Provider.tsx',
+    size: 24126
+  },
+  {
+    id: '/workspace/codex-burn/uat-llmworld/apps/web/src/components/TownMap.tsx',
+    size: 21553
+  },
+  { id: 'react/cjs/react.production.js', size: 19185 },
+  {
+    id: '/workspace/codex-burn/uat-llmworld/apps/web/src/pages/Steps.tsx',
+    size: 11547
+  },
+  { id: 'scheduler/cjs/scheduler.production.js', size: 11134 },
+  {
+    id: '/workspace/codex-burn/uat-llmworld/apps/web/src/pages/Character.tsx',
+    size: 9614
+  },
+  {
+    id: '/workspace/codex-burn/uat-llmworld/apps/web/src/components/StepForm.tsx',
+    size: 9055
+  },
+  {
+    id: '/workspace/codex-burn/uat-llmworld/apps/web/src/pages/Admin.tsx',
+    size: 8209
+  },
+  { id: 'react-dom/cjs/react-dom.production.js', size: 7918 }
+]
+✓ built in 2.25s

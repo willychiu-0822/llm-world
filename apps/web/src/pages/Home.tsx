@@ -1,10 +1,12 @@
+import { lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 import { Avatar } from "../components/Avatar";
 import { ErrorBox, Loading } from "../components/Bits";
-import { TownMap } from "../components/TownMap";
 import { useSession } from "../lib/session";
 import type { Town } from "../lib/types";
 import { useFetch } from "../lib/useFetch";
+
+const TownMap = lazy(() => import("../components/TownMap").then(m => ({ default: m.TownMap })));
 
 export function HomePage() {
   const { me, loading } = useSession();
@@ -51,7 +53,7 @@ export function HomePage() {
           <small>拖曳移動、滾輪或雙指縮放；點建築看看大家的事蹟</small>
         </div>
         <ErrorBox error={town.error} />
-        {town.loading && !town.data ? <Loading /> : town.data && <TownMap districts={town.data.districts} places={town.data.places} />}
+        {town.loading && !town.data ? <Loading /> : town.data && <Suspense fallback={<Loading />}><TownMap districts={town.data.districts} places={town.data.places} /></Suspense>}
       </section>
     </div>
   );

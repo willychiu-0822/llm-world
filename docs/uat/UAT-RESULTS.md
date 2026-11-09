@@ -27,3 +27,7 @@
 - 2026-11-10 02:47：P2-4 / UAT-09、09b 已修：保留試用店優先、明確願望次之的既有定位規則；也想做預設只選同區的有效願望，否則沿用來源區域（不再誤選第一件運動願望）。UI 選擇旁清楚說明完成後位置；無願望時後端以第一個來源事蹟區域補足。理由：尊重明確選擇與試用實際店址，避免靜默跨區。TDD red 未指定落 misc/預設 sport→green；雙裝置4/4、全單元105/105。證據 evidence/*-UAT-09*.png。P2-3 commit 8955e31。
 
 - 2026-11-10 03:09：P2-5 / UAT-10 已修：手機訪客 header 顯示登入按鈕，登入狀態載入後才顯示。TDD desktop pass/mobile red 隱藏→green 雙裝置2/2，可點到登入表單。證據 evidence/*-UAT-10-header-login.png。P2-4 commit 9b6e5ac。
+
+- 2026-11-10 04:07：P2-6 / UAT-11、UAT-16 已修：按路由 lazy import（含 Admin、Provider、Character 與現有 SVG TownMap；此版本未使用 Leaflet），build 明確設 production，移除 Google Fonts 外站依賴。TDD：735245 bytes 失敗→最大 334936 bytes 通過；外部字型雙裝置 red→green。全 E2E 30/30（含原三人物×雙裝置及新手 console=0）、單元105/105、typecheck與build成功。證據 p2-6-green-{bundle,e2e,unit}.log、build.log、evidence/*-UAT-16-local-fonts.png。一次並行 build 清空 dist 造成 server ENOENT，測試仍30/30；後續完整回歸將採序列 build/E2E，消除此執行干擾。P2-5 commit c1442ab。
+
+- 2026-11-10 04:07：P0 公開站唯讀檢查：127.0.0.1:5200/healthz=200；公開首頁 curl TLS unexpected EOF（HTTP 000），web 工具也無法存取。未啟動或重啟5200，未修改 /workspace/deploy、tunnel 或 relay。公開首頁200與公開閉環仍 blocked，由 Product Builder 依部署權限接續查驗。
