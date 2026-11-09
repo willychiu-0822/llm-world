@@ -1,0 +1,31 @@
+{
+  "name": "@lj/server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --env-file-if-exists=../../.env src/index.ts",
+    "build": "tsup",
+    "start": "node dist/index.js",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@lj/core": "workspace:*",
+    "@lj/db": "workspace:*",
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "cookie": "^1.0.2",
+    "drizzle-orm": "0.44.7",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "helmet": "^8.1.0",
+    "jose": "^6.1.0",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/supertest": "^6.0.3",
+    "supertest": "^7.1.4",
+    "tsup": "8.5.1",
+    "tsx": "^4.20.0"
+  }
+}
