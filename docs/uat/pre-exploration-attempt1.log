@@ -1,0 +1,125 @@
+
+> llm-world@ test:e2e /workspace/codex-burn/uat-llmworld
+> playwright test --grep-invert 'UAT-15|UAT-17'
+
+[WebServer] e2e database reset
+[WebServer] 
+[WebServer] > @lj/web@0.0.0 build /workspace/codex-burn/uat-llmworld/apps/web
+[WebServer] > NODE_ENV=production vite build
+[WebServer] 
+[WebServer] vite v7.3.7 building client environment for production...
+[WebServer] transforming...
+[WebServer] ✓ 85 modules transformed.
+[WebServer] rendering chunks...
+[WebServer] computing gzip size...
+[WebServer] dist/index.html                          1.22 kB │ gzip:   0.78 kB
+[WebServer] dist/assets/index-DlO0mi1S.css          10.74 kB │ gzip:   3.22 kB
+[WebServer] dist/assets/Place-C_-2hwbo.js            1.44 kB │ gzip:   0.76 kB
+[WebServer] dist/assets/Me-B5T_NURw.js               1.75 kB │ gzip:   0.97 kB
+[WebServer] dist/assets/Discoveries-BbtXc7hC.js      1.93 kB │ gzip:   1.04 kB
+[WebServer] dist/assets/Notifications-CKVr5YEi.js    2.14 kB │ gzip:   1.17 kB
+[WebServer] dist/assets/Connect-DZBgzO20.js          2.45 kB │ gzip:   1.36 kB
+[WebServer] dist/assets/Trial-plgkE1UP.js            2.57 kB │ gzip:   1.26 kB
+[WebServer] dist/assets/Mirror-BAkITKdN.js           3.21 kB │ gzip:   1.35 kB
+[WebServer] dist/assets/Deed-B0v8xwMt.js             3.53 kB │ gzip:   1.61 kB
+[WebServer] dist/assets/Admin-BtRStG9m.js            4.60 kB │ gzip:   1.81 kB
+[WebServer] dist/assets/Character-CxhnUV8a.js        6.13 kB │ gzip:   2.45 kB
+[WebServer] dist/assets/NewStep-DH7-VAFt.js          7.46 kB │ gzip:   3.06 kB
+[WebServer] dist/assets/Steps-BPOp9EU4.js            7.77 kB │ gzip:   3.00 kB
+[WebServer] dist/assets/TownMap-BkKSgCcN.js         12.23 kB │ gzip:   4.65 kB
+[WebServer] dist/assets/Provider-D1jVud3o.js        15.19 kB │ gzip:   4.61 kB
+[WebServer] dist/assets/index-gyrdxkOr.js          335.41 kB │ gzip: 103.35 kB
+[WebServer] ✓ built in 1.64s
+[WebServer] 龍角鎮 listening on :4131 (development) base=http://localhost:4131 web=/workspace/codex-burn/uat-llmworld/apps/web/dist
+
+Running 40 tests using 1 worker
+
+(node:146) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [desktop] › e2e/leo.spec.ts:9:1 › Leo opens a shop, publishes a trial, confirms attendance and sees thanks (8.3s)
+  ✓   2 [desktop] › e2e/login-recovery.spec.ts:4:1 › UAT-18 登入設定失敗可重試，恢復後可登入且不閃出Google (728ms)
+  ✓   3 [desktop] › e2e/mia.spec.ts:9:1 › Mia shares her first step and is thanked when Kai follows it (5.8s)
+  ✘   4 [desktop] › e2e/novice.spec.ts:6:1 › UAT-01 P2-7 新手從訪客走到第一個事蹟與鏡子 (20.1s)
+(node:860) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   5 [desktop] › e2e/p1-1.spec.ts:5:1 › UAT-02 P1-1 Google login stays hidden while config loads and unavailable start explains why (3.2s)
+  ✓   6 [desktop] › e2e/p1-2.spec.ts:5:1 › UAT-03 P1-2 完成後立刻看得到剛完成的步驟與事蹟 (1.4s)
+  ✓   7 [desktop] › e2e/p1-3.spec.ts:5:1 › UAT-04 P1-3 角色選項手機至少三欄且儲存在兩點五個螢幕內 (784ms)
+  ✓   8 [desktop] › e2e/p1-4.spec.ts:5:1 › UAT-05 P1-4 前人第一步引用文字有完整寬度 (1.4s)
+  ✓   9 [desktop] › e2e/p2-1.spec.ts:5:1 › UAT-06 P2-1 初次儲存角色後帶到想做的事且訊息不遮表單 (1.9s)
+  ✓  10 [desktop] › e2e/p2-2.spec.ts:5:1 › UAT-07 P2-2 訪客逛首頁地點事蹟沒有 console error (805ms)
+  ✓  11 [desktop] › e2e/p2-3.spec.ts:5:1 › UAT-08 P2-3 非管理者不呼叫管理 API 並能回到地圖 (719ms)
+  ✓  12 [desktop] › e2e/p2-4.spec.ts:5:1 › UAT-09 P2-4 音樂事蹟的預設第一步不誤掛到運動願望 (844ms)
+  ✓  13 [desktop] › e2e/p2-4.spec.ts:25:1 › UAT-09b P2-4 手動改選另一區時說明與事蹟位置一致 (1.6s)
+  ✓  14 [desktop] › e2e/p2-5.spec.ts:5:1 › UAT-10 P2-5 訪客頂部登入入口可見可點 (505ms)
+  ✓  15 [desktop] › e2e/p2-6.spec.ts:4:1 › UAT-16 P2-6 首頁載入與截圖不依賴外部字型服務 (396ms)
+  ✓  16 [desktop] › e2e/ui-polish.spec.ts:21:1 › UAT-14a 空狀態都能直接走到下一步 (4.4s)
+  ✓  17 [desktop] › e2e/ui-polish.spec.ts:43:1 › UAT-14b 多筆步驟與完成表單只有一個主要操作且可取消 (1.4s)
+  ✓  18 [desktop] › e2e/ui-polish.spec.ts:59:1 › UAT-14c 測試登入說明可照做且寫下願望後可去地圖 (1.7s)
+  ✓  19 [desktop] › e2e/ui-polish.spec.ts:80:1 › UAT-14d 提供者與管理者的等待畫面和空狀態有下一步 (2.8s)
+  ✓  20 [desktop] › e2e/xiaoan.spec.ts:10:1 › Xiaoan's loop: AI step first, then going to the trial in person (6.0s)
+(node:1902) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  21 [mobile] › e2e/leo.spec.ts:9:1 › Leo opens a shop, publishes a trial, confirms attendance and sees thanks (9.4s)
+  ✓  22 [mobile] › e2e/login-recovery.spec.ts:4:1 › UAT-18 登入設定失敗可重試，恢復後可登入且不閃出Google (639ms)
+  ✓  23 [mobile] › e2e/mia.spec.ts:9:1 › Mia shares her first step and is thanked when Kai follows it (7.7s)
+  ✓  24 [mobile] › e2e/novice.spec.ts:6:1 › UAT-01 P2-7 新手從訪客走到第一個事蹟與鏡子 (2.6s)
+  ✓  25 [mobile] › e2e/p1-1.spec.ts:5:1 › UAT-02 P1-1 Google login stays hidden while config loads and unavailable start explains why (2.5s)
+  ✓  26 [mobile] › e2e/p1-2.spec.ts:5:1 › UAT-03 P1-2 完成後立刻看得到剛完成的步驟與事蹟 (1.3s)
+  ✓  27 [mobile] › e2e/p1-3.spec.ts:5:1 › UAT-04 P1-3 角色選項手機至少三欄且儲存在兩點五個螢幕內 (699ms)
+  ✓  28 [mobile] › e2e/p1-4.spec.ts:5:1 › UAT-05 P1-4 前人第一步引用文字有完整寬度 (755ms)
+  ✓  29 [mobile] › e2e/p2-1.spec.ts:5:1 › UAT-06 P2-1 初次儲存角色後帶到想做的事且訊息不遮表單 (1.3s)
+  ✓  30 [mobile] › e2e/p2-2.spec.ts:5:1 › UAT-07 P2-2 訪客逛首頁地點事蹟沒有 console error (671ms)
+  ✓  31 [mobile] › e2e/p2-3.spec.ts:5:1 › UAT-08 P2-3 非管理者不呼叫管理 API 並能回到地圖 (629ms)
+  ✓  32 [mobile] › e2e/p2-4.spec.ts:5:1 › UAT-09 P2-4 音樂事蹟的預設第一步不誤掛到運動願望 (794ms)
+  ✓  33 [mobile] › e2e/p2-4.spec.ts:25:1 › UAT-09b P2-4 手動改選另一區時說明與事蹟位置一致 (1.5s)
+  ✓  34 [mobile] › e2e/p2-5.spec.ts:5:1 › UAT-10 P2-5 訪客頂部登入入口可見可點 (428ms)
+  ✓  35 [mobile] › e2e/p2-6.spec.ts:4:1 › UAT-16 P2-6 首頁載入與截圖不依賴外部字型服務 (343ms)
+  ✓  36 [mobile] › e2e/ui-polish.spec.ts:21:1 › UAT-14a 空狀態都能直接走到下一步 (4.0s)
+  ✓  37 [mobile] › e2e/ui-polish.spec.ts:43:1 › UAT-14b 多筆步驟與完成表單只有一個主要操作且可取消 (1.3s)
+  ✓  38 [mobile] › e2e/ui-polish.spec.ts:59:1 › UAT-14c 測試登入說明可照做且寫下願望後可去地圖 (1.6s)
+  ✓  39 [mobile] › e2e/ui-polish.spec.ts:80:1 › UAT-14d 提供者與管理者的等待畫面和空狀態有下一步 (2.6s)
+  ✓  40 [mobile] › e2e/xiaoan.spec.ts:10:1 › Xiaoan's loop: AI step first, then going to the trial in person (6.1s)
+
+
+  1) [desktop] › e2e/novice.spec.ts:6:1 › UAT-01 P2-7 新手從訪客走到第一個事蹟與鏡子 ──────────────────────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('code').filter({ hasText: '/mcp' })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('code').filter({ hasText: '/mcp' }) with timeout 10000ms
+      - waiting for locator('code').filter({ hasText: '/mcp' })
+
+
+      62 |   await snap("15-discoveries");
+      63 |   await page.goto("/connect");
+    > 64 |   await expect(page.locator("code", { hasText: "/mcp" })).toBeVisible();
+         |                                                           ^
+      65 |   await snap("16-connect");
+      66 |   expect(errors).toEqual([]);
+      67 | });
+        at /workspace/codex-burn/uat-llmworld/e2e/novice.spec.ts:64:59
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/novice-UAT-01-P2-7-新手從訪客走到第一個事蹟與鏡子-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/novice-UAT-01-P2-7-新手從訪客走到第一個事蹟與鏡子-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/novice-UAT-01-P2-7-新手從訪客走到第一個事蹟與鏡子-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/novice-UAT-01-P2-7-新手從訪客走到第一個事蹟與鏡子-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [desktop] › e2e/novice.spec.ts:6:1 › UAT-01 P2-7 新手從訪客走到第一個事蹟與鏡子 ───────────────────────────────
+  39 passed (2.0m)
+ ELIFECYCLE  Command failed with exit code 1.

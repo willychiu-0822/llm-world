@@ -61,3 +61,33 @@
 - 2026-11-10 07:26：UAT-15 / UAT-17 探索式測試：發現長英文連結撐寬步驟頁（桌面scrollWidth2163>1280，手機也超出390）。UAT-17已修：頁面內容允許長字串斷行，不截字、不隱藏溢出；斷言改用明確project viewport（1280/390），避免手機被撐寬後innerWidth也變大造成漏測。TDD red→green，五頁（我、完成步驟、事蹟、鏡子、角色）雙裝置均無溢出；探索＋UI12/12。證據exploratory-{red,green}-e2e.log、evidence/*-UAT-17-long-content-{0..4}.png。
 - UAT-15測試修正：提交後先等成功導向與步驟標題，再重新整理；不在尚未收到成功回應時中斷提交。補驗證來源音樂區、未先設定角色/願望仍能完成、重新整理後資料保留，以及session失效後登入回到原/steps。最後全套雙裝置通過且console/pageerror=0。證據evidence/*-UAT-15-*.png。
 - UAT-18修復commit：5568557；UAT-14資料載入等待修正commit：02c26c9。
+
+## 最終驗收（2026-11-10 07:27 Asia/Taipei）
+
+本機程式碼驗收通過，公開站仍blocked。分支codex/uat-v1，基準b45b0a0；未push、未修改remote、未操作部署/tunnel/relay或其他DB。UAT-17修復commit：7d3630b。
+
+| 檢查 | 結果 | 證據 |
+|---|---|---|
+| pnpm typecheck | PASS，0錯誤 | final-typecheck.log |
+| pnpm build | PASS | final-build.log |
+| node scripts/check-web-chunks.mjs | PASS，最大335411 bytes（<400000） | final-bundles.log |
+| TEST_DATABASE_URL=專用test DB pnpm test | PASS，20檔105/105；原100個保留 | final-unit.log |
+| PW_CHANNEL=chrome E2E_PORT=4131 E2E_DATABASE_URL=專用e2e DB pnpm test:e2e | PASS，44/44，無skip/fixme，1.9分鐘 | final-e2e.log |
+| 原小安／Leo／Mia | PASS，三情境×雙裝置6/6 | final-e2e.log、evidence/*-{xiaoan,leo,mia}-*.png |
+| 新手閉環UAT-01／探索UAT-15 | PASS，雙裝置；console/pageerror=0 | evidence/*-UAT-01-*.png、*-UAT-15-*.png |
+| 手機390×844／桌面1280×800 UI與長字串 | PASS，實際project viewport寬度斷言；頁尾操作不被tabbar遮住 | evidence/*-UAT-14*.png、*-UAT-17*.png |
+| 自啟動測試服務 | PASS，4131–4139已無listener | ss本機檢查 |
+| P0本機app | PASS，5200/healthz=200（唯讀檢查） | 本節記錄 |
+| P0公開首頁及公開閉環 | BLOCKED，curl TLS unexpected EOF，HTTP000，未能驗證首頁200 | 本節記錄；未修改DEPLOY_STATUS.md，依使用者禁止操作/workspace/deploy規則 |
+
+### 本輪完整執行的失敗紀錄
+
+- UAT-14首次完整36pass/2fail：測試收集暫時Loading節點；02c26c9修正等待條件，保留逐項入口斷言。
+- 接續37pass/1fail：手機小安在API200接收約224秒停頓後耗盡90秒；原案例定向重跑通過，未改timeout/斷言。
+- pre-exploration-attempt1.log：39pass/1fail（桌面新手在Connect載入中；API與chunk均200、沒有console錯誤，原因未能確定）。
+- pre-exploration-attempt2.log：39pass/1fail（手機UAT-02在2秒延遲採樣中超過90秒；與工具長時間等待停頓同時發生）。
+- exploratory-red-e2e.log：4fail，兩個為探索腳本尚未等提交完成就重新整理，兩個揭露實際UAT-17長字串溢出；均已修正，探索＋UI12/12。
+- final-e2e-attempt1.log：43pass/1fail（桌面UAT-15截圖期間停頓，字型已載完，案例耗時3.4分鐘）。
+- 最後透過連續收集輸出的完整執行：final-e2e.log 44/44，一次通過、retries=0。以上間歇停頓保留紀錄，沒有新增retry或延長timeout；若其他環境再出現，需依trace追查，不能只憑重跑通過認定原因。
+
+UAT-STATUS計數：44次瀏覽器案例執行（22案×雙裝置）＋1個公開站驗收=45；靜態檢查獨立列於上表。公開網址尚不可宣告可供使用者驗收，需Product Builder於部署環境接續確認；本機程式碼與證據已可拉取。
