@@ -1,0 +1,286 @@
+
+> llm-world@ test:e2e /workspace/codex-burn/uat-llmworld
+> playwright test e2e/content-recovery.spec.ts
+
+[WebServer] e2e database reset
+[WebServer] 
+[WebServer] > @lj/web@0.0.0 build /workspace/codex-burn/uat-llmworld/apps/web
+[WebServer] > NODE_ENV=production vite build
+[WebServer] 
+[WebServer] vite v7.3.7 building client environment for production...
+[WebServer] transforming...
+[WebServer] ✓ 85 modules transformed.
+[WebServer] rendering chunks...
+[WebServer] computing gzip size...
+[WebServer] dist/index.html                          1.22 kB │ gzip:   0.77 kB
+[WebServer] dist/assets/index-C4xDEp5H.css          10.76 kB │ gzip:   3.24 kB
+[WebServer] dist/assets/Place-DLvAm65f.js            1.44 kB │ gzip:   0.76 kB
+[WebServer] dist/assets/Me-C-93l7rV.js               1.75 kB │ gzip:   0.97 kB
+[WebServer] dist/assets/Discoveries-BxjE4lBg.js      1.93 kB │ gzip:   1.04 kB
+[WebServer] dist/assets/Notifications-DLoooREu.js    2.14 kB │ gzip:   1.17 kB
+[WebServer] dist/assets/Connect-pOwcqDp8.js          2.45 kB │ gzip:   1.36 kB
+[WebServer] dist/assets/Trial-Dbz_5ugR.js            2.57 kB │ gzip:   1.26 kB
+[WebServer] dist/assets/Mirror-D-JWJuLu.js           3.21 kB │ gzip:   1.36 kB
+[WebServer] dist/assets/Deed-Dsab1QCY.js             3.53 kB │ gzip:   1.61 kB
+[WebServer] dist/assets/Admin-DoWgNlOA.js            4.60 kB │ gzip:   1.81 kB
+[WebServer] dist/assets/Character-BzHm3aFC.js        6.13 kB │ gzip:   2.45 kB
+[WebServer] dist/assets/NewStep-CGhCftr-.js          7.46 kB │ gzip:   3.06 kB
+[WebServer] dist/assets/Steps-p5K5JciK.js            7.77 kB │ gzip:   3.00 kB
+[WebServer] dist/assets/TownMap-B2ldmQGo.js         12.23 kB │ gzip:   4.65 kB
+[WebServer] dist/assets/Provider-DGVDY3z2.js        15.19 kB │ gzip:   4.61 kB
+[WebServer] dist/assets/index-D5rhhkPP.js          335.41 kB │ gzip: 103.35 kB
+[WebServer] ✓ built in 1.64s
+[WebServer] 龍角鎮 listening on :4131 (development) base=http://localhost:4131 web=/workspace/codex-burn/uat-llmworld/apps/web/dist
+
+Running 6 tests using 1 worker
+
+(node:132) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 [desktop] › e2e/content-recovery.spec.ts:4:1 › UAT-19 來源事蹟改為私人或試用連結失效時，先說明並引導回地圖 (11.1s)
+(node:306) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  2 [desktop] › e2e/content-recovery.spec.ts:25:1 › UAT-19b 來源建議載入暫時失敗後，重試仍保留原主題與參考 (11.0s)
+(node:480) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  3 [desktop] › e2e/content-recovery.spec.ts:49:1 › UAT-20 隨筆儲存暫時失敗時保留內容，可重試而不產生未處理錯誤 (11.1s)
+(node:655) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  4 [mobile] › e2e/content-recovery.spec.ts:4:1 › UAT-19 來源事蹟改為私人或試用連結失效時，先說明並引導回地圖 (10.8s)
+(node:832) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  5 [mobile] › e2e/content-recovery.spec.ts:25:1 › UAT-19b 來源建議載入暫時失敗後，重試仍保留原主題與參考 (11.0s)
+(node:1004) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  6 [mobile] › e2e/content-recovery.spec.ts:49:1 › UAT-20 隨筆儲存暫時失敗時保留內容，可重試而不產生未處理錯誤 (12.2s)
+
+
+  1) [desktop] › e2e/content-recovery.spec.ts:4:1 › UAT-19 來源事蹟改為私人或試用連結失效時，先說明並引導回地圖 ──────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('heading', { name: '這個起點暫時無法使用' })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('heading', { name: '這個起點暫時無法使用' }) with timeout 10000ms
+      - waiting for getByRole('heading', { name: '這個起點暫時無法使用' })
+
+
+      12 |   for (const [kind, query] of [["deed", `deedId=${deed.id}`], ["trial", "trialId=trl_no_longer_available"]]) {
+      13 |     await page.goto(`/steps/new?${query}`);
+    > 14 |     await expect(page.getByRole("heading", { name: "這個起點暫時無法使用" })).toBeVisible();
+         |                                                                     ^
+      15 |     await expect(page.getByRole("alert")).toContainText("找不到這個內容");
+      16 |     await expect(page.getByLabel("第一步", { exact: true })).toHaveCount(0);
+      17 |     await expect(page.getByRole("button", { name: "確定這一步" })).toHaveCount(0);
+        at /workspace/codex-burn/uat-llmworld/e2e/content-recovery.spec.ts:14:69
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/content-recovery-UAT-19-來源事蹟改為私人或試用連結失效時，先說明並引導回地圖-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/content-recovery-UAT-19-來源事蹟改為私人或試用連結失效時，先說明並引導回地圖-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/content-recovery-UAT-19-來源事蹟改為私人或試用連結失效時，先說明並引導回地圖-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/content-recovery-UAT-19-來源事蹟改為私人或試用連結失效時，先說明並引導回地圖-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [desktop] › e2e/content-recovery.spec.ts:25:1 › UAT-19b 來源建議載入暫時失敗後，重試仍保留原主題與參考 ───────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('heading', { name: '這個起點暫時無法使用' })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('heading', { name: '這個起點暫時無法使用' }) with timeout 10000ms
+      - waiting for getByRole('heading', { name: '這個起點暫時無法使用' })
+
+
+      32 |   });
+      33 |   await page.goto(`/steps/new?deedId=${deed.id}`);
+    > 34 |   await expect(page.getByRole("heading", { name: "這個起點暫時無法使用" })).toBeVisible();
+         |                                                                   ^
+      35 |   await expect(page.getByLabel("第一步", { exact: true })).toHaveCount(0);
+      36 |   await evidence(page, "UAT-19b-source-retry");
+      37 |   await page.getByRole("button", { name: "再試一次", exact: true }).click();
+        at /workspace/codex-burn/uat-llmworld/e2e/content-recovery.spec.ts:34:67
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/content-recovery-UAT-19b-來源建議載入暫時失敗後，重試仍保留原主題與參考-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/content-recovery-UAT-19b-來源建議載入暫時失敗後，重試仍保留原主題與參考-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/content-recovery-UAT-19b-來源建議載入暫時失敗後，重試仍保留原主題與參考-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/content-recovery-UAT-19b-來源建議載入暫時失敗後，重試仍保留原主題與參考-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [desktop] › e2e/content-recovery.spec.ts:49:1 › UAT-20 隨筆儲存暫時失敗時保留內容，可重試而不產生未處理錯誤 ─────────────
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('form.before').getByRole('alert')
+    Expected substring: "還沒存好"
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toContainText" locator('form.before').getByRole('alert') with timeout 10000ms
+      - waiting for locator('form.before').getByRole('alert')
+
+
+      66 |     await form.getByLabel(label, { exact: true }).fill(note);
+      67 |     await form.getByRole("button", { name: "儲存", exact: true }).click();
+    > 68 |     await expect(form.getByRole("alert")).toContainText("還沒存好");
+         |                                           ^
+      69 |     await expect(form.getByLabel(label, { exact: true })).toHaveValue(note);
+      70 |     await evidence(page, `UAT-20-${kind}-retry`);
+      71 |     await form.getByRole("button", { name: "儲存", exact: true }).click();
+        at /workspace/codex-burn/uat-llmworld/e2e/content-recovery.spec.ts:68:43
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/content-recovery-UAT-20-隨筆儲存暫時失敗時保留內容，可重試而不產生未處理錯誤-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/content-recovery-UAT-20-隨筆儲存暫時失敗時保留內容，可重試而不產生未處理錯誤-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/content-recovery-UAT-20-隨筆儲存暫時失敗時保留內容，可重試而不產生未處理錯誤-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/content-recovery-UAT-20-隨筆儲存暫時失敗時保留內容，可重試而不產生未處理錯誤-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [mobile] › e2e/content-recovery.spec.ts:4:1 › UAT-19 來源事蹟改為私人或試用連結失效時，先說明並引導回地圖 ───────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('heading', { name: '這個起點暫時無法使用' })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('heading', { name: '這個起點暫時無法使用' }) with timeout 10000ms
+      - waiting for getByRole('heading', { name: '這個起點暫時無法使用' })
+
+
+      12 |   for (const [kind, query] of [["deed", `deedId=${deed.id}`], ["trial", "trialId=trl_no_longer_available"]]) {
+      13 |     await page.goto(`/steps/new?${query}`);
+    > 14 |     await expect(page.getByRole("heading", { name: "這個起點暫時無法使用" })).toBeVisible();
+         |                                                                     ^
+      15 |     await expect(page.getByRole("alert")).toContainText("找不到這個內容");
+      16 |     await expect(page.getByLabel("第一步", { exact: true })).toHaveCount(0);
+      17 |     await expect(page.getByRole("button", { name: "確定這一步" })).toHaveCount(0);
+        at /workspace/codex-burn/uat-llmworld/e2e/content-recovery.spec.ts:14:69
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/content-recovery-UAT-19-來源事蹟改為私人或試用連結失效時，先說明並引導回地圖-mobile/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/content-recovery-UAT-19-來源事蹟改為私人或試用連結失效時，先說明並引導回地圖-mobile/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/content-recovery-UAT-19-來源事蹟改為私人或試用連結失效時，先說明並引導回地圖-mobile/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/content-recovery-UAT-19-來源事蹟改為私人或試用連結失效時，先說明並引導回地圖-mobile/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) [mobile] › e2e/content-recovery.spec.ts:25:1 › UAT-19b 來源建議載入暫時失敗後，重試仍保留原主題與參考 ────────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('heading', { name: '這個起點暫時無法使用' })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('heading', { name: '這個起點暫時無法使用' }) with timeout 10000ms
+      - waiting for getByRole('heading', { name: '這個起點暫時無法使用' })
+
+
+      32 |   });
+      33 |   await page.goto(`/steps/new?deedId=${deed.id}`);
+    > 34 |   await expect(page.getByRole("heading", { name: "這個起點暫時無法使用" })).toBeVisible();
+         |                                                                   ^
+      35 |   await expect(page.getByLabel("第一步", { exact: true })).toHaveCount(0);
+      36 |   await evidence(page, "UAT-19b-source-retry");
+      37 |   await page.getByRole("button", { name: "再試一次", exact: true }).click();
+        at /workspace/codex-burn/uat-llmworld/e2e/content-recovery.spec.ts:34:67
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/content-recovery-UAT-19b-來源建議載入暫時失敗後，重試仍保留原主題與參考-mobile/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/content-recovery-UAT-19b-來源建議載入暫時失敗後，重試仍保留原主題與參考-mobile/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/content-recovery-UAT-19b-來源建議載入暫時失敗後，重試仍保留原主題與參考-mobile/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/content-recovery-UAT-19b-來源建議載入暫時失敗後，重試仍保留原主題與參考-mobile/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) [mobile] › e2e/content-recovery.spec.ts:49:1 › UAT-20 隨筆儲存暫時失敗時保留內容，可重試而不產生未處理錯誤 ──────────────
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('form.before').getByRole('alert')
+    Expected substring: "還沒存好"
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toContainText" locator('form.before').getByRole('alert') with timeout 10000ms
+      - waiting for locator('form.before').getByRole('alert')
+
+
+      66 |     await form.getByLabel(label, { exact: true }).fill(note);
+      67 |     await form.getByRole("button", { name: "儲存", exact: true }).click();
+    > 68 |     await expect(form.getByRole("alert")).toContainText("還沒存好");
+         |                                           ^
+      69 |     await expect(form.getByLabel(label, { exact: true })).toHaveValue(note);
+      70 |     await evidence(page, `UAT-20-${kind}-retry`);
+      71 |     await form.getByRole("button", { name: "儲存", exact: true }).click();
+        at /workspace/codex-burn/uat-llmworld/e2e/content-recovery.spec.ts:68:43
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/content-recovery-UAT-20-隨筆儲存暫時失敗時保留內容，可重試而不產生未處理錯誤-mobile/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/content-recovery-UAT-20-隨筆儲存暫時失敗時保留內容，可重試而不產生未處理錯誤-mobile/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/content-recovery-UAT-20-隨筆儲存暫時失敗時保留內容，可重試而不產生未處理錯誤-mobile/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/content-recovery-UAT-20-隨筆儲存暫時失敗時保留內容，可重試而不產生未處理錯誤-mobile/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6 failed
+    [desktop] › e2e/content-recovery.spec.ts:4:1 › UAT-19 來源事蹟改為私人或試用連結失效時，先說明並引導回地圖 ───────────────
+    [desktop] › e2e/content-recovery.spec.ts:25:1 › UAT-19b 來源建議載入暫時失敗後，重試仍保留原主題與參考 ────────────────
+    [desktop] › e2e/content-recovery.spec.ts:49:1 › UAT-20 隨筆儲存暫時失敗時保留內容，可重試而不產生未處理錯誤 ──────────────
+    [mobile] › e2e/content-recovery.spec.ts:4:1 › UAT-19 來源事蹟改為私人或試用連結失效時，先說明並引導回地圖 ────────────────
+    [mobile] › e2e/content-recovery.spec.ts:25:1 › UAT-19b 來源建議載入暫時失敗後，重試仍保留原主題與參考 ─────────────────
+    [mobile] › e2e/content-recovery.spec.ts:49:1 › UAT-20 隨筆儲存暫時失敗時保留內容，可重試而不產生未處理錯誤 ───────────────
+ ELIFECYCLE  Command failed with exit code 1.

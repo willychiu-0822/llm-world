@@ -1,0 +1,46 @@
+
+> llm-world@ test:e2e /workspace/codex-burn/uat-llmworld
+> playwright test e2e/content-recovery.spec.ts
+
+[WebServer] e2e database reset
+[WebServer] 
+[WebServer] > @lj/web@0.0.0 build /workspace/codex-burn/uat-llmworld/apps/web
+[WebServer] > NODE_ENV=production vite build
+[WebServer] 
+[WebServer] vite v7.3.7 building client environment for production...
+[WebServer] transforming...
+[WebServer] ✓ 85 modules transformed.
+[WebServer] rendering chunks...
+[WebServer] computing gzip size...
+[WebServer] dist/index.html                          1.22 kB │ gzip:   0.77 kB
+[WebServer] dist/assets/index-C4xDEp5H.css          10.76 kB │ gzip:   3.24 kB
+[WebServer] dist/assets/Place-CgojPuJG.js            1.44 kB │ gzip:   0.76 kB
+[WebServer] dist/assets/Me-Cb2xbEiW.js               1.75 kB │ gzip:   0.97 kB
+[WebServer] dist/assets/Discoveries-CyMUJGn8.js      1.93 kB │ gzip:   1.04 kB
+[WebServer] dist/assets/Notifications-w9ImDpdD.js    2.14 kB │ gzip:   1.17 kB
+[WebServer] dist/assets/Connect-D_95CL9G.js          2.45 kB │ gzip:   1.36 kB
+[WebServer] dist/assets/Trial-DajJdMhb.js            2.57 kB │ gzip:   1.26 kB
+[WebServer] dist/assets/Mirror-DdH3M_JV.js           3.21 kB │ gzip:   1.36 kB
+[WebServer] dist/assets/Deed-u9fmn24F.js             3.53 kB │ gzip:   1.60 kB
+[WebServer] dist/assets/Admin-DVsNnK8c.js            4.60 kB │ gzip:   1.81 kB
+[WebServer] dist/assets/Character-ikVZLx_h.js        6.13 kB │ gzip:   2.45 kB
+[WebServer] dist/assets/Steps-4jk8ywZf.js            7.77 kB │ gzip:   3.00 kB
+[WebServer] dist/assets/NewStep-Cu4rnDcQ.js          8.11 kB │ gzip:   3.27 kB
+[WebServer] dist/assets/TownMap-C32K_9cE.js         12.23 kB │ gzip:   4.65 kB
+[WebServer] dist/assets/Provider-Dpu-ybF1.js        15.19 kB │ gzip:   4.61 kB
+[WebServer] dist/assets/index-DvxsUALe.js          335.41 kB │ gzip: 103.35 kB
+[WebServer] ✓ built in 1.45s
+[WebServer] 龍角鎮 listening on :4131 (development) base=http://localhost:4131 web=/workspace/codex-burn/uat-llmworld/apps/web/dist
+
+Running 4 tests using 1 worker
+
+(node:134) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [desktop] › e2e/content-recovery.spec.ts:4:1 › UAT-19 來源事蹟改為私人或試用連結失效時，先說明並引導回地圖 (2.1s)
+  ✓  2 [desktop] › e2e/content-recovery.spec.ts:25:1 › UAT-19b 來源建議載入暫時失敗後，重試仍保留原主題與參考 (1.5s)
+(node:347) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  3 [mobile] › e2e/content-recovery.spec.ts:4:1 › UAT-19 來源事蹟改為私人或試用連結失效時，先說明並引導回地圖 (2.2s)
+  ✓  4 [mobile] › e2e/content-recovery.spec.ts:25:1 › UAT-19b 來源建議載入暫時失敗後，重試仍保留原主題與參考 (1.4s)
+
+  4 passed (13.6s)

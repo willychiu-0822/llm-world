@@ -23,6 +23,18 @@ export function NewStepPage() {
   const [error, setError] = useState<Error | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  const sourceError = deed.error ?? trial.error ?? sug.error;
+  if (sourceError) return (
+    <section className="panel stack" style={{ maxWidth: 760, margin: "0 auto" }}>
+      <h1>這個起點暫時無法使用</h1>
+      <p>來源可能已改成私人、下架，或暫時載入不了。你可以再試一次，也可以回地圖找別的靈感。</p>
+      <ErrorBox error={sourceError} />
+      <div className="row wrap">
+        <Link className="btn primary" to="/#map">回地圖找靈感</Link>
+        <button className="btn ghost" disabled={deed.loading || trial.loading || sug.loading} onClick={() => void Promise.all([deed.reload(), trial.reload(), sug.reload()])}>再試一次</button>
+      </div>
+    </section>
+  );
   if ((deedId && deed.loading && !deed.data) || sug.loading || (trialId && trial.loading && !trial.data)) return <Loading />;
   const submit = async (p: StepPayload) => {
     setSubmitting(true);

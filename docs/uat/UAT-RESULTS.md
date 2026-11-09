@@ -91,3 +91,9 @@
 - 最後透過連續收集輸出的完整執行：final-e2e.log 44/44，一次通過、retries=0。以上間歇停頓保留紀錄，沒有新增retry或延長timeout；若其他環境再出現，需依trace追查，不能只憑重跑通過認定原因。
 
 UAT-STATUS計數：44次瀏覽器案例執行（22案×雙裝置）＋1個公開站驗收=45；靜態檢查獨立列於上表。公開網址尚不可宣告可供使用者驗收，需Product Builder於部署環境接續確認；本機程式碼與證據已可拉取。
+
+- 2026-11-10 07:49：第2輪基準回歸：typecheck 0、build成功、最大chunk335411 bytes、單元105/105、Chrome桌面+手機原44/44全過（2.4m）。證據round2-{typecheck,build,unit,baseline-e2e}.log。啟動時遇corepack全域快取唯讀，依環境指示改COREPACK_HOME=$PWD/.corepack後通過；未變更套件。5200/healthz唯讀200，公開網址仍TLS unexpected EOF／HTTP000，公開閉環blocked；未操作部署。新增UAT-19/20恢復分支TDD執行中。
+
+- 2026-11-10 07:50：UAT-19/19b、UAT-20新發現：雙裝置6/6 red（round2-recovery-red.log）。來源改私人或建議503仍顯示表單且無回復入口；隨筆PUT503沒有頁內錯誤且有未處理ApiError。已拆為content-recovery與note-recovery兩個spec，以便逐項修復提交；斷言保持。來源修復定向驗證中。
+
+- 2026-11-10 07:56：UAT-19/19b 已修：來源事蹟／試用機會／建議任一載入失敗時先顯示中文說明，提供回地圖與再試一次，不呈現必定失敗的表單。TDD雙裝置4 red→4 green；新增真實私人來源、失效試用連結、建議503後重試，斷言來源參考保留。證據round2-source-green.log、evidence/*-UAT-19*.png。UAT-20兩案仍待修驗證，公開站blocked。

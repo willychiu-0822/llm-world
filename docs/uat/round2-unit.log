@@ -1,0 +1,40 @@
+
+> llm-world@ test /workspace/codex-burn/uat-llmworld
+> vitest run
+
+
+ RUN  v3.2.7 /workspace/codex-burn/uat-llmworld
+
+ ✓ |server| src/mcp/mcp.test.ts (11 tests) 3320ms
+   ✓ OAuth 2.1 for MCP clients > publishes authorization server and protected resource metadata  479ms
+   ✓ MCP tools > lists the world tools and the character prompt  416ms
+   ✓ MCP tools > runs Xiaoan's AI loop: discover, ask, bring back, propose, and complete a confirmed AI step  712ms
+ ✓ |server| src/routes/__tests__/steps.test.ts (11 tests) 1148ms
+ ✓ |server| src/routes/__tests__/provider.test.ts (7 tests) 1352ms
+   ✓ bookings and attendance > books a session, provider confirms attendance, and the deed is provider-confirmed  353ms
+ ✓ |server| src/routes/__tests__/discover.test.ts (5 tests) 733ms
+ ✓ |server| src/seed/seed.test.ts (2 tests) 714ms
+   ✓ demo content > seeds clearly labelled demo content in every district, idempotently  335ms
+   ✓ demo content > purges demo content and keeps real deeds that used demo shops  333ms
+ ✓ |server| src/auth/auth.test.ts (12 tests) 525ms
+ ✓ |server| src/routes/__tests__/town.test.ts (4 tests) 451ms
+ ✓ |server| src/routes/__tests__/character.test.ts (5 tests) 538ms
+ ✓ |server| src/routes/__tests__/session.test.ts (3 tests) 249ms
+ ✓ |server| src/routes/__tests__/config.test.ts (3 tests) 206ms
+ ✓ |db| src/db.test.ts (4 tests) 82ms
+ ✓ |db| src/migrate.test.ts (1 test) 91ms
+ ✓ |core| src/moderation.test.ts (7 tests) 5ms
+ ✓ |core| src/text.test.ts (5 tests) 4ms
+ ✓ |core| src/curation.test.ts (8 tests) 12ms
+ ✓ |core| src/ics.test.ts (4 tests) 4ms
+ ✓ |web| src/components/StepForm.test.tsx (4 tests) 612ms
+   ✓ StepForm > defines a self step with a session, a before-note and a referenced predecessor  342ms
+ ✓ |web| src/components/TownMap.test.tsx (3 tests) 249ms
+ ✓ |web| src/components/Avatar.test.tsx (3 tests) 70ms
+ ✓ |web| src/lib/api.test.ts (3 tests) 9ms
+
+ Test Files  20 passed (20)
+      Tests  105 passed (105)
+   Start at  07:32:00
+   Duration  30.26s (transform 1.12s, setup 533ms, collect 13.28s, tests 10.37s, environment 1.28s, prepare 1.37s)
+

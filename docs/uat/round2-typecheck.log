@@ -1,0 +1,13 @@
+
+> llm-world@ typecheck /workspace/codex-burn/uat-llmworld
+> pnpm -r typecheck
+
+Scope: 4 of 5 workspace projects
+packages/core typecheck$ tsc -p tsconfig.json
+packages/core typecheck: Done
+apps/web typecheck$ tsc -p tsconfig.json
+packages/db typecheck$ tsc -p tsconfig.json
+packages/db typecheck: Done
+apps/web typecheck: Done
+apps/server typecheck$ tsc -p tsconfig.json
+apps/server typecheck: Done
