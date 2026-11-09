@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Empty, ErrorBox, Loading } from "../components/Bits";
 import { api } from "../lib/api";
@@ -17,12 +18,13 @@ interface Metrics {
 
 export function AdminPage() {
   const { me, toast } = useSession();
-  const providers = useFetch<Provider[]>("/api/admin/providers");
-  const mods = useFetch<Mod[]>("/api/admin/moderation");
-  const metrics = useFetch<Metrics>("/api/admin/metrics");
+  const isAdmin = me?.user.roles.includes("admin") ?? false;
+  const providers = useFetch<Provider[]>(isAdmin ? "/api/admin/providers" : null);
+  const mods = useFetch<Mod[]>(isAdmin ? "/api/admin/moderation" : null);
+  const metrics = useFetch<Metrics>(isAdmin ? "/api/admin/metrics" : null);
   const [deedId, setDeedId] = useState("");
   const [error, setError] = useState<Error | null>(null);
-  if (!me?.user.roles.includes("admin")) return <Empty>需要管理者權限。</Empty>;
+  if (!isAdmin) return <Empty><p>需要管理者權限。</p><Link className="btn primary" to="/">回地圖</Link></Empty>;
   const act = async (fn: () => Promise<unknown>, msg: string) => {
     try {
       await fn();

@@ -4,7 +4,6 @@ import { evidence, seedPredecessor } from "./helpers";
 
 
 test("UAT-01 P2-7 新手從訪客走到第一個事蹟與鏡子", async ({ page }) => {
-  test.fixme(true, "P2-2/P2-3：匿名 session 與管理權限檢查修好後啟用，console error 必須為 0");
   await seedPredecessor();
   const errors: string[] = [];
   page.on("console", m => { if (m.type() === "error") errors.push(m.text()); });
@@ -34,7 +33,7 @@ test("UAT-01 P2-7 新手從訪客走到第一個事蹟與鏡子", async ({ page 
   await snap("06-want");
   await page.getByRole("link", { name: "龍角鎮首頁" }).click();
   await page.getByRole("link", { name: /音樂坊/ }).click();
-  await expect(page.getByRole("heading", { name: "音樂坊", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "音樂坊小廣場", exact: true })).toBeVisible();
   await snap("07-place");
   await page.getByRole("link", { name: /去上一次聲樂試用課/ }).click();
   await snap("08-deed");
@@ -49,8 +48,7 @@ test("UAT-01 P2-7 新手從訪客走到第一個事蹟與鏡子", async ({ page 
   await page.getByLabel("做之後的隨筆（選填）").fill("原來真的可以從很小的一步開始");
   await snap("11-completing");
   await page.getByRole("button", { name: "完成", exact: true }).click();
-  // P1-2 pins completion feedback separately; this journey follows the completed tab too.
-  await page.getByRole("tab", { name: /完成了/ }).click();
+  await expect(page.getByRole("tab", { name: /完成了/ })).toHaveAttribute("aria-selected", "true");
   await expect(page.getByRole("link", { name: "看看這個事蹟" })).toBeVisible();
   await snap("12-done");
   await page.getByRole("link", { name: "看看這個事蹟" }).click();

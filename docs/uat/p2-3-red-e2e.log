@@ -1,0 +1,119 @@
+
+> llm-world@ test:e2e /workspace/codex-burn/uat-llmworld
+> playwright test e2e/p2-3.spec.ts
+
+[WebServer] e2e database reset
+[WebServer] 
+[WebServer] > @lj/web@0.0.0 build /workspace/codex-burn/uat-llmworld/apps/web
+[WebServer] > vite build
+[WebServer] 
+[WebServer] vite v7.3.7 building client environment for production...
+[WebServer] transforming...
+[WebServer] ✓ 84 modules transformed.
+[WebServer] rendering chunks...
+[WebServer] computing gzip size...
+[WebServer] dist/index.html                   1.49 kB │ gzip:   0.88 kB
+[WebServer] dist/assets/index-BCQ8ycAa.css   10.36 kB │ gzip:   3.14 kB
+[WebServer] dist/assets/index-WNmtm1YJ.js   733.60 kB │ gzip: 190.14 kB
+[WebServer] ✓ built in 1.94s
+[WebServer] 
+[WebServer] (!) Some chunks are larger than 500 kB after minification. Consider:
+[WebServer] - Using dynamic import() to code-split the application
+[WebServer] - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+[WebServer] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+[WebServer] 龍角鎮 listening on :4131 (development) base=http://localhost:4131 web=/workspace/codex-burn/uat-llmworld/apps/web/dist
+
+Running 2 tests using 1 worker
+
+(node:140) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 [desktop] › e2e/p2-3.spec.ts:5:1 › UAT-08 P2-3 非管理者不呼叫管理 API 並能回到地圖 (860ms)
+(node:298) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  2 [mobile] › e2e/p2-3.spec.ts:5:1 › UAT-08 P2-3 非管理者不呼叫管理 API 並能回到地圖 (852ms)
+
+
+  1) [desktop] › e2e/p2-3.spec.ts:5:1 › UAT-08 P2-3 非管理者不呼叫管理 API 並能回到地圖 ───────────────────────────
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 8
+
+    - Array []
+    + Array [
+    +   "http://localhost:4131/api/admin/providers",
+    +   "http://localhost:4131/api/admin/moderation",
+    +   "http://localhost:4131/api/admin/metrics",
+    +   "http://localhost:4131/api/admin/providers",
+    +   "http://localhost:4131/api/admin/moderation",
+    +   "http://localhost:4131/api/admin/metrics",
+    + ]
+
+      11 |   await page.goto("/admin");
+      12 |   await expect(page.getByText("需要管理者權限。", { exact: true })).toBeVisible();
+    > 13 |   expect(adminRequests).toEqual([]);
+         |                         ^
+      14 |   await evidence(page, "UAT-08-forbidden");
+      15 |   await page.getByRole("link", { name: "回地圖", exact: true }).click();
+      16 |   await expect(page).toHaveURL("/");
+        at /workspace/codex-burn/uat-llmworld/e2e/p2-3.spec.ts:13:25
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/p2-3-UAT-08-P2-3-非管理者不呼叫管理-API-並能回到地圖-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/p2-3-UAT-08-P2-3-非管理者不呼叫管理-API-並能回到地圖-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/p2-3-UAT-08-P2-3-非管理者不呼叫管理-API-並能回到地圖-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/p2-3-UAT-08-P2-3-非管理者不呼叫管理-API-並能回到地圖-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [mobile] › e2e/p2-3.spec.ts:5:1 › UAT-08 P2-3 非管理者不呼叫管理 API 並能回到地圖 ────────────────────────────
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 8
+
+    - Array []
+    + Array [
+    +   "http://localhost:4131/api/admin/providers",
+    +   "http://localhost:4131/api/admin/moderation",
+    +   "http://localhost:4131/api/admin/metrics",
+    +   "http://localhost:4131/api/admin/providers",
+    +   "http://localhost:4131/api/admin/moderation",
+    +   "http://localhost:4131/api/admin/metrics",
+    + ]
+
+      11 |   await page.goto("/admin");
+      12 |   await expect(page.getByText("需要管理者權限。", { exact: true })).toBeVisible();
+    > 13 |   expect(adminRequests).toEqual([]);
+         |                         ^
+      14 |   await evidence(page, "UAT-08-forbidden");
+      15 |   await page.getByRole("link", { name: "回地圖", exact: true }).click();
+      16 |   await expect(page).toHaveURL("/");
+        at /workspace/codex-burn/uat-llmworld/e2e/p2-3.spec.ts:13:25
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/p2-3-UAT-08-P2-3-非管理者不呼叫管理-API-並能回到地圖-mobile/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/p2-3-UAT-08-P2-3-非管理者不呼叫管理-API-並能回到地圖-mobile/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/p2-3-UAT-08-P2-3-非管理者不呼叫管理-API-並能回到地圖-mobile/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/p2-3-UAT-08-P2-3-非管理者不呼叫管理-API-並能回到地圖-mobile/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    [desktop] › e2e/p2-3.spec.ts:5:1 › UAT-08 P2-3 非管理者不呼叫管理 API 並能回到地圖 ────────────────────────────
+    [mobile] › e2e/p2-3.spec.ts:5:1 › UAT-08 P2-3 非管理者不呼叫管理 API 並能回到地圖 ─────────────────────────────
+ ELIFECYCLE  Command failed with exit code 1.

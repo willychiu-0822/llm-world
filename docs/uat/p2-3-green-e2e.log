@@ -1,0 +1,82 @@
+
+> llm-world@ test:e2e /workspace/codex-burn/uat-llmworld
+> playwright test e2e/p2-3.spec.ts e2e/novice.spec.ts
+
+[WebServer] e2e database reset
+[WebServer] 
+[WebServer] > @lj/web@0.0.0 build /workspace/codex-burn/uat-llmworld/apps/web
+[WebServer] > vite build
+[WebServer] 
+[WebServer] vite v7.3.7 building client environment for production...
+[WebServer] transforming...
+[WebServer] ✓ 84 modules transformed.
+[WebServer] rendering chunks...
+[WebServer] computing gzip size...
+[WebServer] dist/index.html                   1.49 kB │ gzip:   0.88 kB
+[WebServer] dist/assets/index-BCQ8ycAa.css   10.36 kB │ gzip:   3.14 kB
+[WebServer] dist/assets/index-CMLJBJtw.js   733.97 kB │ gzip: 190.20 kB
+[WebServer] ✓ built in 1.93s
+[WebServer] 
+[WebServer] (!) Some chunks are larger than 500 kB after minification. Consider:
+[WebServer] - Using dynamic import() to code-split the application
+[WebServer] - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+[WebServer] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+[WebServer] 龍角鎮 listening on :4131 (development) base=http://localhost:4131 web=/workspace/codex-burn/uat-llmworld/apps/web/dist
+
+Running 4 tests using 1 worker
+
+(node:134) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [desktop] › e2e/novice.spec.ts:6:1 › UAT-01 P2-7 新手從訪客走到第一個事蹟與鏡子 (5.1s)
+  ✓  2 [desktop] › e2e/p2-3.spec.ts:5:1 › UAT-08 P2-3 非管理者不呼叫管理 API 並能回到地圖 (1.3s)
+(node:346) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  3 [mobile] › e2e/novice.spec.ts:6:1 › UAT-01 P2-7 新手從訪客走到第一個事蹟與鏡子 (5.5m)
+(node:534) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  4 [mobile] › e2e/p2-3.spec.ts:5:1 › UAT-08 P2-3 非管理者不呼叫管理 API 並能回到地圖 (1.2s)
+
+
+  1) [mobile] › e2e/novice.spec.ts:6:1 › UAT-01 P2-7 新手從訪客走到第一個事蹟與鏡子 ───────────────────────────────
+
+    Test timeout of 90000ms exceeded.
+
+    Error: page.screenshot: Target page, context or browser has been closed
+    Call log:
+      - taking page screenshot
+      - waiting for fonts to load...
+      - fonts loaded
+
+
+       at helpers.ts:29
+
+      27 | export async function evidence(page: Page, name: string) {
+      28 |   await mkdir("docs/uat/evidence", { recursive: true });
+    > 29 |   await page.screenshot({ path: `docs/uat/evidence/${test.info().project.name}-${name}.png`, fullPage: true });
+         |              ^
+      30 | }
+      31 |
+      32 | // Nothing listens here; the consent redirect is captured before the browser follows it.
+        at evidence (/workspace/codex-burn/uat-llmworld/e2e/helpers.ts:29:14)
+        at /workspace/codex-burn/uat-llmworld/e2e/novice.spec.ts:24:3
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/novice-UAT-01-P2-7-新手從訪客走到第一個事蹟與鏡子-mobile/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/novice-UAT-01-P2-7-新手從訪客走到第一個事蹟與鏡子-mobile/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/novice-UAT-01-P2-7-新手從訪客走到第一個事蹟與鏡子-mobile/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/novice-UAT-01-P2-7-新手從訪客走到第一個事蹟與鏡子-mobile/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  Slow test file: [mobile] › e2e/novice.spec.ts (5.5m)
+  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel
+  1 failed
+    [mobile] › e2e/novice.spec.ts:6:1 › UAT-01 P2-7 新手從訪客走到第一個事蹟與鏡子 ────────────────────────────────
+  3 passed (5.7m)
+ ELIFECYCLE  Command failed with exit code 1.
