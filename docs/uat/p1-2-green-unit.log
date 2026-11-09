@@ -1,0 +1,34 @@
+
+> llm-world@ test /workspace/codex-burn/uat-llmworld
+> vitest run
+
+
+ RUN  v3.2.7 /workspace/codex-burn/uat-llmworld
+
+ ✓ |server| src/mcp/mcp.test.ts (11 tests) 1115ms
+   ✓ MCP tools > runs Xiaoan's AI loop: discover, ask, bring back, propose, and complete a confirmed AI step  342ms
+ ✓ |server| src/routes/__tests__/steps.test.ts (10 tests) 753ms
+ ✓ |server| src/seed/seed.test.ts (2 tests) 567ms
+ ✓ |server| src/routes/__tests__/town.test.ts (4 tests) 505ms
+ ✓ |server| src/routes/__tests__/provider.test.ts (7 tests) 983ms
+ ✓ |server| src/routes/__tests__/discover.test.ts (5 tests) 764ms
+ ✓ |server| src/routes/__tests__/character.test.ts (5 tests) 432ms
+ ✓ |server| src/auth/auth.test.ts (12 tests) 588ms
+ ✓ |server| src/routes/__tests__/config.test.ts (3 tests) 226ms
+ ✓ |db| src/migrate.test.ts (1 test) 61ms
+ ✓ |db| src/db.test.ts (4 tests) 83ms
+ ✓ |core| src/curation.test.ts (8 tests) 8ms
+ ✓ |core| src/moderation.test.ts (7 tests) 7ms
+ ✓ |core| src/text.test.ts (5 tests) 4ms
+ ✓ |core| src/ics.test.ts (4 tests) 3ms
+ ✓ |web| src/components/StepForm.test.tsx (4 tests) 611ms
+   ✓ StepForm > defines a self step with a session, a before-note and a referenced predecessor  364ms
+ ✓ |web| src/components/TownMap.test.tsx (3 tests) 218ms
+ ✓ |web| src/components/Avatar.test.tsx (3 tests) 81ms
+ ✓ |web| src/lib/api.test.ts (3 tests) 9ms
+
+ Test Files  19 passed (19)
+      Tests  101 passed (101)
+   Start at  00:54:09
+   Duration  22.30s (transform 735ms, setup 562ms, collect 9.41s, tests 7.02s, environment 1.45s, prepare 1.12s)
+

@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { Empty, ErrorBox, ExecutorTag, Loading } from "../components/Bits";
 import { api } from "../lib/api";
@@ -79,9 +79,11 @@ function CompleteForm({ step, onDone }: { step: Step; onDone(): void }) {
   );
 }
 
-function StepItem({ step, reload }: { step: Step; reload(): void }) {
+function StepItem({ step, reload, onCompleted, highlighted }: { step: Step; reload(): void; onCompleted(id: string): void; highlighted: boolean }) {
   const { toast, reload: reloadMe } = useSession();
   const [completing, setCompleting] = useState(false);
+  const completedCard = useRef<HTMLElement>(null);
+  useEffect(() => { if (highlighted) completedCard.current?.scrollIntoView({ block: "start" }); }, [highlighted]);
   const act = async (path: string, msg: string) => {
     await api(`/api/first-steps/${step.id}/${path}`, { method: "POST" });
     toast(msg);
@@ -91,7 +93,8 @@ function StepItem({ step, reload }: { step: Step; reload(): void }) {
   const when = step.session?.startsAt ?? step.plannedAt;
   return (
     <li>
-      <article className="panel stack" style={{ gap: 10 }}>
+      <article ref={completedCard} className={`panel stack ${highlighted ? "just-completed" : ""}`} style={{ gap: 10 }}>
+        {highlighted && <strong className="notice">剛剛完成的這一步</strong>}
         <div className="row wrap" style={{ gap: 6 }}>
           <ExecutorTag executor={step.executor} />
           {step.proposedBy === "ai" && <span className="tag tag-ai">AI 建議</span>}
@@ -127,7 +130,7 @@ function StepItem({ step, reload }: { step: Step; reload(): void }) {
           {step.status === "confirmed" && <button className="btn ghost small" onClick={() => act("drop", "先放下也沒關係")}>先放下</button>}
           {step.status === "done" && step.deedId && <Link className="btn small" to={`/deeds/${step.deedId}`}>看看這個事蹟</Link>}
         </div>
-        {completing && <CompleteForm step={step} onDone={() => { setCompleting(false); toast("太好了！這成為你的新事蹟"); reload(); }} />}
+        {completing && <CompleteForm step={step} onDone={() => { setCompleting(false); toast("太好了！這成為你的新事蹟"); onCompleted(step.id); void reloadMe(); }} />}
       </article>
     </li>
   );
@@ -135,6 +138,7 @@ function StepItem({ step, reload }: { step: Step; reload(): void }) {
 
 export function StepsPage() {
   const [tab, setTab] = useState<Tab>("confirmed");
+  const [completedId, setCompletedId] = useState<string | null>(null);
   const { data, error, loading, reload } = useFetch<Step[]>("/api/first-steps");
   const list = (data ?? []).filter((s) => s.status === tab);
   const count = (t: Tab) => (data ?? []).filter((s) => s.status === t).length;
@@ -152,7 +156,7 @@ export function StepsPage() {
         ))}
       </div>
       <ErrorBox error={error} />
-      {loading && !data ? <Loading /> : list.length ? <ul className="plain">{list.map((s) => <StepItem key={s.id} step={s} reload={reload} />)}</ul> : (
+      {loading && !data ? <Loading /> : list.length ? <ul className="plain">{list.map((s) => <StepItem key={s.id} step={s} reload={reload} highlighted={s.id === completedId} onCompleted={(id) => { setCompletedId(id); setTab("done"); reload(); }} />)}</ul> : (
         <Empty>
           {tab === "draft" ? "AI 角色還沒有建議。" : tab === "confirmed" ? <>沒有進行中的步驟。去<Link to="/">地圖</Link>看看大家的第一步吧。</> : "還沒有完成的步驟。每一步都可以很小。"}
         </Empty>
