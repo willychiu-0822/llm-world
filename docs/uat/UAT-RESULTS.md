@@ -57,3 +57,7 @@
 - 2026-11-10 05:50：完整回歸第二次37 pass /1 fail（手機小安），UAT-14d兩裝置均pass。小安trace的兩個試用課API回200，但接收延遲約224秒；原90秒案例耗盡，最後停在steps載入中。保留原測試、timeout及斷言，原小安與UAT-18雙裝置定向重跑4/4，手機小安4.1秒通過。未以重試或增加timeout掩蓋。
 
 - 2026-11-10 05:50：UAT-18 / 審查新發現已修：/api/config暫時失敗不再無限載入；顯示中文錯誤與重新載入入口，重試成功後可直接登入，Google未設定時仍全程隱藏。TDD雙裝置red→green，含原小安回歸4/4，typecheck成功。證據uat-18-{red,green}-e2e.log、evidence/*-UAT-18-*.png。獨立唯讀審查未發現其他明確程式回歸。
+
+- 2026-11-10 07:26：UAT-15 / UAT-17 探索式測試：發現長英文連結撐寬步驟頁（桌面scrollWidth2163>1280，手機也超出390）。UAT-17已修：頁面內容允許長字串斷行，不截字、不隱藏溢出；斷言改用明確project viewport（1280/390），避免手機被撐寬後innerWidth也變大造成漏測。TDD red→green，五頁（我、完成步驟、事蹟、鏡子、角色）雙裝置均無溢出；探索＋UI12/12。證據exploratory-{red,green}-e2e.log、evidence/*-UAT-17-long-content-{0..4}.png。
+- UAT-15測試修正：提交後先等成功導向與步驟標題，再重新整理；不在尚未收到成功回應時中斷提交。補驗證來源音樂區、未先設定角色/願望仍能完成、重新整理後資料保留，以及session失效後登入回到原/steps。最後全套雙裝置通過且console/pageerror=0。證據evidence/*-UAT-15-*.png。
+- UAT-18修復commit：5568557；UAT-14資料載入等待修正commit：02c26c9。

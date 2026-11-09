@@ -6,7 +6,7 @@ async function signIn(page: Page) {
 }
 
 async function layoutAndEvidence(page: Page, name: string) {
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(test.info().project.use.viewport!.width);
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
   const actions = page.locator("main a:visible, main button:visible");
   const last = actions.last();
