@@ -1,5 +1,5 @@
 import { ACCESSORIES, ACCESSORY_LABELS, BODY_LABELS, BODY_SHAPES, DEFAULT_APPEARANCE, DISTRICTS, PALETTE, type Appearance } from "@lj/core";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Avatar } from "../components/Avatar";
 import { DistrictTag } from "../components/Bits";
 import { api } from "../lib/api";
@@ -13,6 +13,9 @@ export function CharacterPage() {
   const [allowAiQuotes, setAllowAiQuotes] = useState(me?.character?.sharing.allowAiQuotes ?? true);
   const [error, setError] = useState("");
   const [want, setWant] = useState("");
+  const wantInput = useRef<HTMLInputElement>(null);
+  const [saved, setSaved] = useState(false);
+  const [nextWant, setNextWant] = useState(false);
   const [district, setDistrict] = useState("music");
 
   useEffect(() => {
@@ -28,11 +31,17 @@ export function CharacterPage() {
 
   const save = async (e: FormEvent) => {
     e.preventDefault();
+    const firstSave = !me?.character;
     try {
       await api("/api/me/character", { method: "PUT", body: { name, appearance, personality, sharing: { allowAiQuotes } } });
       setError("");
       await reload();
-      toast("角色已儲存");
+      setSaved(true);
+      setNextWant(firstSave);
+      if (firstSave) {
+        wantInput.current?.focus({ preventScroll: true });
+        wantInput.current?.scrollIntoView({ block: "center" });
+      }
     } catch (err) {
       setError((err as Error).message);
     }
@@ -123,6 +132,7 @@ export function CharacterPage() {
 
       <section className="panel stack">
         <h2>想做的事</h2>
+        {saved && <p role="status" className="notice">角色已儲存{nextWant ? "。下一步：寫下一件想做的事" : "。"}</p>}
         <p className="muted">可以很模糊。你的角色會依這些方向，在鎮上找跟你相似的人的第一步。</p>
         <ul className="plain">
           {me?.wants.map((w) => (
@@ -139,7 +149,7 @@ export function CharacterPage() {
           ))}
         </ul>
         <form className="row wrap" onSubmit={addWant} aria-label="新增想做的事">
-          <input aria-label="想做的事" className="grow" value={want} onChange={(e) => setWant(e.target.value)} placeholder="例如：想在別人面前唱一首歌" maxLength={100} style={{ minWidth: 200, flex: 2 }} />
+          <input ref={wantInput} aria-label="想做的事" className="grow" value={want} onChange={(e) => setWant(e.target.value)} placeholder="例如：想在別人面前唱一首歌" maxLength={100} style={{ minWidth: 200, flex: 2 }} />
           <select aria-label="主題區" value={district} onChange={(e) => setDistrict(e.target.value)} style={{ flex: 1, minWidth: 120 }}>
             {DISTRICTS.map((d) => <option key={d.key} value={d.key}>{d.name}（{d.theme}）</option>)}
           </select>

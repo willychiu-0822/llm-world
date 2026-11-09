@@ -17,3 +17,5 @@
 - 2026-11-10 02:11：P1-3 / UAT-04 已修：<640px 預覽上置、體型配件三欄、八色色票同列；手機儲存位置 <2110px，無水平溢出，桌面不改排列。TDD mobile red→green，雙裝置 2/2 pass。證據 evidence/*-UAT-04-character-layout.png。P1-2 commit 54e41f8。
 
 - 2026-11-10 02:11：P1-4 / UAT-05 已修：手機參考卡以徽章、全寬引用、按鈕三列排列。TDD mobile red 引用僅7.58字寬→green ≥12字寬、卡高<200px、無溢出，雙裝置 2/2 pass。證據 evidence/*-UAT-05-reference-card.png。P1-3 commit 5b0b4bd。
+
+- 2026-11-10 02:21：P2-1 / UAT-06 已修：初次儲存以頁內訊息提示下一步，聚焦並捲到想做的事；不使用浮動 toast。TDD desktop red 未聚焦→雙裝置 green 2/2，並逐一 boundingBox 確認 status 不遮 input/select。證據 evidence/*-UAT-06-next-want.png。P1-4 commit 61e513c。

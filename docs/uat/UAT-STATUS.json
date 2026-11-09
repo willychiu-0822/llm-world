@@ -1,10 +1,10 @@
 {
   "project": "llm-world 龍角鎮 v1 MVP",
-  "updated": "2026-11-10 02:11",
+  "updated": "2026-11-10 02:21",
   "cases": 8,
   "pass": 6,
   "fail": 0,
   "blocked": 2,
   "ready_for_user_test": false,
-  "notes": "P1-4 / UAT-05 已修：手機參考卡以徽章、全寬引用、按鈕三列排列。TDD mobile red 引用僅7.58字寬→green ≥12字寬、卡高<200px、無溢出，雙裝置 2/2 pass。證據 evidence/*-UAT-05-reference-card.png。P1-3 commit 5b0b4bd。"
+  "notes": "P2-1 / UAT-06 已修：初次儲存以頁內訊息提示下一步，聚焦並捲到想做的事；不使用浮動 toast。TDD desktop red 未聚焦→雙裝置 green 2/2，並逐一 boundingBox 確認 status 不遮 input/select。證據 evidence/*-UAT-06-next-want.png。P1-4 commit 61e513c。"
 }
