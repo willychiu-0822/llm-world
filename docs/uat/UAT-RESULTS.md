@@ -13,3 +13,5 @@
 - 2026-11-10 00:53：P1-1 / UAT-02 已修：config 未到不顯示 Google；未設定 client 導回中文說明且保留 next。TDD：後端 red 1/12、閃現 red 1 按鈕→green；雙裝置 E2E 2/2、全單元 101/101。證據 evidence/*-UAT-02-google-unavailable.png、p1-1-{red,green}-*.log。P2-7 commits b3d7f01、6186d19。
 
 - 2026-11-10 00:54：P1-2 / UAT-03 已修：完成後切完成了分頁、標記並捲到剛完成項目，保留看看這個事蹟。TDD red 兩裝置連結不存在→green；完成回歸＋原 Mia 雙裝置 4/4、全單元 101/101。證據 evidence/*-UAT-03-completed-step.png。P1-1 commit be41ef9。
+
+- 2026-11-10 02:11：P1-3 / UAT-04 已修：<640px 預覽上置、體型配件三欄、八色色票同列；手機儲存位置 <2110px，無水平溢出，桌面不改排列。TDD mobile red→green，雙裝置 2/2 pass。證據 evidence/*-UAT-04-character-layout.png。P1-2 commit 54e41f8。

@@ -226,3 +226,13 @@ td, th { text-align: left; padding: 6px 8px; border-bottom: 1px dashed var(--lin
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 .just-completed { border-color: var(--leaf); scroll-margin-top: 84px; }
+
+@media (max-width: 639px) {
+  .character-layout { flex-direction: column; align-items: stretch !important; }
+  .character-preview { align-self: center; padding: 10px; }
+  .character-preview svg { width: 100px; height: 100px; }
+  .character-layout > .grow { width: 100%; }
+  .character-layout .pick { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .character-layout .swatches { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 7px; }
+  .character-layout .swatch { width: 100%; height: auto; aspect-ratio: 1; max-width: 30px; }
+}

@@ -59,8 +59,8 @@ export function CharacterPage() {
       <form className="panel stack" onSubmit={save} aria-label="角色設定">
         <h1>我的角色</h1>
         <p className="muted">角色可以和你完全不同。牠是你在鎮上的「可能的自己」：替你探索，也讓你嘗試新事物時多一層勇氣。</p>
-        <div className="row wrap" style={{ alignItems: "flex-start" }}>
-          <div className="panel soft" style={{ display: "grid", placeItems: "center", minWidth: 160 }}>
+        <div className="row wrap character-layout" style={{ alignItems: "flex-start" }}>
+          <div className="panel soft character-preview" style={{ display: "grid", placeItems: "center", minWidth: 160 }}>
             <Avatar appearance={appearance} name={name || "我的角色"} size={140} />
             <strong>{name || "（名字）"}</strong>
           </div>
