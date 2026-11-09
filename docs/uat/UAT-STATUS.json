@@ -1,10 +1,10 @@
 {
   "project": "llm-world 龍角鎮 v1 MVP",
-  "updated": "2026-11-10 02:21",
+  "updated": "2026-11-10 02:22",
   "cases": 8,
   "pass": 6,
   "fail": 0,
   "blocked": 2,
   "ready_for_user_test": false,
-  "notes": "P2-1 / UAT-06 已修：初次儲存以頁內訊息提示下一步，聚焦並捲到想做的事；不使用浮動 toast。TDD desktop red 未聚焦→雙裝置 green 2/2，並逐一 boundingBox 確認 status 不遮 input/select。證據 evidence/*-UAT-06-next-want.png。P1-4 commit 61e513c。"
+  "notes": "P2-2 / UAT-07 已修：新增 200 /api/session（匿名 me:null、no-store），前端改用探測端點；/api/me 及寫入原 401 合約不變。TDD red 三個單元及訪客雙裝置 console401→green：訪客首頁/地點/事蹟 console=0，E2E 2/2、session+原 auth 15/15。證據 evidence/*-UAT-07-visitor-*.png。P2-1 commit 11cfbb7。"
 }

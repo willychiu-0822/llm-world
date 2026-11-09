@@ -1,0 +1,96 @@
+
+ RUN  v3.2.7 /workspace/codex-burn/uat-llmworld
+
+ ❯ |server| src/routes/__tests__/session.test.ts (3 tests | 3 failed) 184ms
+   × P2-2 optional session probe > returns an anonymous 200 without opening protected writes 57ms
+     → expected 404 to be 200 // Object.is equality
+   × P2-2 optional session probe > returns the same signed-in identity as the protected endpoint, then null after logout 58ms
+     → expected { error: { code: 'not_found', …(1) } } to deeply equal { me: { user: { …(4) }, …(4) } }
+   × P2-2 optional session probe > treats an unknown session cookie as an anonymous visit 25ms
+     → expected 404 to be 200 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |server| src/routes/__tests__/session.test.ts > P2-2 optional session probe > returns an anonymous 200 without opening protected writes
+AssertionError: expected 404 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 404
+
+ ❯ src/routes/__tests__/session.test.ts:9:24
+      7|   it("returns an anonymous 200 without opening protected writes", asyn…
+      8|     const res = await request(env.app).get("/api/session");
+      9|     expect(res.status).toBe(200);
+       |                        ^
+     10|     expect(res.body).toEqual({ me: null });
+     11|     expect(res.headers["cache-control"]).toContain("no-store");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  |server| src/routes/__tests__/session.test.ts > P2-2 optional session probe > returns the same signed-in identity as the protected endpoint, then null after logout
+AssertionError: expected { error: { code: 'not_found', …(1) } } to deeply equal { me: { user: { …(4) }, …(4) } }
+
+- Expected
++ Received
+
+  {
+-   "me": {
+-     "character": null,
+-     "provider": null,
+-     "unread": {
+-       "discoveries": 0,
+-       "notifications": 0,
+-     },
+-     "user": {
+-       "displayName": "session",
+-       "email": "session@example.com",
+-       "id": "usr_72rzkuw67khp10vd",
+-       "roles": [
+-         "user",
+-       ],
+-     },
+-     "wants": [],
++   "error": {
++     "code": "not_found",
++     "message": "route not found",
+    },
+  }
+
+ ❯ src/routes/__tests__/session.test.ts:16:52
+     14|   it("returns the same signed-in identity as the protected endpoint, t…
+     15|     const agent = await login(env.app, "session@example.com");
+     16|     expect((await agent.get("/api/session")).body).toEqual({ me: (awai…
+       |                                                    ^
+     17|     await agent.post("/api/auth/logout");
+     18|     expect((await agent.get("/api/session")).body).toEqual({ me: null …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  |server| src/routes/__tests__/session.test.ts > P2-2 optional session probe > treats an unknown session cookie as an anonymous visit
+AssertionError: expected 404 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 404
+
+ ❯ src/routes/__tests__/session.test.ts:22:24
+     20|   it("treats an unknown session cookie as an anonymous visit", async (…
+     21|     const res = await request(env.app).get("/api/session").set("Cookie…
+     22|     expect(res.status).toBe(200);
+       |                        ^
+     23|     expect(res.body).toEqual({ me: null });
+     24|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed (3)
+   Start at  02:12:13
+   Duration  1.57s (transform 319ms, setup 0ms, collect 1.16s, tests 184ms, environment 0ms, prepare 78ms)
+

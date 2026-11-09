@@ -19,3 +19,5 @@
 - 2026-11-10 02:11：P1-4 / UAT-05 已修：手機參考卡以徽章、全寬引用、按鈕三列排列。TDD mobile red 引用僅7.58字寬→green ≥12字寬、卡高<200px、無溢出，雙裝置 2/2 pass。證據 evidence/*-UAT-05-reference-card.png。P1-3 commit 5b0b4bd。
 
 - 2026-11-10 02:21：P2-1 / UAT-06 已修：初次儲存以頁內訊息提示下一步，聚焦並捲到想做的事；不使用浮動 toast。TDD desktop red 未聚焦→雙裝置 green 2/2，並逐一 boundingBox 確認 status 不遮 input/select。證據 evidence/*-UAT-06-next-want.png。P1-4 commit 61e513c。
+
+- 2026-11-10 02:22：P2-2 / UAT-07 已修：新增 200 /api/session（匿名 me:null、no-store），前端改用探測端點；/api/me 及寫入原 401 合約不變。TDD red 三個單元及訪客雙裝置 console401→green：訪客首頁/地點/事蹟 console=0，E2E 2/2、session+原 auth 15/15。證據 evidence/*-UAT-07-visitor-*.png。P2-1 commit 11cfbb7。
