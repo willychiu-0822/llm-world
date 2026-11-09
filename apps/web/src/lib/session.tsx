@@ -12,16 +12,19 @@ export interface PublicConfig {
 interface SessionValue {
   me: Me | null;
   config: PublicConfig | null;
+  configError: boolean;
+  reloadConfig(): Promise<void>;
   loading: boolean;
   reload(): Promise<void>;
   toast(msg: string): void;
 }
 
-const Ctx = createContext<SessionValue>({ me: null, config: null, loading: true, reload: async () => {}, toast: () => {} });
+const Ctx = createContext<SessionValue>({ me: null, config: null, configError: false, reloadConfig: async () => {}, loading: true, reload: async () => {}, toast: () => {} });
 
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [me, setMe] = useState<Me | null>(null);
   const [config, setConfig] = useState<PublicConfig | null>(null);
+  const [configError, setConfigError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
@@ -36,10 +39,20 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const reloadConfig = useCallback(async () => {
+    setConfig(null);
+    setConfigError(false);
+    try {
+      setConfig(await api<PublicConfig>("/api/config"));
+    } catch {
+      setConfigError(true);
+    }
+  }, []);
+
   useEffect(() => {
     void reload();
-    void api<PublicConfig>("/api/config").then(setConfig).catch(() => setConfig(null));
-  }, [reload]);
+    void reloadConfig();
+  }, [reload, reloadConfig]);
 
   const toast = useCallback((msg: string) => {
     setMessage(msg);
@@ -47,7 +60,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <Ctx.Provider value={{ me, config, loading, reload, toast }}>
+    <Ctx.Provider value={{ me, config, configError, reloadConfig, loading, reload, toast }}>
       {children}
       {message && (
         <div className="toast" role="status">

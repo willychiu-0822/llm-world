@@ -1,0 +1,46 @@
+
+> llm-world@ test:e2e /workspace/codex-burn/uat-llmworld
+> playwright test e2e/login-recovery.spec.ts e2e/xiaoan.spec.ts
+
+[WebServer] e2e database reset
+[WebServer] 
+[WebServer] > @lj/web@0.0.0 build /workspace/codex-burn/uat-llmworld/apps/web
+[WebServer] > NODE_ENV=production vite build
+[WebServer] 
+[WebServer] vite v7.3.7 building client environment for production...
+[WebServer] transforming...
+[WebServer] ✓ 85 modules transformed.
+[WebServer] rendering chunks...
+[WebServer] computing gzip size...
+[WebServer] dist/index.html                          1.22 kB │ gzip:   0.78 kB
+[WebServer] dist/assets/index-DlO0mi1S.css          10.74 kB │ gzip:   3.22 kB
+[WebServer] dist/assets/Place-C_-2hwbo.js            1.44 kB │ gzip:   0.76 kB
+[WebServer] dist/assets/Me-B5T_NURw.js               1.75 kB │ gzip:   0.97 kB
+[WebServer] dist/assets/Discoveries-BbtXc7hC.js      1.93 kB │ gzip:   1.04 kB
+[WebServer] dist/assets/Notifications-CKVr5YEi.js    2.14 kB │ gzip:   1.17 kB
+[WebServer] dist/assets/Connect-DZBgzO20.js          2.45 kB │ gzip:   1.36 kB
+[WebServer] dist/assets/Trial-plgkE1UP.js            2.57 kB │ gzip:   1.26 kB
+[WebServer] dist/assets/Mirror-BAkITKdN.js           3.21 kB │ gzip:   1.35 kB
+[WebServer] dist/assets/Deed-B0v8xwMt.js             3.53 kB │ gzip:   1.61 kB
+[WebServer] dist/assets/Admin-BtRStG9m.js            4.60 kB │ gzip:   1.81 kB
+[WebServer] dist/assets/Character-CxhnUV8a.js        6.13 kB │ gzip:   2.45 kB
+[WebServer] dist/assets/NewStep-DH7-VAFt.js          7.46 kB │ gzip:   3.06 kB
+[WebServer] dist/assets/Steps-BPOp9EU4.js            7.77 kB │ gzip:   3.00 kB
+[WebServer] dist/assets/TownMap-BkKSgCcN.js         12.23 kB │ gzip:   4.65 kB
+[WebServer] dist/assets/Provider-D1jVud3o.js        15.19 kB │ gzip:   4.61 kB
+[WebServer] dist/assets/index-gyrdxkOr.js          335.41 kB │ gzip: 103.35 kB
+[WebServer] ✓ built in 2.67s
+[WebServer] 龍角鎮 listening on :4131 (development) base=http://localhost:4131 web=/workspace/codex-burn/uat-llmworld/apps/web/dist
+
+Running 4 tests using 1 worker
+
+(node:132) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [desktop] › e2e/login-recovery.spec.ts:4:1 › UAT-18 登入設定失敗可重試，恢復後可登入且不閃出Google (1.5s)
+  ✓  2 [desktop] › e2e/xiaoan.spec.ts:10:1 › Xiaoan's loop: AI step first, then going to the trial in person (6.1s)
+(node:428) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  3 [mobile] › e2e/login-recovery.spec.ts:4:1 › UAT-18 登入設定失敗可重試，恢復後可登入且不閃出Google (776ms)
+  ✓  4 [mobile] › e2e/xiaoan.spec.ts:10:1 › Xiaoan's loop: AI step first, then going to the trial in person (4.1s)
+
+  4 passed (22.2s)

@@ -8,7 +8,7 @@ const safeNext = (n: string | null) => (n && n.startsWith("/") && !n.startsWith(
 export function LoginPage() {
   const [params] = useSearchParams();
   const next = safeNext(params.get("next"));
-  const { config } = useSession();
+  const { config, configError, reloadConfig } = useSession();
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState("");
@@ -30,7 +30,8 @@ export function LoginPage() {
         <p className="muted">登入後，你可以設定角色、接上自己的 AI，並在鎮上留下你的第一步。</p>
         {next.startsWith("/oauth/") && <p className="notice">你的 AI 用戶端想連接龍角鎮，登入後會請你確認。</p>}
         {params.get("error") === "google_unavailable" && <p role="status" className="notice">Google 登入尚未開放，請使用下方的開發用登入。</p>}
-        {!config && <p role="status">正在確認可以使用的登入方式……</p>}
+        {!config && !configError && <p role="status">正在確認可以使用的登入方式……</p>}
+        {configError && <div className="stack"><p role="alert">暫時無法取得登入方式，請再試一次。</p><button className="btn primary" onClick={() => void reloadConfig()}>重新載入登入方式</button></div>}
         {config?.googleLogin && (
           <a className="btn primary" href={`/auth/google/start?next=${encodeURIComponent(next)}`}>
             使用 Google 帳號登入
