@@ -1,0 +1,34 @@
+
+> llm-world@ test /workspace/codex-burn/uat-llmworld
+> vitest run
+
+
+ RUN  v3.2.7 /workspace/codex-burn/uat-llmworld
+
+ ✓ |server| src/routes/__tests__/steps.test.ts (11 tests) 1242ms
+ ✓ |server| src/mcp/mcp.test.ts (11 tests) 974ms
+ ✓ |server| src/routes/__tests__/provider.test.ts (7 tests) 814ms
+ ✓ |server| src/routes/__tests__/discover.test.ts (5 tests) 659ms
+ ✓ |server| src/seed/seed.test.ts (2 tests) 509ms
+ ✓ |server| src/auth/auth.test.ts (12 tests) 442ms
+ ✓ |server| src/routes/__tests__/town.test.ts (4 tests) 443ms
+ ✓ |server| src/routes/__tests__/character.test.ts (5 tests) 326ms
+ ✓ |server| src/routes/__tests__/config.test.ts (3 tests) 153ms
+ ✓ |server| src/routes/__tests__/session.test.ts (3 tests) 211ms
+ ✓ |db| src/db.test.ts (4 tests) 106ms
+ ✓ |db| src/migrate.test.ts (1 test) 73ms
+ ✓ |core| src/curation.test.ts (8 tests) 6ms
+ ✓ |core| src/moderation.test.ts (7 tests) 5ms
+ ✓ |core| src/text.test.ts (5 tests) 4ms
+ ✓ |core| src/ics.test.ts (4 tests) 4ms
+ ✓ |web| src/components/StepForm.test.tsx (4 tests) 587ms
+   ✓ StepForm > defines a self step with a session, a before-note and a referenced predecessor  356ms
+ ✓ |web| src/components/TownMap.test.tsx (3 tests) 206ms
+ ✓ |web| src/components/Avatar.test.tsx (3 tests) 97ms
+ ✓ |web| src/lib/api.test.ts (3 tests) 9ms
+
+ Test Files  20 passed (20)
+      Tests  105 passed (105)
+   Start at  02:29:29
+   Duration  23.34s (transform 813ms, setup 576ms, collect 10.29s, tests 6.87s, environment 1.51s, prepare 1.24s)
+

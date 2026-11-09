@@ -1,0 +1,50 @@
+
+ RUN  v3.2.7 /workspace/codex-burn/uat-llmworld
+
+ ❯ |server| src/routes/__tests__/steps.test.ts (11 tests | 1 failed) 1028ms
+   ✓ first steps and deeds > defines a self step with a before-note and completes it into a public deed 159ms
+   ✓ first steps and deeds > keeps private deeds hidden from others and lets the owner change visibility 99ms
+   ✓ first steps and deeds > marks only the first deed in a district as a first time 73ms
+   ✓ first steps and deeds > thanks the source deed's owner when someone references and then completes it 98ms
+   ✓ first steps and deeds > rejects referencing one's own or a private deed 62ms
+   ✓ first steps and deeds > does not let the web complete an AI step and lets the user drop steps 57ms
+   ✓ first steps and deeds > edits before/after notes and their sharing 91ms
+   ✓ first steps and deeds > downloads a calendar file for a planned step 78ms
+   ✓ first steps and deeds > suggests predecessors' first steps for a deed 68ms
+   ✓ first steps with blocking moderation > refuses a step whose text is blocked 48ms
+   × P2-4 source district and explicit intent > uses the source district without a selected want, and respects an explicit different want 113ms
+     → expected { id: 'deed_j2a4s2a24wgqq9x5', …(12) } to match object { districtKey: 'music', …(1) }
+(11 matching properties omitted from actual)
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |server| src/routes/__tests__/steps.test.ts > P2-4 source district and explicit intent > uses the source district without a selected want, and respects an explicit different want
+AssertionError: expected { id: 'deed_j2a4s2a24wgqq9x5', …(12) } to match object { districtKey: 'music', …(1) }
+(11 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "districtKey": "music",
+-   "placeId": "pub_music",
++   "districtKey": "misc",
++   "placeId": "pub_misc",
+  }
+
+ ❯ src/routes/__tests__/steps.test.ts:164:35
+    162|       const completed = await follower.post(`/api/first-steps/${step.i…
+    163|       expect(completed.status).toBe(200);
+    164|       expect(completed.body.deed).toMatchObject({ districtKey, placeId…
+       |                                   ^
+    165|     }
+    166|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 10 passed (11)
+   Start at  02:12:32
+   Duration  2.90s (transform 408ms, setup 0ms, collect 1.58s, tests 1.03s, environment 0ms, prepare 78ms)
+

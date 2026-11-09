@@ -1,0 +1,37 @@
+
+> llm-world@ test:e2e /workspace/codex-burn/uat-llmworld
+> playwright test e2e/p2-4.spec.ts
+
+[WebServer] e2e database reset
+[WebServer] 
+[WebServer] > @lj/web@0.0.0 build /workspace/codex-burn/uat-llmworld/apps/web
+[WebServer] > vite build
+[WebServer] 
+[WebServer] vite v7.3.7 building client environment for production...
+[WebServer] transforming...
+[WebServer] ✓ 84 modules transformed.
+[WebServer] rendering chunks...
+[WebServer] computing gzip size...
+[WebServer] dist/index.html                   1.49 kB │ gzip:   0.88 kB
+[WebServer] dist/assets/index-BCQ8ycAa.css   10.36 kB │ gzip:   3.14 kB
+[WebServer] dist/assets/index-CKik3dyH.js   735.01 kB │ gzip: 190.50 kB
+[WebServer] 
+[WebServer] (!) Some chunks are larger than 500 kB after minification. Consider:
+[WebServer] - Using dynamic import() to code-split the application
+[WebServer] - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+[WebServer] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+[WebServer] ✓ built in 2.14s
+[WebServer] 龍角鎮 listening on :4131 (development) base=http://localhost:4131 web=/workspace/codex-burn/uat-llmworld/apps/web/dist
+
+Running 4 tests using 1 worker
+
+(node:142) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [desktop] › e2e/p2-4.spec.ts:5:1 › UAT-09 P2-4 音樂事蹟的預設第一步不誤掛到運動願望 (1.6s)
+  ✓  2 [desktop] › e2e/p2-4.spec.ts:25:1 › UAT-09b P2-4 手動改選另一區時說明與事蹟位置一致 (1.4s)
+(node:354) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  3 [mobile] › e2e/p2-4.spec.ts:5:1 › UAT-09 P2-4 音樂事蹟的預設第一步不誤掛到運動願望 (1.4s)
+  ✓  4 [mobile] › e2e/p2-4.spec.ts:25:1 › UAT-09b P2-4 手動改選另一區時說明與事蹟位置一致 (1.2s)
+
+  4 passed (12.7s)

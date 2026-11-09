@@ -1,3 +1,4 @@
+import { DISTRICT_BY_KEY, type DistrictKey } from "@lj/core";
 import { useState, type FormEvent } from "react";
 import { formatDateTime } from "../lib/format";
 import type { Predecessor, Session, Want } from "../lib/types";
@@ -20,6 +21,8 @@ export function StepForm(props: {
   hints?: { ai: string; self: string } | null;
   sessions?: Session[];
   trialId?: string;
+  sourceDistrictKey?: string;
+  trialPlace?: { name: string; districtKey: string };
   initialExecutor?: "ai" | "self";
   initialWantId?: string;
   initialSourceIds?: string[];
@@ -62,6 +65,8 @@ export function StepForm(props: {
   };
 
   const sessions = props.sessions ?? [];
+  const selectedWant = active.find(w => w.id === wantId);
+  const destination = props.trialPlace?.name ?? DISTRICT_BY_KEY[(selectedWant?.districtKey ?? props.sourceDistrictKey ?? "misc") as DistrictKey]?.publicPlaceName ?? "萬事屋門口";
   return (
     <form className="stack" onSubmit={submit} noValidate>
       {props.predecessors.length > 0 && (
@@ -126,17 +131,19 @@ export function StepForm(props: {
 
       {active.length > 0 && (
         <label className="field">
-          <span>想做的事</span>
+          <span>這一步屬於哪件想做的事？</span>
           <select aria-label="想做的事" value={wantId} onChange={(e) => setWantId(e.target.value)}>
             {active.map((w) => (
               <option key={w.id} value={w.id}>
                 {w.text}
               </option>
             ))}
-            <option value="">（不指定）</option>
+            <option value="">{props.sourceDistrictKey ? "沿用來源事蹟的主題區" : "先不指定（放在萬事屋）"}</option>
           </select>
         </label>
       )}
+
+      <p className="notice" role="status">完成後，事蹟會留在「{destination}」。<small>{props.trialPlace ? "試用課的事蹟會留在提供者的店；願望仍可自由選。" : selectedWant ? "依你選的想做的事決定主題區。" : props.sourceDistrictKey ? "沒指定想做的事時，沿用來源的主題區。" : "先不分類也沒關係。"}</small></p>
 
       {executor === "self" && (
         <>

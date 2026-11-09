@@ -23,7 +23,7 @@ export function NewStepPage() {
   const [error, setError] = useState<Error | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  if ((deedId && deed.loading && !deed.data) || sug.loading) return <Loading />;
+  if ((deedId && deed.loading && !deed.data) || sug.loading || (trialId && trial.loading && !trial.data)) return <Loading />;
   const submit = async (p: StepPayload) => {
     setSubmitting(true);
     try {
@@ -50,6 +50,9 @@ export function NewStepPage() {
       <section className="panel">
         <StepForm
           wants={me?.wants ?? []}
+          initialWantId={deed.data || trial.data ? me?.wants.find(w => w.status === "active" && w.districtKey === (trial.data?.place.districtKey ?? deed.data?.districtKey))?.id ?? "" : undefined}
+          sourceDistrictKey={deed.data?.districtKey}
+          trialPlace={trial.data?.place}
           predecessors={sug.data?.predecessors ?? []}
           hints={sug.data?.hints ?? null}
           sessions={trial.data?.sessions ?? []}

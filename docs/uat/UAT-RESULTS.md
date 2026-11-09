@@ -23,3 +23,5 @@
 - 2026-11-10 02:22：P2-2 / UAT-07 已修：新增 200 /api/session（匿名 me:null、no-store），前端改用探測端點；/api/me 及寫入原 401 合約不變。TDD red 三個單元及訪客雙裝置 console401→green：訪客首頁/地點/事蹟 console=0，E2E 2/2、session+原 auth 15/15。證據 evidence/*-UAT-07-visitor-*.png。P2-1 commit 11cfbb7。
 
 - 2026-11-10 02:28：P2-3 / UAT-08 已修：非管理者發請求前先檢查權限，回地圖入口。TDD red 6 個 admin 請求→green 0，桌面＋手機 admin 案 2/2。新手 fixme 已移除：桌面閉環 pass；手機於角色頁截圖等待外部 Google Fonts 超時（UAT-16，排入 P2-6），此輪總計3 pass/1 fail，尚不可交付。證據 evidence/*-UAT-08-forbidden.png、*-UAT-01-*。P2-2 commit 7a6cacd。
+
+- 2026-11-10 02:47：P2-4 / UAT-09、09b 已修：保留試用店優先、明確願望次之的既有定位規則；也想做預設只選同區的有效願望，否則沿用來源區域（不再誤選第一件運動願望）。UI 選擇旁清楚說明完成後位置；無願望時後端以第一個來源事蹟區域補足。理由：尊重明確選擇與試用實際店址，避免靜默跨區。TDD red 未指定落 misc/預設 sport→green；雙裝置4/4、全單元105/105。證據 evidence/*-UAT-09*.png。P2-3 commit 8955e31。

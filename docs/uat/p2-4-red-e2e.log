@@ -1,0 +1,117 @@
+
+> llm-world@ test:e2e /workspace/codex-burn/uat-llmworld
+> playwright test e2e/p2-4.spec.ts
+
+[WebServer] e2e database reset
+[WebServer] 
+[WebServer] > @lj/web@0.0.0 build /workspace/codex-burn/uat-llmworld/apps/web
+[WebServer] > vite build
+[WebServer] 
+[WebServer] vite v7.3.7 building client environment for production...
+[WebServer] transforming...
+[WebServer] ✓ 84 modules transformed.
+[WebServer] rendering chunks...
+[WebServer] computing gzip size...
+[WebServer] dist/index.html                   1.49 kB │ gzip:   0.88 kB
+[WebServer] dist/assets/index-BCQ8ycAa.css   10.36 kB │ gzip:   3.14 kB
+[WebServer] dist/assets/index-CMLJBJtw.js   733.97 kB │ gzip: 190.20 kB
+[WebServer] 
+[WebServer] (!) Some chunks are larger than 500 kB after minification. Consider:
+[WebServer] - Using dynamic import() to code-split the application
+[WebServer] - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+[WebServer] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+[WebServer] ✓ built in 2.43s
+[WebServer] 龍角鎮 listening on :4131 (development) base=http://localhost:4131 web=/workspace/codex-burn/uat-llmworld/apps/web/dist
+
+Running 2 tests using 1 worker
+
+(node:139) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 [desktop] › e2e/p2-4.spec.ts:5:1 › UAT-09 P2-4 音樂事蹟的預設第一步不誤掛到運動願望 (11.3s)
+(node:313) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  2 [mobile] › e2e/p2-4.spec.ts:5:1 › UAT-09 P2-4 音樂事蹟的預設第一步不誤掛到運動願望 (11.2s)
+
+
+  1) [desktop] › e2e/p2-4.spec.ts:5:1 › UAT-09 P2-4 音樂事蹟的預設第一步不誤掛到運動願望 ─────────────────────────────
+
+    Error: expect(locator).toHaveValue(expected) failed
+
+    Locator:  getByLabel('想做的事', { exact: true })
+    Expected: ""
+    Received: "want_ou1u6itz1ebjaeob"
+    Timeout:  10000ms
+
+    Call log:
+      - Expect "toHaveValue" getByLabel('想做的事', { exact: true }) with timeout 10000ms
+      - waiting for getByLabel('想做的事', { exact: true })
+        24 × locator resolved to <select aria-label="想做的事">…</select>
+           - unexpected value "want_ou1u6itz1ebjaeob"
+
+
+       9 |   await page.goto(`/deeds/${source.id}`);
+      10 |   await page.getByRole("link", { name: "我也想做", exact: true }).click();
+    > 11 |   await expect(page.getByLabel("想做的事", { exact: true })).toHaveValue("");
+         |                                                          ^
+      12 |   await expect(page.getByText(/完成後.*音樂坊/)).toBeVisible();
+      13 |   await evidence(page, "UAT-09-music-default");
+      14 |   await page.getByLabel("第一步", { exact: true }).fill("先在家唱一句");
+        at /workspace/codex-burn/uat-llmworld/e2e/p2-4.spec.ts:11:58
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/p2-4-UAT-09-P2-4-音樂事蹟的預設第一步不誤掛到運動願望-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/p2-4-UAT-09-P2-4-音樂事蹟的預設第一步不誤掛到運動願望-desktop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/p2-4-UAT-09-P2-4-音樂事蹟的預設第一步不誤掛到運動願望-desktop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/p2-4-UAT-09-P2-4-音樂事蹟的預設第一步不誤掛到運動願望-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [mobile] › e2e/p2-4.spec.ts:5:1 › UAT-09 P2-4 音樂事蹟的預設第一步不誤掛到運動願望 ──────────────────────────────
+
+    Error: expect(locator).toHaveValue(expected) failed
+
+    Locator:  getByLabel('想做的事', { exact: true })
+    Expected: ""
+    Received: "want_4ayfp31jm6tg99kq"
+    Timeout:  10000ms
+
+    Call log:
+      - Expect "toHaveValue" getByLabel('想做的事', { exact: true }) with timeout 10000ms
+      - waiting for getByLabel('想做的事', { exact: true })
+        24 × locator resolved to <select aria-label="想做的事">…</select>
+           - unexpected value "want_4ayfp31jm6tg99kq"
+
+
+       9 |   await page.goto(`/deeds/${source.id}`);
+      10 |   await page.getByRole("link", { name: "我也想做", exact: true }).click();
+    > 11 |   await expect(page.getByLabel("想做的事", { exact: true })).toHaveValue("");
+         |                                                          ^
+      12 |   await expect(page.getByText(/完成後.*音樂坊/)).toBeVisible();
+      13 |   await evidence(page, "UAT-09-music-default");
+      14 |   await page.getByLabel("第一步", { exact: true }).fill("先在家唱一句");
+        at /workspace/codex-burn/uat-llmworld/e2e/p2-4.spec.ts:11:58
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/p2-4-UAT-09-P2-4-音樂事蹟的預設第一步不誤掛到運動願望-mobile/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/p2-4-UAT-09-P2-4-音樂事蹟的預設第一步不誤掛到運動願望-mobile/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/p2-4-UAT-09-P2-4-音樂事蹟的預設第一步不誤掛到運動願望-mobile/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/p2-4-UAT-09-P2-4-音樂事蹟的預設第一步不誤掛到運動願望-mobile/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    [desktop] › e2e/p2-4.spec.ts:5:1 › UAT-09 P2-4 音樂事蹟的預設第一步不誤掛到運動願望 ──────────────────────────────
+    [mobile] › e2e/p2-4.spec.ts:5:1 › UAT-09 P2-4 音樂事蹟的預設第一步不誤掛到運動願望 ───────────────────────────────
+ ELIFECYCLE  Command failed with exit code 1.

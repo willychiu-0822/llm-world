@@ -9,7 +9,7 @@ import { notify } from "./notifications";
 export type DeedRow = typeof deeds.$inferSelect;
 export type StepRow = typeof firstSteps.$inferSelect;
 
-/** Where a deed lives in town: the trial's shop, else the want's district public place, else 萬事屋. */
+/** Trial shop → explicitly selected want → first referenced deed's district → 萬事屋. */
 export async function placeForStep(ctx: AppContext, step: StepRow) {
   if (step.trialId) {
     const [t] = await ctx.db.select({ placeId: trials.placeId, districtKey: places.districtKey }).from(trials).innerJoin(places, eq(places.id, trials.placeId)).where(eq(trials.id, step.trialId));
@@ -18,6 +18,10 @@ export async function placeForStep(ctx: AppContext, step: StepRow) {
   if (step.wantId) {
     const [w] = await ctx.db.select({ districtKey: wants.districtKey }).from(wants).where(eq(wants.id, step.wantId));
     if (w) return { placeId: DISTRICT_BY_KEY[w.districtKey as DistrictKey].publicPlaceId, districtKey: w.districtKey };
+  }
+  if (step.sourceDeedIds.length) {
+    const [source] = await ctx.db.select({ districtKey: deeds.districtKey }).from(deeds).where(eq(deeds.id, step.sourceDeedIds[0]));
+    if (source) return { placeId: DISTRICT_BY_KEY[source.districtKey as DistrictKey].publicPlaceId, districtKey: source.districtKey };
   }
   return { placeId: "pub_misc", districtKey: "misc" };
 }

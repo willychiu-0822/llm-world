@@ -148,3 +148,20 @@ describe("first steps with blocking moderation", () => {
     expect(res.body.error.code).toBe("moderation_blocked");
   });
 });
+
+describe("P2-4 source district and explicit intent", () => {
+  const env = useTestApp();
+  it("uses the source district without a selected want, and respects an explicit different want", async () => {
+    const { xiaoan: sourceUser, want: music } = await setup(env);
+    const s = (await sourceUser.post("/api/first-steps").send({ executor: "self", text: "唱一首歌", wantId: music.id })).body;
+    const source = (await sourceUser.post(`/api/first-steps/${s.id}/complete`).send({})).body.deed;
+    const follower = await userWithCharacter(env.app, "cross@example.com");
+    const sport = (await follower.post("/api/me/wants").send({ text: "想跑步", districtKey: "sports" })).body;
+    for (const [wantId, districtKey, placeId] of [[undefined, "music", "pub_music"], [sport.id, "sports", "pub_sports"]]) {
+      const step = (await follower.post("/api/first-steps").send({ executor: "self", text: "我的下一步", sourceDeedIds: [source.id], wantId })).body;
+      const completed = await follower.post(`/api/first-steps/${step.id}/complete`).send({});
+      expect(completed.status).toBe(200);
+      expect(completed.body.deed).toMatchObject({ districtKey, placeId });
+    }
+  });
+});
