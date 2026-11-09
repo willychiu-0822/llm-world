@@ -236,3 +236,9 @@ td, th { text-align: left; padding: 6px 8px; border-bottom: 1px dashed var(--lin
   .character-layout .swatches { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 7px; }
   .character-layout .swatch { width: 100%; height: auto; aspect-ratio: 1; max-width: 30px; }
 }
+
+@media (max-width: 639px) {
+  .predecessor { display: grid; grid-template-columns: auto 1fr; justify-items: start; }
+  .predecessor > .grow { grid-column: 1 / -1; width: 100%; }
+  .predecessor > button { grid-column: 1 / -1; }
+}
