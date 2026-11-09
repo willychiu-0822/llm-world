@@ -25,3 +25,5 @@
 - 2026-11-10 02:28：P2-3 / UAT-08 已修：非管理者發請求前先檢查權限，回地圖入口。TDD red 6 個 admin 請求→green 0，桌面＋手機 admin 案 2/2。新手 fixme 已移除：桌面閉環 pass；手機於角色頁截圖等待外部 Google Fonts 超時（UAT-16，排入 P2-6），此輪總計3 pass/1 fail，尚不可交付。證據 evidence/*-UAT-08-forbidden.png、*-UAT-01-*。P2-2 commit 7a6cacd。
 
 - 2026-11-10 02:47：P2-4 / UAT-09、09b 已修：保留試用店優先、明確願望次之的既有定位規則；也想做預設只選同區的有效願望，否則沿用來源區域（不再誤選第一件運動願望）。UI 選擇旁清楚說明完成後位置；無願望時後端以第一個來源事蹟區域補足。理由：尊重明確選擇與試用實際店址，避免靜默跨區。TDD red 未指定落 misc/預設 sport→green；雙裝置4/4、全單元105/105。證據 evidence/*-UAT-09*.png。P2-3 commit 8955e31。
+
+- 2026-11-10 03:09：P2-5 / UAT-10 已修：手機訪客 header 顯示登入按鈕，登入狀態載入後才顯示。TDD desktop pass/mobile red 隱藏→green 雙裝置2/2，可點到登入表單。證據 evidence/*-UAT-10-header-login.png。P2-4 commit 9b6e5ac。

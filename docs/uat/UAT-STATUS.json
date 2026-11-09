@@ -1,10 +1,10 @@
 {
   "project": "llm-world 龍角鎮 v1 MVP",
-  "updated": "2026-11-10 02:47",
+  "updated": "2026-11-10 03:09",
   "cases": 8,
   "pass": 6,
   "fail": 0,
   "blocked": 2,
   "ready_for_user_test": false,
-  "notes": "P2-4 / UAT-09、09b 已修：保留試用店優先、明確願望次之的既有定位規則；也想做預設只選同區的有效願望，否則沿用來源區域（不再誤選第一件運動願望）。UI 選擇旁清楚說明完成後位置；無願望時後端以第一個來源事蹟區域補足。理由：尊重明確選擇與試用實際店址，避免靜默跨區。TDD red 未指定落 misc/預設 sport→green；雙裝置4/4、全單元105/105。證據 evidence/*-UAT-09*.png。P2-3 commit 8955e31。"
+  "notes": "P2-5 / UAT-10 已修：手機訪客 header 顯示登入按鈕，登入狀態載入後才顯示。TDD desktop pass/mobile red 隱藏→green 雙裝置2/2，可點到登入表單。證據 evidence/*-UAT-10-header-login.png。P2-4 commit 9b6e5ac。"
 }

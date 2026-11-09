@@ -242,3 +242,6 @@ td, th { text-align: left; padding: 6px 8px; border-bottom: 1px dashed var(--lin
   .predecessor > .grow { grid-column: 1 / -1; width: 100%; }
   .predecessor > button { grid-column: 1 / -1; }
 }
+
+.mobile-login { display: none; }
+@media (max-width: 720px) { .mobile-login { display: inline-flex; margin-left: auto; } }

@@ -6,7 +6,7 @@ import { Avatar } from "./Avatar";
 const Badge = ({ n }: { n: number }) => (n > 0 ? <span className="badge" aria-label={`${n} 則未讀`}>{n}</span> : null);
 
 export function Layout({ children }: { children: ReactNode }) {
-  const { me } = useSession();
+  const { me, loading } = useSession();
   const unread = me?.unread ?? { notifications: 0, discoveries: 0 };
   return (
     <div className="app">
@@ -15,6 +15,7 @@ export function Layout({ children }: { children: ReactNode }) {
           <Avatar appearance={{ body: "round", accessory: "dragon_horns", main: "#F2C6A8", accent: "#A9C7DE" }} name="龍角鎮" size={34} />
           龍角鎮
         </Link>
+        {!loading && !me && <Link to="/login" className="btn small ghost mobile-login">登入</Link>}
         <nav className="nav" aria-label="主要導覽">
           <NavLink to="/" end>地圖</NavLink>
           {me ? (

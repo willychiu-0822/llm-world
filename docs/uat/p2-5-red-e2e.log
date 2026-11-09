@@ -1,0 +1,76 @@
+
+> llm-world@ test:e2e /workspace/codex-burn/uat-llmworld
+> playwright test e2e/p2-5.spec.ts
+
+[WebServer] e2e database reset
+[WebServer] 
+[WebServer] > @lj/web@0.0.0 build /workspace/codex-burn/uat-llmworld/apps/web
+[WebServer] > vite build
+[WebServer] 
+[WebServer] vite v7.3.7 building client environment for production...
+[WebServer] transforming...
+[WebServer] ✓ 84 modules transformed.
+[WebServer] rendering chunks...
+[WebServer] computing gzip size...
+[WebServer] dist/index.html                   1.49 kB │ gzip:   0.88 kB
+[WebServer] dist/assets/index-BCQ8ycAa.css   10.36 kB │ gzip:   3.14 kB
+[WebServer] dist/assets/index-CKik3dyH.js   735.01 kB │ gzip: 190.50 kB
+[WebServer] ✓ built in 1.83s
+[WebServer] 
+[WebServer] (!) Some chunks are larger than 500 kB after minification. Consider:
+[WebServer] - Using dynamic import() to code-split the application
+[WebServer] - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+[WebServer] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+[WebServer] 龍角鎮 listening on :4131 (development) base=http://localhost:4131 web=/workspace/codex-burn/uat-llmworld/apps/web/dist
+
+Running 2 tests using 1 worker
+
+(node:140) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [desktop] › e2e/p2-5.spec.ts:5:1 › UAT-10 P2-5 訪客頂部登入入口可見可點 (1.6s)
+(node:298) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  2 [mobile] › e2e/p2-5.spec.ts:5:1 › UAT-10 P2-5 訪客頂部登入入口可見可點 (11.0s)
+
+
+  1) [mobile] › e2e/p2-5.spec.ts:5:1 › UAT-10 P2-5 訪客頂部登入入口可見可點 ────────────────────────────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('banner').getByRole('link', { name: '登入', exact: true })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('banner').getByRole('link', { name: '登入', exact: true }) with timeout 10000ms
+      - waiting for getByRole('banner').getByRole('link', { name: '登入', exact: true })
+
+
+       6 |   await page.goto("/");
+       7 |   const login = page.getByRole("banner").getByRole("link", { name: "登入", exact: true });
+    >  8 |   await expect(login).toBeVisible();
+         |                       ^
+       9 |   await evidence(page, "UAT-10-header-login");
+      10 |   await login.click();
+      11 |   await expect(page).toHaveURL(/\/login/);
+        at /workspace/codex-burn/uat-llmworld/e2e/p2-5.spec.ts:8:23
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/p2-5-UAT-10-P2-5-訪客頂部登入入口可見可點-mobile/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/p2-5-UAT-10-P2-5-訪客頂部登入入口可見可點-mobile/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/p2-5-UAT-10-P2-5-訪客頂部登入入口可見可點-mobile/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/p2-5-UAT-10-P2-5-訪客頂部登入入口可見可點-mobile/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [mobile] › e2e/p2-5.spec.ts:5:1 › UAT-10 P2-5 訪客頂部登入入口可見可點 ─────────────────────────────────────
+  1 passed (20.1s)
+ ELIFECYCLE  Command failed with exit code 1.
