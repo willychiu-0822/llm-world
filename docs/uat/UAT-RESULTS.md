@@ -33,3 +33,25 @@
 - 2026-11-10 04:07：P0 公開站唯讀檢查：127.0.0.1:5200/healthz=200；公開首頁 curl TLS unexpected EOF（HTTP 000），web 工具也無法存取。未啟動或重啟5200，未修改 /workspace/deploy、tunnel 或 relay。公開首頁200與公開閉環仍 blocked，由 Product Builder 依部署權限接續查驗。
 
 - 2026-11-10 04:47：UAT-14a～14d 新手 UI 已修：空狀態連到地圖、步驟或 AI；第一次角色儲存→寫願望→找靈感依序只突出一個操作；步驟列表只有一個主要操作，展開完成時以完成為主且可取消；測試登入可照說明填寫。提供者審核等待可回地圖，開店/上架依進度突出；管理頁空狀態可繼續。TDD：入口缺失、多個主要操作、測試登入無突出操作 red→green；雙裝置8/8，typecheck成功。首次測試 helper 錯把桌面隱藏tabbar當作可見navigation等待，已改為檢查實際tabbar元素的boundingBox；UAT-14a重跑仍因鏡子缺入口而失敗，證據uat-14a-red-e2e.log。截圖 evidence/*-UAT-14*.png。P2-6 commit a36d7d3。
+
+- 2026-11-10 05:08：完整驗收第一次：typecheck 0、build成功、最大chunk335005 bytes、單元105/105；E2E36 pass /2 fail，均UAT-14d，原因是測試在資料未載完時收集Loading節點，之後nth(1)消失。已在收集空狀態前等所有「載入中」消失，保留逐個入口與版面斷言，重跑全38案。UI產品修復commit 515454c。
+
+## Bug → 驗收與修復 commit 對照
+
+| Bug | 已修與驗收方式 | commit |
+|---|---|---|
+| P1-1 | 已修；延遲config與未設定OAuth的雙裝置UAT-02，原auth單元 | be41ef9 |
+| P1-2 | 已修；完成後3秒內顯示標題與事蹟入口UAT-03 | 54e41f8 |
+| P1-3 | 已修；390寬角色選項≥3欄、儲存≤2110px、無水平溢出UAT-04 | 5b0b4bd |
+| P1-4 | 已修；引用≥12字寬、卡高<200px UAT-05 | 61e513c |
+| P2-1 | 已修；願望focus/viewport與訊息不遮表單UAT-06 | 11cfbb7 |
+| P2-2 | 已修；匿名session200、保留受保護API401，訪客console0 UAT-07 | 7a6cacd |
+| P2-3 | 已修；非管理者admin API請求0、說明與回地圖UAT-08 | 8955e31 |
+| P2-4 | 已修；音樂來源預設留音樂、手動運動保留選擇且UI說明UAT-09/09b | 9b6e5ac |
+| P2-5 | 已修；手機header登入可見可點UAT-10 | c1442ab |
+| P2-6 | 已修；每個JS chunk<400000 bytes、原人物及新手雙裝置回歸UAT-11/16 | a36d7d3 |
+| P2-7 | 已修；PW_CHANNEL與雙viewport、新手逐步截圖console0 UAT-01/12/13 | b3d7f01、6186d19 |
+| UAT-14 | 已修；空狀態、主要操作、手機邊界與tabbar，雙裝置8/8 | 515454c |
+| P0公開站 | 本機5200健康200；公開站連線未成功，部署操作被使用者工作範圍禁止，仍blocked | 無部署變更 |
+
+- 2026-11-10 05:50：完整回歸第二次37 pass /1 fail（手機小安），UAT-14d兩裝置均pass。小安trace的兩個試用課API回200，但接收延遲約224秒；原90秒案例耗盡，最後停在steps載入中。保留原測試、timeout及斷言，原小安與UAT-18雙裝置定向重跑4/4，手機小安4.1秒通過。未以重試或增加timeout掩蓋。

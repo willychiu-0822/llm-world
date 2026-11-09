@@ -23,6 +23,7 @@ test("UAT-14a 空狀態都能直接走到下一步", async ({ page }) => {
   for (const [route, heading] of [["/steps", "我的步驟"], ["/mirror", "鏡子"], ["/notifications", "通知"], ["/discoveries", "發現匣"]]) {
     await page.goto(route);
     await expect(page.getByRole("heading", { name: heading, exact: true })).toBeVisible();
+    await expect(page.getByText("載入中……", { exact: true })).toHaveCount(0);
     const empties = page.locator("main .empty");
     for (const empty of await empties.all()) await expect(empty.locator("a, button").first()).toBeVisible();
     await layoutAndEvidence(page, `UAT-14a-${route.slice(1)}`);
@@ -86,12 +87,14 @@ test("UAT-14d 提供者與管理者的等待畫面和空狀態有下一步", asy
   await json(page.request.post("/api/auth/dev-login", { data: { email: "admin@e2e.test" } }));
   await page.goto("/admin");
   await expect(page.getByRole("heading", { name: "管理", exact: true })).toBeVisible();
+  await expect(page.getByText("載入中……", { exact: true })).toHaveCount(0);
   for (const empty of await page.locator("main .empty").all()) await expect(empty.locator("a, button").first()).toBeVisible();
   await layoutAndEvidence(page, "UAT-14d-admin");
   await json(page.request.post(`/api/admin/providers/${provider.id}/approve`));
   await signIn(page);
   await page.goto("/provider");
   await expect(page.getByRole("heading", { name: "我的店", exact: true })).toBeVisible();
+  await expect(page.getByText("載入中……", { exact: true })).toHaveCount(0);
   for (const empty of await page.locator("main .empty").all()) await expect(empty.locator("a, button").first()).toBeVisible();
   await expect(page.locator("main .btn.primary:visible")).toHaveCount(1);
   await layoutAndEvidence(page, "UAT-14d-provider-start");
