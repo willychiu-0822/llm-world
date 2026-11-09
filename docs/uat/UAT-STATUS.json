@@ -1,0 +1,10 @@
+{
+  "project": "llm-world 龍角鎮 v1 MVP",
+  "updated": "2026-11-10 00:41",
+  "cases": 8,
+  "pass": 6,
+  "fail": 0,
+  "blocked": 2,
+  "ready_for_user_test": false,
+  "notes": "P2-7 / UAT-01、12、13：測試基礎已完成；原人物情境桌面＋手機 6/6 pass，新手閉環因 P2-2/P2-3 暫 fixme 2；基準單元 100/100、typecheck 0 錯誤。證據 evidence/{desktop,mobile}-{leo,mia,xiaoan}-*.png；p2-7-e2e.log。"
+}

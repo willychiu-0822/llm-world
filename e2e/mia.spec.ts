@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { json, loginPage, mcpConnect, tool } from "./helpers";
+import { json, loginPage, mcpConnect, tool, panToPlace } from "./helpers";
 
 /**
  * 情境 C：經驗者 Mia
@@ -45,6 +45,7 @@ test("Mia shares her first step and is thanked when Kai follows it", async ({ br
   await kai.getByRole("button", { name: "儲存角色" }).click();
   await expect(kai.getByText("角色已儲存")).toBeVisible();
   await kai.goto("/");
+  await panToPlace(kai, /手作巷長椅/);
   await kai.getByRole("link", { name: /手作巷長椅/ }).click();
   await kai.getByRole("link", { name: /去上一次陶藝體驗課/ }).click();
   await expect(kai.getByText("怕手很笨，在門口站了五分鐘才進去。")).toBeVisible();

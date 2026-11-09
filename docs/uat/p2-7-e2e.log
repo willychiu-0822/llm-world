@@ -1,0 +1,42 @@
+
+> llm-world@ test:e2e /workspace/codex-burn/uat-llmworld
+> playwright test e2e/leo.spec.ts e2e/mia.spec.ts e2e/xiaoan.spec.ts e2e/novice.spec.ts
+
+[WebServer] e2e database reset
+[WebServer] 
+[WebServer] > @lj/web@0.0.0 build /workspace/codex-burn/uat-llmworld/apps/web
+[WebServer] > vite build
+[WebServer] 
+[WebServer] vite v7.3.7 building client environment for production...
+[WebServer] transforming...
+[WebServer] ✓ 84 modules transformed.
+[WebServer] rendering chunks...
+[WebServer] computing gzip size...
+[WebServer] dist/index.html                   1.49 kB │ gzip:   0.88 kB
+[WebServer] dist/assets/index-BDZLmpgl.css    9.63 kB │ gzip:   2.96 kB
+[WebServer] dist/assets/index-CZVnFv9C.js   732.23 kB │ gzip: 189.66 kB
+[WebServer] ✓ built in 2.29s
+[WebServer] 
+[WebServer] (!) Some chunks are larger than 500 kB after minification. Consider:
+[WebServer] - Using dynamic import() to code-split the application
+[WebServer] - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+[WebServer] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+[WebServer] 龍角鎮 listening on :4131 (development) base=http://localhost:4131 web=/workspace/codex-burn/uat-llmworld/apps/web/dist
+
+Running 8 tests using 1 worker
+
+(node:134) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [desktop] › e2e/leo.spec.ts:8:1 › Leo opens a shop, publishes a trial, confirms attendance and sees thanks (5.6s)
+  ✓  2 [desktop] › e2e/mia.spec.ts:8:1 › Mia shares her first step and is thanked when Kai follows it (4.9s)
+  -  3 [desktop] › e2e/novice.spec.ts:5:1 › UAT-01 P2-7 新手從訪客走到第一個事蹟與鏡子
+  ✓  4 [desktop] › e2e/xiaoan.spec.ts:9:1 › Xiaoan's loop: AI step first, then going to the trial in person (4.0s)
+(node:766) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  5 [mobile] › e2e/leo.spec.ts:8:1 › Leo opens a shop, publishes a trial, confirms attendance and sees thanks (5.3s)
+  ✓  6 [mobile] › e2e/mia.spec.ts:8:1 › Mia shares her first step and is thanked when Kai follows it (5.2s)
+  -  7 [mobile] › e2e/novice.spec.ts:5:1 › UAT-01 P2-7 新手從訪客走到第一個事蹟與鏡子
+  ✓  8 [mobile] › e2e/xiaoan.spec.ts:9:1 › Xiaoan's loop: AI step first, then going to the trial in person (3.9s)
+
+  2 skipped
+  6 passed (36.9s)

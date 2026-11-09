@@ -1,0 +1,35 @@
+! Corepack is about to download https://registry.npmjs.org/pnpm/-/pnpm-10.28.0.tgz
+
+> llm-world@ test /workspace/codex-burn/uat-llmworld
+> vitest run
+
+
+ RUN  v3.2.7 /workspace/codex-burn/uat-llmworld
+
+ ✓ |server| src/mcp/mcp.test.ts (11 tests) 1247ms
+   ✓ MCP tools > runs Xiaoan's AI loop: discover, ask, bring back, propose, and complete a confirmed AI step  321ms
+ ✓ |server| src/routes/__tests__/steps.test.ts (10 tests) 942ms
+ ✓ |server| src/routes/__tests__/provider.test.ts (7 tests) 884ms
+ ✓ |server| src/routes/__tests__/discover.test.ts (5 tests) 713ms
+ ✓ |server| src/auth/auth.test.ts (11 tests) 604ms
+ ✓ |server| src/routes/__tests__/town.test.ts (4 tests) 490ms
+ ✓ |core| src/curation.test.ts (8 tests) 8ms
+ ✓ |server| src/routes/__tests__/character.test.ts (5 tests) 376ms
+ ✓ |server| src/seed/seed.test.ts (2 tests) 588ms
+ ✓ |core| src/moderation.test.ts (7 tests) 6ms
+ ✓ |server| src/routes/__tests__/config.test.ts (3 tests) 170ms
+ ✓ |db| src/db.test.ts (4 tests) 89ms
+ ✓ |core| src/ics.test.ts (4 tests) 5ms
+ ✓ |core| src/text.test.ts (5 tests) 4ms
+ ✓ |db| src/migrate.test.ts (1 test) 110ms
+ ✓ |web| src/components/StepForm.test.tsx (4 tests) 783ms
+   ✓ StepForm > defines a self step with a session, a before-note and a referenced predecessor  486ms
+ ✓ |web| src/components/TownMap.test.tsx (3 tests) 334ms
+ ✓ |web| src/lib/api.test.ts (3 tests) 9ms
+ ✓ |web| src/components/Avatar.test.tsx (3 tests) 78ms
+
+ Test Files  19 passed (19)
+      Tests  100 passed (100)
+   Start at  00:22:14
+   Duration  23.85s (transform 856ms, setup 507ms, collect 10.42s, tests 7.44s, environment 1.52s, prepare 1.18s)
+

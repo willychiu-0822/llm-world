@@ -2,7 +2,7 @@
 import pg from "pg";
 
 const url = process.env.DATABASE_URL;
-if (!url) throw new Error("DATABASE_URL is required");
+if (!url || new URL(url).pathname !== "/longjiao_laned_e2e") throw new Error("Only the session D E2E database may be reset");
 const c = new pg.Client({ connectionString: url });
 await c.connect();
 await c.query("DROP SCHEMA IF EXISTS drizzle CASCADE; DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public;");
