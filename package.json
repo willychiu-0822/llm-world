@@ -20,6 +20,7 @@
     "seed:demo": "pnpm --filter @lj/server exec tsx --env-file-if-exists=../../.env src/seed-demo.ts"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@modelcontextprotocol/sdk": "1.32.2",
     "@playwright/test": "1.63.0",
     "@types/node": "^22.15.0",

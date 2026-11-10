@@ -293,8 +293,8 @@ body:has(.veil) main .btn.primary { visibility: hidden; }
 .confetti span { position: absolute; color: var(--butter); font-size: 1.4rem; animation: float 1.6s ease-in-out infinite; }
 .confetti span:nth-child(1) { left: 12%; top: 18%; }
 .confetti span:nth-child(2) { right: 14%; top: 22%; animation-delay: 0.2s; }
-.confetti span:nth-child(3) { left: 22%; bottom: 16%; animation-delay: 0.4s; }
-.confetti span:nth-child(4) { right: 20%; bottom: 18%; animation-delay: 0.1s; }
+.confetti span:nth-child(3) { left: 18%; top: 36%; animation-delay: 0.4s; }
+.confetti span:nth-child(4) { right: 16%; top: 40%; animation-delay: 0.1s; }
 .adopt { max-width: 520px; margin: 0 auto; }
 .adopt-actions { display: flex; gap: 8px; }
 .adopt-actions .btn.primary { flex: 1; }

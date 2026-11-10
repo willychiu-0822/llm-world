@@ -1,5 +1,7 @@
 # 龍角鎮新手路徑 UI/UX 稽核
 
+修完後的畫面在 [`docs/uat/evidence/uiux-audit/after/`](evidence/uiux-audit/after)。下面這份清單記的是動手之前的狀態，用來對照。
+
 - 日期：2026-11-10
 - 分支起點：`codex/llmworld-combined-20261110-0905` @ `24ca184`
 - 範圍：訪客落地、登入、領養三步、孵化、家、出門、信物、接下、我做到了、收藏櫃、郵筒／第 2 階信、設定；並含信的出口（連接頁）與 OAuth 同意頁
