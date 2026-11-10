@@ -391,7 +391,7 @@ export function TownMap({ districts, places, children, onInteract }: { districts
             return (
               <g key={d.key} data-testid={`district-${d.key}`} className="district">
                 {pub && (
-                  <Link to={`/places/${pub.id}`} aria-label={`${pub.name}（${pub.deedCount} 個事蹟）`} className="map-place">
+                  <Link to={`/places/${pub.id}`} aria-label={`${pub.name}（${pub.deedCount} 個信物）`} className="map-place">
                     <g transform={`translate(${L.x} ${L.y})`}>
                       <circle r="46" fill="transparent" />
                       <Landmark k={d.key} color={d.color} />
@@ -403,7 +403,7 @@ export function TownMap({ districts, places, children, onInteract }: { districts
                   const [ox, oy] = SLOTS[i];
                   return (
                     <g key={s.id}>
-                      <Link to={`/places/${s.id}`} aria-label={`${s.name}（${s.deedCount} 個事蹟、${s.trialCount} 個試用機會）`} className="map-place">
+                      <Link to={`/places/${s.id}`} aria-label={`${s.name}（${s.deedCount} 個信物、${s.trialCount} 個試用機會）`} className="map-place">
                         <g transform={`translate(${L.x + ox} ${L.y + oy})`}>
                           <circle r="24" fill="transparent" />
                           <Shop color={s.roofColor} />

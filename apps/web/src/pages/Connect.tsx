@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Empty, ErrorBox, Loading } from "../components/Bits";
 import { api, ApiError } from "../lib/api";
 import { formatDateTime } from "../lib/format";
@@ -38,7 +39,15 @@ export function ConnectPage() {
   return (
     <div className="stack" style={{ maxWidth: 760, margin: "0 auto" }}>
       <section className="panel stack">
-        <h1>連接你的 AI</h1>
+        <h1>會說話的朋友</h1>
+        <p>小龍想找一個會說話的朋友，幫牠去鎮上打聽。你平時聊天的那個，可以來串門子。</p>
+        <Link to="/" className="btn primary">回小龍身邊</Link>
+      </section>
+      <details className="panel advanced">
+        <summary>進階</summary>
+        <div className="stack">
+      <section className="panel stack">
+        <h2>連接你的 AI</h2>
         <p>龍角鎮不提供 AI。你的角色的「大腦」是你自己的 AI，透過 <strong>MCP</strong> 連進鎮上。</p>
         <div className="field">
           <span>MCP 伺服器網址</span>
@@ -99,6 +108,8 @@ export function ConnectPage() {
         <h2>給 Cursor 等用設定檔的用戶端</h2>
         <pre className="code" style={{ whiteSpace: "pre-wrap" }}>{JSON.stringify({ mcpServers: { longjiao: { url } } }, null, 2)}</pre>
       </section>
+        </div>
+      </details>
     </div>
   );
 }

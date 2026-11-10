@@ -29,6 +29,7 @@ test("Xiaoan's loop: AI step first, then going to the trial in person", async ({
 
   // 連接 AI（OAuth 同意頁）
   await page.goto("/connect");
+  await page.locator("details.advanced summary").click();
   await expect(page.locator("code", { hasText: "/mcp" })).toBeVisible();
   const ai = await mcpConnect(page);
 
