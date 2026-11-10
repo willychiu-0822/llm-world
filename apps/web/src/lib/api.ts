@@ -21,6 +21,7 @@ const KNOWN: Record<string, string> = {
   "this step has no planned time": "這一步沒有設定時間",
   "step is not a draft": "這一步已經確認過了",
   "approved provider required": "需要先成為核准的提供者",
+  "connection not found": "找不到這個連接",
 };
 
 const BY_CODE: Record<string, string> = {
@@ -31,6 +32,7 @@ const BY_CODE: Record<string, string> = {
   conflict: "操作衝突，請重新整理再試",
   rate_limited: "太頻繁了，請稍後再試",
   moderation_blocked: "內容不符合社群規範",
+  step_already_done: "這一步已經完成了",
 };
 
 const hasCjk = (s: string) => /[㐀-鿿]/.test(s);

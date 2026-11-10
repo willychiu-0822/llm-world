@@ -14,7 +14,7 @@ export async function ensureBasePlaces(db: Db): Promise<void> {
 }
 
 const TABLES = [
-  "moderation_log", "oauth_tokens", "oauth_codes", "oauth_requests", "oauth_clients", "discovery_seen", "notifications",
+  "moderation_log", "oauth_tokens", "oauth_grants", "oauth_codes", "oauth_requests", "oauth_clients", "discovery_seen", "notifications",
   "follows", "trial_events", "provider_questions", "discoveries", "deeds", "bookings", "notes", "first_steps",
   "trial_sessions", "trial_faqs", "trials", "places", "providers", "wants", "characters", "sessions", "users",
 ];

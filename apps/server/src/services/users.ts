@@ -1,5 +1,5 @@
-import { newId, users } from "@lj/db";
-import { eq, or } from "drizzle-orm";
+import { newId, oauthGrants, oauthTokens, users } from "@lj/db";
+import { and, eq, isNull, or } from "drizzle-orm";
 import type { AppContext } from "../context";
 
 export async function upsertUser(ctx: AppContext, p: { email: string; name: string; googleSub?: string }) {
@@ -25,5 +25,10 @@ export async function upsertUser(ctx: AppContext, p: { email: string; name: stri
 }
 
 export async function deleteUser(ctx: AppContext, userId: string) {
-  await ctx.db.delete(users).where(eq(users.id, userId));
+  const now = ctx.now();
+  await ctx.db.transaction(async (tx) => {
+    await tx.update(oauthGrants).set({ revokedAt: now }).where(and(eq(oauthGrants.userId, userId), isNull(oauthGrants.revokedAt)));
+    await tx.update(oauthTokens).set({ revokedAt: now }).where(and(eq(oauthTokens.userId, userId), isNull(oauthTokens.revokedAt)));
+    await tx.delete(users).where(eq(users.id, userId));
+  });
 }

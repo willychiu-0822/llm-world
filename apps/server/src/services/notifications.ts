@@ -28,3 +28,18 @@ export async function listNotifications(ctx: AppContext, userId: string) {
 export async function readAllNotifications(ctx: AppContext, userId: string) {
   await ctx.db.update(notifications).set({ readAt: ctx.now() }).where(and(eq(notifications.userId, userId), isNull(notifications.readAt)));
 }
+
+/** Merge fields into notifications for one step, so a confirmed or published step no longer says it is waiting. */
+export async function touchStepNotice(ctx: AppContext, userId: string, stepId: string, kind: NotificationKind, patch: Record<string, unknown>) {
+  const rows = await ctx.db
+    .select({ id: notifications.id, payload: notifications.payload })
+    .from(notifications)
+    .where(and(eq(notifications.userId, userId), eq(notifications.kind, kind)));
+  for (const row of rows) {
+    const payload = (row.payload ?? {}) as Record<string, unknown>;
+    if (payload.stepId !== stepId) continue;
+    // A later result gets its own notice; don't rewrite one the player already handled.
+    if (kind === "ai_step_done" && payload.handled === true) continue;
+    await ctx.db.update(notifications).set({ payload: { ...payload, ...patch } }).where(eq(notifications.id, row.id));
+  }
+}

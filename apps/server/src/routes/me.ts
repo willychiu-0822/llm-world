@@ -3,12 +3,21 @@ import { destroySession, requireUser } from "../auth/session";
 import type { AppContext } from "../context";
 import { h } from "../http/errors";
 import { addWant, getMe, saveCharacter, updateWant } from "../services/characters";
+import { disconnectClient, listConnections } from "../services/connections";
 import { deleteUser } from "../services/users";
 
 export function meRoutes(ctx: AppContext) {
   const r = Router();
   r.use(requireUser);
   r.get("/", h(async (req, res) => res.json(await getMe(ctx, req.user!))));
+  r.get("/connections", h(async (req, res) => res.json(await listConnections(ctx, req.user!.id))));
+  r.post(
+    "/connections/:clientId/disconnect",
+    h(async (req, res) => {
+      await disconnectClient(ctx, req.user!.id, String(req.params.clientId));
+      res.status(204).end();
+    }),
+  );
   r.delete(
     "/",
     h(async (req, res) => {
