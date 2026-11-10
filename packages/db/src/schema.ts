@@ -278,17 +278,36 @@ export const oauthCodes = pgTable("oauth_codes", {
   usedAt: ts("used_at"),
 });
 
-export const oauthTokens = pgTable("oauth_tokens", {
-  token: text("token").primaryKey(), // sha256
-  kind: text("kind").notNull(), // access | refresh
-  clientId: text("client_id").notNull().references(() => oauthClients.clientId, { onDelete: "cascade" }),
-  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  scopes: text("scopes").array().notNull().default(sql`ARRAY[]::text[]`),
-  resource: text("resource"),
-  expiresAt: ts("expires_at").notNull(),
-  revokedAt: ts("revoked_at"),
-  createdAt: createdAt(),
-});
+/** One authorization of a client by a user. Disconnect revokes the grant and every token on it. */
+export const oauthGrants = pgTable(
+  "oauth_grants",
+  {
+    id: text("id").primaryKey(),
+    clientId: text("client_id").notNull().references(() => oauthClients.clientId, { onDelete: "cascade" }),
+    userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    createdAt: createdAt(),
+    lastUsedAt: ts("last_used_at"),
+    revokedAt: ts("revoked_at"),
+  },
+  (t) => [index("oauth_grants_user_client_idx").on(t.userId, t.clientId)],
+);
+
+export const oauthTokens = pgTable(
+  "oauth_tokens",
+  {
+    token: text("token").primaryKey(), // sha256
+    kind: text("kind").notNull(), // access | refresh
+    clientId: text("client_id").notNull().references(() => oauthClients.clientId, { onDelete: "cascade" }),
+    userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    grantId: text("grant_id").references(() => oauthGrants.id, { onDelete: "cascade" }),
+    scopes: text("scopes").array().notNull().default(sql`ARRAY[]::text[]`),
+    resource: text("resource"),
+    expiresAt: ts("expires_at").notNull(),
+    revokedAt: ts("revoked_at"),
+    createdAt: createdAt(),
+  },
+  (t) => [index("oauth_tokens_grant_idx").on(t.grantId)],
+);
 
 export const moderationLog = pgTable("moderation_log", {
   id: text("id").primaryKey(),

@@ -149,7 +149,8 @@ describe("MCP tools", () => {
   it("lists the world tools and the character prompt", async () => {
     const agent = await userWithCharacter(env.app, "xiaoan@example.com");
     const client = await connect((await tokenFor(env, agent)).access_token);
-    const tools = (await client.listTools()).tools.map((t) => t.name).sort();
+    const listed = (await client.listTools()).tools;
+    const tools = listed.map((t) => t.name).sort();
     expect(tools).toEqual([
       "character_get",
       "deed_get",
@@ -163,6 +164,14 @@ describe("MCP tools", () => {
       "world_discover",
     ]);
     const prompts = (await client.listPrompts()).prompts.map((p) => p.name);
+    const annotations = Object.fromEntries(listed.map((t) => [t.name, t.annotations]));
+    for (const name of ["character_get", "world_discover", "place_get", "deed_get", "trial_get", "first_step_list"]) {
+      expect(annotations[name], name).toMatchObject({ readOnlyHint: true, destructiveHint: false, idempotentHint: true });
+    }
+    for (const name of ["discovery_bring_back", "first_step_propose", "provider_ask"]) {
+      expect(annotations[name], name).toMatchObject({ readOnlyHint: false, destructiveHint: false, idempotentHint: false });
+    }
+    expect(annotations.first_step_complete).toMatchObject({ readOnlyHint: false, destructiveHint: false, idempotentHint: true });
     expect(prompts).toEqual(["be_my_character"]);
     const prompt = await client.getPrompt({ name: "be_my_character" });
     expect(JSON.stringify(prompt.messages)).toContain("Nova");
@@ -215,15 +224,59 @@ describe("MCP tools", () => {
     expect((await call<unknown[]>(client, "first_step_list")).data).toEqual([]);
 
     expect((await xiaoan.post(`/api/first-steps/${proposed.data.id}/confirm`)).body.status).toBe("confirmed");
+    expect((await xiaoan.get("/api/notifications")).body[0]).toMatchObject({ kind: "step_proposed", payload: { handled: true, outcome: "confirmed", stepId: proposed.data.id } });
     const todo = await call<{ id: string; text: string }[]>(client, "first_step_list");
     expect(todo.data.map((s) => s.id)).toEqual([proposed.data.id]);
 
-    const done = await call<{ id: string; executor: string; summary: string }>(client, "first_step_complete", { stepId: proposed.data.id, result: "前十分鐘練呼吸、接著唱音階、最後選一首熟悉的歌，不會要你獨唱。" });
-    expect(done.data).toMatchObject({ executor: "ai", summary: expect.stringContaining("練呼吸") });
-    const view = (await xiaoan.get(`/api/deeds/${done.data.id}`)).body;
-    expect(view).toMatchObject({ executor: "ai", recordSource: "ai", visibility: "public", relatedDeedIds: [miaDeed.id] });
+    const done = await call<{ status: string; result: string; stepId: string }>(client, "first_step_complete", { stepId: proposed.data.id, result: "前十分鐘練呼吸、接著唱音階、最後選一首熟悉的歌，不會要你獨唱。" });
+    expect(done.data).toMatchObject({ status: "pending_review", stepId: proposed.data.id, result: expect.stringContaining("練呼吸") });
+    expect(done.data).not.toHaveProperty("id");
+    const waiting = (await xiaoan.get("/api/first-steps")).body.find((s: { id: string }) => s.id === proposed.data.id);
+    expect(waiting).toMatchObject({ status: "review", deedId: null });
+    expect((await request(env.app).get("/api/places/pub_music")).body.deeds.map((d: { title: string }) => d.title)).not.toContain("Nova 去問老師試用課的流程");
+    expect((await miaAgent.get("/api/notifications")).body.map((n: { kind: string }) => n.kind)).toEqual(["followed_referenced"]);
+
+    const published = await xiaoan.post(`/api/first-steps/${proposed.data.id}/review`).send({ decision: "approve", visibility: "public" });
+    expect(published.status).toBe(200);
+    expect(published.body.deed).toMatchObject({ executor: "ai", recordSource: "ai", visibility: "public", relatedDeedIds: [miaDeed.id], summary: expect.stringContaining("練呼吸") });
+    const view = (await request(env.app).get(`/api/deeds/${published.body.deed.id}`)).body;
+    expect(view).toMatchObject({ visibility: "public", summary: expect.stringContaining("練呼吸") });
     const miaNotes = (await miaAgent.get("/api/notifications")).body.map((n: { kind: string }) => n.kind);
     expect(miaNotes).toEqual(["followed_completed", "followed_referenced"]);
+    const again = await call(client, "first_step_complete", { stepId: proposed.data.id, result: "再寫一次" });
+    expect(again.isError).toBe(true);
+    expect(again.data.message).toContain("step_already_done");
+    expect(again.data.message).toContain("這一步已經完成了");
+    await client.close();
+  });
+
+  it("keeps an AI result out of public deeds until the player edits and approves it", async () => {
+    const xiaoan = await userWithCharacter(env.app, "xiaoan@example.com");
+    const client = await connect((await tokenFor(env, xiaoan)).access_token);
+    const proposed = await call<{ id: string }>(client, "first_step_propose", { executor: "ai", text: "先問清楚流程" });
+    await xiaoan.post(`/api/first-steps/${proposed.data.id}/confirm`);
+    const pending = await call<{ status: string; result: string }>(client, "first_step_complete", {
+      stepId: proposed.data.id,
+      result: "主人，我是小碼。問題 pq_nn3qsdsqi59autjg 先練呼吸。",
+    });
+    expect(pending.data).toMatchObject({ status: "pending_review", result: "我是小碼。問題先練呼吸。" });
+    expect(JSON.stringify(pending.data)).not.toMatch(/主人|pq_/);
+    const step = (await xiaoan.get("/api/first-steps")).body.find((s: { id: string }) => s.id === proposed.data.id);
+    expect(step).toMatchObject({ status: "review", deedId: null, result: "我是小碼。問題先練呼吸。" });
+    expect((await request(env.app).get("/api/places/pub_misc")).body.deeds.map((d: { summary: string }) => d.summary).join("\n")).not.toContain("先練呼吸");
+
+    expect((await xiaoan.post(`/api/first-steps/${proposed.data.id}/review`).send({ decision: "reject" })).body.step.status).toBe("confirmed");
+    expect((await xiaoan.get("/api/first-steps")).body.find((s: { id: string }) => s.id === proposed.data.id).deedId).toBeNull();
+    expect((await call<{ id: string }[]>(client, "first_step_list")).data.map((s) => s.id)).toEqual([proposed.data.id]);
+
+    await call(client, "first_step_complete", { stepId: proposed.data.id, result: "主人，第二次的結果" });
+    const other = await userWithCharacter(env.app, "reader@example.com");
+    const published = await xiaoan.post(`/api/first-steps/${proposed.data.id}/review`).send({ decision: "approve", visibility: "public", result: "主人，公開版 pq_nn3qsdsqi59autjg 先練呼吸" });
+    expect(published.body.deed.summary).toBe("公開版先練呼吸");
+    expect((await request(env.app).get(`/api/deeds/${published.body.deed.id}`)).status).toBe(200);
+    expect((await other.get(`/api/deeds/${published.body.deed.id}`)).body.summary).toBe("公開版先練呼吸");
+    const notice = (await xiaoan.get("/api/notifications")).body.find((n: { kind: string }) => n.kind === "ai_step_done");
+    expect(notice.payload).toMatchObject({ pending: false, handled: true, outcome: "published", deedId: published.body.deed.id });
     await client.close();
   });
 
@@ -252,5 +305,48 @@ describe("MCP tools", () => {
   it("rejects revoked or bogus tokens", async () => {
     const res = await request(env.app).post("/mcp").set("Authorization", "Bearer nope").send({ jsonrpc: "2.0", id: 1, method: "tools/list" });
     expect(res.status).toBe(401);
+  });
+
+  it("lists a connected AI and disconnect revokes access and refresh immediately", async () => {
+    const agent = await userWithCharacter(env.app, "xiaoan@example.com");
+    const tokens = await tokenFor(env, agent);
+    const client = await connect(tokens.access_token);
+    await call(client, "character_get");
+    await client.close();
+
+    const listed = (await agent.get("/api/me/connections")).body as { clientId: string; name: string; connectedAt: string; lastUsedAt: string | null }[];
+    expect(listed).toHaveLength(1);
+    expect(listed[0]).toMatchObject({ clientId: tokens.clientId, name: "Test AI" });
+    expect(listed[0].connectedAt).toBeTruthy();
+    expect(listed[0].lastUsedAt).toBeTruthy();
+
+    expect((await agent.post(`/api/me/connections/${encodeURIComponent(tokens.clientId)}/disconnect`)).status).toBe(204);
+    expect((await agent.get("/api/me/connections")).body).toEqual([]);
+    expect((await request(env.app).post("/mcp").set("Authorization", `Bearer ${tokens.access_token}`).send({ jsonrpc: "2.0", id: 1, method: "tools/list" })).status).toBe(401);
+    expect((await request(env.app).post("/token").type("form").send({ grant_type: "refresh_token", refresh_token: tokens.refresh_token, client_id: tokens.clientId })).status).toBe(400);
+    expect((await agent.post(`/api/me/connections/${encodeURIComponent(tokens.clientId)}/disconnect`)).status).toBe(404);
+  });
+
+  it("revoking an access token blocks refresh, and revoking a refresh token blocks access", async () => {
+    const agent = await userWithCharacter(env.app, "xiaoan@example.com");
+    const first = await tokenFor(env, agent);
+    expect((await request(env.app).post("/revoke").type("form").send({ token: first.access_token, client_id: first.clientId })).status).toBe(200);
+    expect((await request(env.app).post("/token").type("form").send({ grant_type: "refresh_token", refresh_token: first.refresh_token, client_id: first.clientId })).status).toBe(400);
+    expect((await request(env.app).post("/mcp").set("Authorization", `Bearer ${first.access_token}`).send({ jsonrpc: "2.0", id: 1, method: "tools/list" })).status).toBe(401);
+
+    const second = await tokenFor(env, agent);
+    const rotated = await request(env.app).post("/token").type("form").send({ grant_type: "refresh_token", refresh_token: second.refresh_token, client_id: second.clientId });
+    expect(rotated.status).toBe(200);
+    expect((await request(env.app).post("/revoke").type("form").send({ token: rotated.body.refresh_token, client_id: second.clientId })).status).toBe(200);
+    expect((await request(env.app).post("/mcp").set("Authorization", `Bearer ${rotated.body.access_token}`).send({ jsonrpc: "2.0", id: 1, method: "tools/list" })).status).toBe(401);
+    expect((await request(env.app).post("/mcp").set("Authorization", `Bearer ${second.access_token}`).send({ jsonrpc: "2.0", id: 1, method: "tools/list" })).status).toBe(401);
+  });
+
+  it("deleting the account revokes its access and refresh tokens", async () => {
+    const agent = await userWithCharacter(env.app, "gone@example.com");
+    const tokens = await tokenFor(env, agent);
+    expect((await agent.delete("/api/me")).status).toBe(204);
+    expect((await request(env.app).post("/mcp").set("Authorization", `Bearer ${tokens.access_token}`).send({ jsonrpc: "2.0", id: 1, method: "tools/list" })).status).toBe(401);
+    expect((await request(env.app).post("/token").type("form").send({ grant_type: "refresh_token", refresh_token: tokens.refresh_token, client_id: tokens.clientId })).status).toBe(400);
   });
 });

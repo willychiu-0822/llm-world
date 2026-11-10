@@ -93,7 +93,7 @@ export interface Step {
   id: string;
   executor: "ai" | "self";
   text: string;
-  status: "draft" | "confirmed" | "done" | "dropped";
+  status: "draft" | "confirmed" | "review" | "done" | "dropped";
   proposedBy: "user" | "ai";
   proposalReason: string | null;
   wantId: string | null;

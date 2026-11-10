@@ -1,4 +1,4 @@
-import { aiProposeInput, buildIcs, completeStepInput, firstStepInput, noteInput } from "@lj/core";
+import { aiProposeInput, buildIcs, completeStepInput, firstStepInput, forPlayer, noteInput, reviewStepInput } from "@lj/core";
 import { bookings, characters, deeds, firstSteps, follows, newId, notes, places, providers, trialEvents, trialSessions, trials } from "@lj/db";
 import { and, count, desc, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
@@ -7,9 +7,9 @@ import { AppError, notFound } from "../http/errors";
 import { getWant } from "./characters";
 import { createDeedFromStep, deedDto, listPublicDeeds, type StepRow } from "./deeds";
 import { moderate } from "./moderation";
-import { notify } from "./notifications";
+import { notify, touchStepNotice } from "./notifications";
 
-const STATUS = z.enum(["draft", "confirmed", "done", "dropped"]);
+const STATUS = z.enum(["draft", "confirmed", "review", "done", "dropped"]);
 
 async function getOwnStep(ctx: AppContext, userId: string, stepId: string) {
   const [s] = await ctx.db.select().from(firstSteps).where(and(eq(firstSteps.id, stepId), eq(firstSteps.userId, userId))).limit(1);
@@ -140,6 +140,7 @@ export async function confirmStep(ctx: AppContext, userId: string, stepId: strin
   if (s.status !== "draft") throw new AppError("conflict", "step is not a draft");
   const [step] = await ctx.db.update(firstSteps).set({ status: "confirmed", confirmedAt: ctx.now() }).where(eq(firstSteps.id, s.id)).returning();
   await onConfirmed(ctx, step);
+  await touchStepNotice(ctx, userId, step.id, "step_proposed", { handled: true, outcome: "confirmed" });
   return stepDto(step);
 }
 
@@ -147,6 +148,8 @@ export async function dropStep(ctx: AppContext, userId: string, stepId: string) 
   const s = await getOwnStep(ctx, userId, stepId);
   if (s.status === "done") throw new AppError("conflict", "step is already done");
   const [step] = await ctx.db.update(firstSteps).set({ status: "dropped" }).where(eq(firstSteps.id, s.id)).returning();
+  await touchStepNotice(ctx, userId, step.id, "step_proposed", { handled: true, outcome: "dropped" });
+  if (s.status === "review") await touchStepNotice(ctx, userId, step.id, "ai_step_done", { pending: false, handled: true, outcome: "rejected" });
   return stepDto(step);
 }
 
@@ -166,11 +169,43 @@ export async function completeSelfStep(ctx: AppContext, userId: string, stepId: 
 export async function completeAiStep(ctx: AppContext, userId: string, stepId: string, result: string) {
   const s = await getOwnStep(ctx, userId, stepId);
   if (s.executor !== "ai") throw new AppError("invalid_input", "this step is for the person, not the AI");
+  if (s.status === "done") throw new AppError("step_already_done", "這一步已經完成了");
+  if (s.status === "review") throw new AppError("conflict", "這一步的結果已經交回來了，等你在龍角鎮看過");
   if (s.status !== "confirmed") throw new AppError("step_not_confirmed", "the user has not confirmed this step yet");
-  const deed = await createDeedFromStep(ctx, s, { recordSource: "ai", visibility: "public", summary: result });
+  const cleaned = forPlayer(result);
+  if (!cleaned) throw new AppError("invalid_input", "結果不能是空的");
+  const summary = await moderate(ctx, cleaned, { userId, targetType: "deed" });
+  const [step] = await ctx.db
+    .update(firstSteps)
+    .set({ status: "review", result: summary })
+    .where(and(eq(firstSteps.id, s.id), eq(firstSteps.status, "confirmed")))
+    .returning();
+  if (!step) throw new AppError("conflict", "這一步的結果已經交回來了，等你在龍角鎮看過");
+  await notify(ctx, userId, "ai_step_done", { stepId: s.id, text: s.text, pending: true });
+  return {
+    stepId: s.id,
+    status: "pending_review" as const,
+    result: summary,
+    note: "結果已交給你看過。你在龍角鎮公開之前，不會出現在鎮上，其他人也看不到。",
+  };
+}
+
+/** The player approves (and may edit) or rejects an AI result before it can become a deed. */
+export async function reviewAiResult(ctx: AppContext, userId: string, stepId: string, raw: unknown) {
+  const input = reviewStepInput.parse(raw);
+  const s = await getOwnStep(ctx, userId, stepId);
+  if (s.executor !== "ai" || s.status !== "review") throw new AppError("conflict", "這一步沒有待看的結果");
+  if (input.decision === "reject") {
+    const [step] = await ctx.db.update(firstSteps).set({ status: "confirmed", result: null }).where(eq(firstSteps.id, s.id)).returning();
+    await touchStepNotice(ctx, userId, s.id, "ai_step_done", { pending: false, handled: true, outcome: "rejected" });
+    return { step: stepDto(step), deed: null };
+  }
+  const cleaned = forPlayer(input.result?.trim() ? input.result : (s.result ?? ""));
+  if (!cleaned) throw new AppError("invalid_input", "結果不能是空的");
+  const deed = await createDeedFromStep(ctx, s, { recordSource: "ai", visibility: input.visibility ?? "public", summary: cleaned });
   await ctx.db.update(firstSteps).set({ result: deed.summary }).where(eq(firstSteps.id, s.id));
-  await notify(ctx, userId, "ai_step_done", { stepId: s.id, deedId: deed.id, text: s.text });
-  return deedDto(deed);
+  await touchStepNotice(ctx, userId, s.id, "ai_step_done", { pending: false, handled: true, outcome: "published", deedId: deed.id });
+  return { step: stepDto({ ...s, status: "done", result: deed.summary, doneAt: deed.createdAt }), deed: deedDto(deed) };
 }
 
 export async function upsertNote(ctx: AppContext, userId: string, stepId: string, kind: string, raw: unknown) {

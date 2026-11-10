@@ -1,3 +1,24 @@
+const INTERNAL_ID = /\b(?:pq|stp|want|deed|chr|usr|trl|faq|ses|tev|bkg|fol|ntf|dsc|note|mod|prv|plc|oar|grt)_[0-9a-z]{6,}\b/gi;
+
+/**
+ * Text a player (or later, the town) will read.
+ * Drops internal ids and speaks to the person as 你, never 主人.
+ */
+export function forPlayer(text: string): string {
+  let s = text.replace(INTERNAL_ID, "");
+  s = s.replace(/主人/g, "你");
+  s = s.replace(/^你[，,：:]\s*/, "");
+  s = s.replace(/[ \t]{2,}/g, " ");
+  let prev = "";
+  while (prev !== s) {
+    prev = s;
+    s = s.replace(/([\u3400-\u9fff])\s+([\u3400-\u9fff])/g, "$1$2");
+  }
+  s = s.replace(/\s+([，。！？、；：,.!?:])/g, "$1");
+  s = s.replace(/（\s*）/g, "").replace(/\(\s*\)/g, "");
+  return s.replace(/[ \t]{2,}/g, " ").trim();
+}
+
 /** Lowercase and keep only letters, digits and CJK characters. */
 export function normalize(text: string): string {
   return text.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");

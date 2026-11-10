@@ -28,6 +28,6 @@ export async function askProvider(ctx: AppContext, userId: string, raw: unknown,
     answered: false as const,
     questionId: q.id,
     processInfo: trial.processInfo,
-    message: "常見問答裡沒有這個問題，已經轉給提供者。提供者回答後，主人會在龍角鎮收到通知。",
+    message: "常見問答裡沒有這個問題，已經轉給提供者。提供者回答後，你會在龍角鎮收到通知。",
   };
 }

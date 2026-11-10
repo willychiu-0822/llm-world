@@ -7,7 +7,7 @@ import { getDeedView, setDeedVisibility } from "../services/deeds";
 import { listDiscoveries, readDiscovery } from "../services/discover";
 import { getMirror } from "../services/mirror";
 import { listNotifications, readAllNotifications } from "../services/notifications";
-import { completeSelfStep, confirmStep, createStep, dropStep, getSuggestions, listSteps, stepIcs, upsertNote } from "../services/steps";
+import { completeSelfStep, confirmStep, createStep, dropStep, getSuggestions, listSteps, reviewAiResult, stepIcs, upsertNote } from "../services/steps";
 
 const qs = (v: unknown) => (typeof v === "string" && v ? v : undefined);
 
@@ -20,6 +20,7 @@ export function stepRoutes(ctx: AppContext) {
   r.post("/:id/confirm", h(async (req, res) => res.json(await confirmStep(ctx, req.user!.id, String(req.params.id)))));
   r.post("/:id/drop", h(async (req, res) => res.json(await dropStep(ctx, req.user!.id, String(req.params.id)))));
   r.post("/:id/complete", h(async (req, res) => res.json(await completeSelfStep(ctx, req.user!.id, String(req.params.id), req.body))));
+  r.post("/:id/review", h(async (req, res) => res.json(await reviewAiResult(ctx, req.user!.id, String(req.params.id), req.body))));
   r.put("/:id/notes/:kind", h(async (req, res) => res.json(await upsertNote(ctx, req.user!.id, String(req.params.id), String(req.params.kind), req.body))));
   r.get(
     "/:id/ics",

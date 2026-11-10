@@ -9,7 +9,8 @@ export type ErrorCode =
   | "conflict"
   | "moderation_blocked"
   | "rate_limited"
-  | "step_not_confirmed";
+  | "step_not_confirmed"
+  | "step_already_done";
 
 const STATUS: Record<ErrorCode, number> = {
   invalid_input: 400,
@@ -19,6 +20,7 @@ const STATUS: Record<ErrorCode, number> = {
   conflict: 409,
   moderation_blocked: 422,
   step_not_confirmed: 409,
+  step_already_done: 409,
   rate_limited: 429,
 };
 

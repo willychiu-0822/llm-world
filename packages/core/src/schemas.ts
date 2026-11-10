@@ -82,6 +82,11 @@ export const discoveryItem = z.object({ type: z.enum(["deed", "trial", "place"])
 export const bringBackInput = z.object({ message: text(1000), items: z.array(discoveryItem).min(1).max(10) });
 export const providerAskInput = z.object({ trialId: id, question: text(300) });
 export const aiCompleteInput = z.object({ stepId: id, result: text(2000) });
+export const reviewStepInput = z.object({
+  decision: z.enum(["approve", "reject"]),
+  result: z.string().trim().max(2000).optional(),
+  visibility: z.enum(["public", "private"]).optional(),
+});
 export const aiProposeInput = z.object({
   executor,
   text: text(200),

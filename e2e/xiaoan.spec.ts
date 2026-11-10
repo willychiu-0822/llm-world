@@ -81,12 +81,18 @@ test("Xiaoan's loop: AI step first, then going to the trial in person", async ({
   expect(faq.answered).toBe(true);
   const fwd = await tool(ai, "provider_ask", { trialId: voice.trial.id, question: "可以只在旁邊聽嗎？", stepId: todo[0].id });
   expect(fwd.answered).toBe(false);
-  const aiDeed = await tool(ai, "first_step_complete", { stepId: todo[0].id, result: "前十分鐘練呼吸、接著唱音階、最後選一首熟悉的歌。完全不會唱也可以，大部分人第一次都會破音。" });
+  const pending = await tool(ai, "first_step_complete", { stepId: todo[0].id, result: "前十分鐘練呼吸、接著唱音階、最後選一首熟悉的歌。完全不會唱也可以，大部分人第一次都會破音。" });
+  expect(pending.status).toBe("pending_review");
 
-  // ⑦⑧ 紀錄與新事蹟（執行者：AI 角色）
+  // ⑦⑧ 先看過，再公開，才成為事蹟（執行者：AI 角色）
   await page.goto("/notifications");
-  await expect(page.getByText("你的 AI 角色完成了「Nova 去問老師試用課的流程」。")).toBeVisible();
-  await page.goto(`/deeds/${aiDeed.id}`);
+  const notice = page.getByRole("link", { name: /等你看過/ });
+  await expect(notice).toBeVisible();
+  await notice.click();
+  await expect(page).toHaveURL(/\/steps\?tab=review/);
+  await page.getByRole("button", { name: "公開到鎮上" }).click();
+  await expect(page.getByRole("status")).toHaveText("已公開到鎮上");
+  await page.getByRole("link", { name: "看看這個事蹟" }).click();
   await expect(page.getByText("AI 角色執行")).toBeVisible();
   await expect(page.getByText(/前十分鐘練呼吸/)).toBeVisible();
 

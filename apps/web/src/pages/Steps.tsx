@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Empty, ErrorBox, ExecutorTag, Loading } from "../components/Bits";
 import { api, ApiError } from "../lib/api";
 import { formatDateTime } from "../lib/format";
@@ -7,12 +7,14 @@ import { useSession } from "../lib/session";
 import type { Step } from "../lib/types";
 import { useFetch } from "../lib/useFetch";
 
-type Tab = "draft" | "confirmed" | "done";
+type Tab = "draft" | "confirmed" | "review" | "done";
 const TABS: { key: Tab; label: string }[] = [
   { key: "draft", label: "AI 的建議" },
   { key: "confirmed", label: "進行中" },
+  { key: "review", label: "等你看過" },
   { key: "done", label: "完成了" },
 ];
+const isTab = (v: string | null): v is Tab => TABS.some((t) => t.key === v);
 
 function NoteEditor({ step, kind, onSaved }: { step: Step; kind: "before" | "after"; onSaved(): void }) {
   const cur = step.notes[kind];
@@ -57,6 +59,43 @@ function NoteEditor({ step, kind, onSaved }: { step: Step; kind: "before" | "aft
   );
 }
 
+function ReviewForm({ step, onDone }: { step: Step; onDone(message: string, published: boolean): void }) {
+  const [result, setResult] = useState(step.result ?? "");
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const send = async (decision: "approve" | "reject", visibility?: "public" | "private") => {
+    setSaving(true);
+    setError("");
+    try {
+      await api(`/api/first-steps/${step.id}/review`, {
+        method: "POST",
+        body: { decision, result: decision === "approve" ? result : undefined, visibility },
+      });
+      onDone(decision === "reject" ? "已退回，這一步回到進行中" : visibility === "private" ? "已留下，只有你看得到" : "已公開到鎮上", decision === "approve");
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "連線暫時中斷，請稍後再試");
+    } finally {
+      setSaving(false);
+    }
+  };
+  return (
+    <div className="panel soft stack" aria-label="看過 AI 的結果">
+      <strong>AI 帶回的結果，公開前先看過</strong>
+      <p className="muted">公開之後，鎮上的人會看到這段話。可以先改成你想分享的版本。</p>
+      <label className="field">
+        <span>要留下的內容</span>
+        <textarea aria-label="要留下的內容" value={result} onChange={(e) => setResult(e.target.value)} rows={4} maxLength={2000} disabled={saving} />
+      </label>
+      {error && <p role="alert" className="error">{error}</p>}
+      <div className="row wrap">
+        <button className="btn primary" type="button" disabled={saving || !result.trim()} onClick={() => send("approve", "public")}>公開到鎮上</button>
+        <button className="btn" type="button" disabled={saving || !result.trim()} onClick={() => send("approve", "private")}>只留給自己</button>
+        <button className="btn ghost" type="button" disabled={saving} onClick={() => send("reject")}>退回，請 AI 重做</button>
+      </div>
+    </div>
+  );
+}
+
 function CompleteForm({ step, onDone, onCancel }: { step: Step; onDone(): void; onCancel(): void }) {
   const [noteAfter, setNoteAfter] = useState("");
   const [noteShared, setNoteShared] = useState(false);
@@ -90,7 +129,7 @@ function CompleteForm({ step, onDone, onCancel }: { step: Step; onDone(): void; 
   );
 }
 
-function StepItem({ step, reload, onCompleted, highlighted, completing, onStart, onCancel, primary }: { step: Step; reload(): void; onCompleted(id: string): void; highlighted: boolean; completing: boolean; onStart(): void; onCancel(): void; primary: boolean }) {
+function StepItem({ step, reload, onCompleted, onReviewed, highlighted, completing, onStart, onCancel, primary }: { step: Step; reload(): void; onCompleted(id: string): void; onReviewed(message: string, published: boolean): void; highlighted: boolean; completing: boolean; onStart(): void; onCancel(): void; primary: boolean }) {
   const { toast, reload: reloadMe } = useSession();
   const completedCard = useRef<HTMLElement>(null);
   useEffect(() => { if (highlighted) completedCard.current?.scrollIntoView({ block: "start" }); }, [highlighted]);
@@ -114,7 +153,7 @@ function StepItem({ step, reload, onCompleted, highlighted, completing, onStart,
         {step.proposalReason && <p className="muted">AI 的理由：{step.proposalReason}</p>}
         {step.trial && <p>試用機會：<Link to={`/trials/${step.trial.id}`}>{step.trial.title}</Link></p>}
         {(when || step.where) && <p>🗓 {when ? formatDateTime(when) : ""}{step.where ? `・${step.where}` : ""}</p>}
-        {step.result && <div className="bubble"><small>AI 角色帶回的結果</small><p style={{ whiteSpace: "pre-wrap" }}>{step.result}</p></div>}
+        {step.result && step.status !== "review" && <div className="bubble"><small>AI 角色帶回的結果</small><p style={{ whiteSpace: "pre-wrap" }}>{step.result}</p></div>}
 
         {step.status !== "draft" && (
           <div className="notes-pair">
@@ -134,12 +173,13 @@ function StepItem({ step, reload, onCompleted, highlighted, completing, onStart,
             <button className={`btn ${primary ? "primary" : "ghost"}`} onClick={onStart}>我做到了</button>
           )}
           {step.status === "confirmed" && step.executor === "ai" && (
-            <p className="muted grow">等你的 AI 角色完成。可以在 AI 用戶端說：「看看我交給你的步驟。」</p>
+            <p className="muted grow">等你的 AI 角色完成。可以在 AI 用戶端說：「看看我交給你的步驟。」做完之後會先給你看過，你決定要不要公開。</p>
           )}
           {step.status === "confirmed" && when && <a className="btn ghost small" href={`/api/first-steps/${step.id}/ics`}>加入行事曆</a>}
           {step.status === "confirmed" && <button className="btn ghost small" onClick={() => act("drop", "先放下也沒關係")}>先放下</button>}
           {step.status === "done" && step.deedId && <Link className={`btn small ${primary ? "primary" : "ghost"}`} to={`/deeds/${step.deedId}`}>看看這個事蹟</Link>}
         </div>
+        {step.status === "review" && <ReviewForm step={step} onDone={onReviewed} />}
         {completing && <CompleteForm step={step} onCancel={onCancel} onDone={() => { onCancel(); toast("太好了！這成為你的新事蹟"); onCompleted(step.id); void reloadMe(); }} />}
       </article>
     </li>
@@ -147,12 +187,22 @@ function StepItem({ step, reload, onCompleted, highlighted, completing, onStart,
 }
 
 export function StepsPage() {
-  const [tab, setTab] = useState<Tab>("confirmed");
+  const { toast } = useSession();
+  const [params, setParams] = useSearchParams();
+  const raw = params.get("tab");
+  const tab: Tab = isTab(raw) ? raw : "confirmed";
+  const setTab = (next: Tab) => {
+    const p = new URLSearchParams(params);
+    if (next === "confirmed") p.delete("tab");
+    else p.set("tab", next);
+    setParams(p, { replace: true });
+    setCompletingId(null);
+  };
   const [completedId, setCompletedId] = useState<string | null>(null);
   const [completingId, setCompletingId] = useState<string | null>(null);
   const { data, error, loading, reload } = useFetch<Step[]>("/api/first-steps");
   const list = (data ?? []).filter((s) => s.status === tab);
-  const primaryId = list.find(s => s.status === "draft" || (s.status === "confirmed" && s.executor === "self") || (s.status === "done" && s.deedId))?.id;
+  const primaryId = list.find(s => s.status === "draft" || s.status === "review" || (s.status === "confirmed" && s.executor === "self") || (s.status === "done" && s.deedId))?.id;
   const count = (t: Tab) => (data ?? []).filter((s) => s.status === t).length;
   return (
     <div className="stack" style={{ maxWidth: 760, margin: "0 auto" }}>
@@ -162,15 +212,15 @@ export function StepsPage() {
       </div>
       <div className="tabs" role="tablist">
         {TABS.map((t) => (
-          <button key={t.key} role="tab" aria-selected={tab === t.key} onClick={() => { setTab(t.key); setCompletingId(null); }}>
+          <button key={t.key} role="tab" aria-selected={tab === t.key} onClick={() => setTab(t.key)}>
             {t.label}（{count(t.key)}）
           </button>
         ))}
       </div>
       <ErrorBox error={error} />
-      {loading && !data ? <Loading /> : list.length ? <ul className="plain">{list.map((s) => <StepItem key={s.id} step={s} primary={!completingId && s.id === primaryId} completing={completingId === s.id} onStart={() => setCompletingId(s.id)} onCancel={() => setCompletingId(null)} reload={reload} highlighted={s.id === completedId} onCompleted={(id) => { setCompletedId(id); setTab("done"); reload(); }} />)}</ul> : (
+      {loading && !data ? <Loading /> : list.length ? <ul className="plain">{list.map((s) => <StepItem key={s.id} step={s} primary={!completingId && s.id === primaryId} completing={completingId === s.id} onStart={() => setCompletingId(s.id)} onCancel={() => setCompletingId(null)} reload={reload} highlighted={s.id === completedId} onCompleted={(id) => { setCompletedId(id); setTab("done"); reload(); }} onReviewed={(message, published) => { toast(message); setCompletedId(published ? s.id : null); setTab(published ? "done" : "confirmed"); reload(); }} />)}</ul> : (
         <Empty>
-          {tab === "draft" ? <>AI 角色還沒有建議。先<Link to="/connect">連接你的 AI</Link>，請牠找一個小小的第一步。</> : tab === "confirmed" ? <>沒有進行中的步驟。去<Link to="/">地圖</Link>看看大家的第一步吧。</> : <>還沒有完成的步驟。到<button className="text-link" onClick={() => setTab("confirmed")}>進行中</button>選一步，做完再回來看看。</>}
+          {tab === "draft" ? <>AI 角色還沒有建議。先<Link to="/connect">連接你的 AI</Link>，請牠找一個小小的第一步。</> : tab === "review" ? <>還沒有等你看過的結果。到<button className="text-link" onClick={() => setTab("confirmed")}>進行中</button>看交給 AI 的步驟，做完之後會先放在這裡。</> : tab === "confirmed" ? <>沒有進行中的步驟。去<Link to="/">地圖</Link>看看大家的第一步吧。</> : <>還沒有完成的步驟。到<button className="text-link" onClick={() => setTab("confirmed")}>進行中</button>選一步，做完再回來看看。</>}
         </Empty>
       )}
     </div>

@@ -9,7 +9,7 @@ import { useFetch } from "../lib/useFetch";
 interface N {
   id: string;
   kind: string;
-  payload: Record<string, string | null>;
+  payload: Record<string, string | boolean | null>;
   readAt: string | null;
   createdAt: string;
 }
@@ -22,13 +22,17 @@ function describe(n: N): { text: string; to?: string } {
     case "followed_completed":
       return { text: `有人參考你的「${p.deedTitle}」，也做到了！`, to: `/deeds/${p.deedId}` };
     case "step_proposed":
-      return { text: `你的 AI 角色建議了一個第一步：「${p.text}」，等你確認。`, to: "/steps" };
+      if (p.outcome === "confirmed") return { text: `你已確認 AI 建議的第一步：「${p.text}」。`, to: "/steps?tab=confirmed" };
+      if (p.outcome === "dropped") return { text: `你已放下 AI 建議的第一步：「${p.text}」。`, to: "/steps?tab=draft" };
+      return { text: `你的 AI 角色建議了一個第一步：「${p.text}」，等你確認。`, to: "/steps?tab=draft" };
     case "ai_step_done":
-      return { text: `你的 AI 角色完成了「${p.text}」。`, to: p.deedId ? `/deeds/${p.deedId}` : "/steps" };
+      if (p.outcome === "rejected") return { text: `你退回了「${p.text}」的結果，這一步回到進行中。`, to: "/steps?tab=confirmed" };
+      if (p.pending !== false && p.outcome !== "published") return { text: `你的 AI 角色帶回了「${p.text}」的結果，等你看過再決定要不要公開。`, to: "/steps?tab=review" };
+      return { text: `你的 AI 角色完成了「${p.text}」。`, to: typeof p.deedId === "string" ? `/deeds/${p.deedId}` : "/steps?tab=done" };
     case "question_answered":
       return { text: `「${p.trialTitle}」回答了你的 AI 問的問題：「${p.question}」→ ${p.answer}`, to: `/trials/${p.trialId}` };
     case "attendance_confirmed":
-      return { text: `「${p.trialTitle}」確認了你的出席。要不要寫一段做之後的隨筆？`, to: "/steps" };
+      return { text: `「${p.trialTitle}」確認了你的出席。要不要寫一段做之後的隨筆？`, to: "/steps?tab=done" };
     case "provider_approved":
       return { text: `你的提供者申請「${p.name}」通過了，可以在鎮上開店了。`, to: "/provider" };
     case "new_question":
