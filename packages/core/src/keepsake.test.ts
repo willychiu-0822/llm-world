@@ -62,7 +62,7 @@ describe("keepsakes", () => {
     expect(keepsakeFor("music").name).toBe("吉他撥片");
     expect(keepsakeFor("outdoors").name).toBe("壓花");
     const line = warmLine({ name: "小雀 Mia", title: "去上一次聲樂課", districtKey: "music" });
-    expect(line).toBe("小雀 Mia的吉他撥片。去上一次聲樂課。");
+    expect(line).toBe("小雀 Mia 的吉他撥片。去上一次聲樂課。");
     expect(line).not.toContain("明信片");
     expect(bannedHits(line)).toEqual([]);
   });

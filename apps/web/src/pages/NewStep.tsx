@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ErrorBox, Loading } from "../components/Bits";
+import { GrownGate } from "../components/GrownGate";
 import { StepForm, type StepPayload } from "../components/StepForm";
 import { api } from "../lib/api";
 import { useSession } from "../lib/session";
@@ -8,6 +9,10 @@ import type { DeedView, Predecessor, TrialView } from "../lib/types";
 import { useFetch } from "../lib/useFetch";
 
 export function NewStepPage() {
+  return <GrownGate><NewStepBody /></GrownGate>;
+}
+
+function NewStepBody() {
   const [params] = useSearchParams();
   const deedId = params.get("deedId") ?? undefined;
   const qsTrial = params.get("trialId") ?? undefined;

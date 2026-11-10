@@ -7,11 +7,11 @@ import type { Deed, Trial } from "../lib/types";
 import { Avatar } from "./Avatar";
 
 export function ExecutorTag({ executor }: { executor: string }) {
-  return executor === "ai" ? <span className="tag tag-ai">AI 角色執行</span> : <span className="tag tag-self">本人執行</span>;
+  return executor === "ai" ? <span className="tag tag-ai">朋友做的</span> : <span className="tag tag-self">自己做的</span>;
 }
 
 export function RealTag({ demo }: { demo: boolean }) {
-  return demo ? <span className="tag tag-demo">示範</span> : <span className="tag tag-real">真人事蹟</span>;
+  return demo ? <span className="tag tag-demo">示範</span> : <span className="tag tag-real">真人做過</span>;
 }
 
 export function DistrictTag({ k }: { k: string }) {

@@ -1,4 +1,4 @@
-import { BABY_LINES, stageLabel } from "@lj/core";
+import { BABY_LINES, joinWords, stageLabel } from "@lj/core";
 import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Avatar } from "../components/Avatar";
@@ -114,18 +114,6 @@ export function HomePage() {
     }
   };
 
-  const dismissLetter = async () => {
-    if (gate.current) return;
-    gate.current = true;
-    try {
-      await api("/api/me/pet", { method: "PATCH", body: { letterDismissed: true } });
-      await reload();
-      setLetterOpen(false);
-    } finally {
-      gate.current = false;
-    }
-  };
-
   const walkedToday = (!pet.canWalk || didWalk) && phase !== "walking";
   const walkLabel = phase === "walking" ? "小龍還在外面晃…" : "出門逛逛";
 
@@ -142,15 +130,18 @@ export function HomePage() {
         </div>
       </div>
 
-      {bubble && <p className="bubble baby-bubble" role="status">{bubble}</p>}
-      <div className={`baby-wrap stage-${pet.stage}`}>
-        <button type="button" className={jump ? "baby-hit jump" : "baby-hit"} onClick={poke} aria-label={baby.name}>
-          <Avatar appearance={baby.appearance} name={baby.name} size={156} />
-          {backpack && <span className="backpack" aria-label="小背包">🎒</span>}
-          {pet.stage >= 2 && baby.appearance.accessory !== "scarf" && <span className="scarf-extra" aria-hidden>🧣</span>}
-        </button>
-        <strong>{baby.name}</strong>
+      <div className="baby-stage">
+        {bubble && <p className="bubble baby-bubble" role="status">{bubble}</p>}
+        <div className={`baby-wrap stage-${pet.stage}`}>
+          <button type="button" className={jump ? "baby-hit jump" : "baby-hit"} onClick={poke} aria-label={baby.name}>
+            <Avatar appearance={baby.appearance} name={baby.name} size={156} />
+            {backpack && <span className="backpack" aria-label="小背包">🎒</span>}
+            {pet.stage >= 2 && baby.appearance.accessory !== "scarf" && <span className="scarf-extra" aria-hidden>🧣</span>}
+          </button>
+          <strong>{baby.name}</strong>
+        </div>
       </div>
+      <div className="baby-actions stack">
 
       {!card && phase !== "found" && ((pet.canWalk && !didWalk) || phase === "walking") && (
         <button type="button" className="btn primary walk-btn" disabled={phase === "walking"} aria-busy={phase === "walking"} onClick={() => void walk()}>
@@ -166,7 +157,7 @@ export function HomePage() {
       {phase === "home" && !card && openTries > 0 && <Link to="/tries" className="btn ghost">我接下的事</Link>}
       {phase === "walking" && (
         <div className="outing" aria-live="polite">
-          <p>小龍出門了，大概在{found?.placeName || "草叢"}附近亂聞。</p>
+          <p>小龍出門了，大概{joinWords("在", found?.placeName || "草叢")}附近亂聞。</p>
           <div className="outing-track" aria-hidden><span className="outing-dot">🐾</span></div>
         </div>
       )}
@@ -175,7 +166,7 @@ export function HomePage() {
         <article className="panel keepsake-card stack">
           {backpackNote && <p className="notice" role="status">小背包背好了。</p>}
           <p className="keepsake-emoji" aria-hidden>{card.emoji}</p>
-          <p>從{card.placeName || "鎮上"}撿到的{card.object}</p>
+          <p>{joinWords("從", card.placeName || "鎮上")}撿到的{card.object}</p>
           <p>{card.warmLine}</p>
           <button type="button" className="btn primary" disabled={accepting} aria-busy={accepting} onClick={() => void accept(card)}>
             {accepting ? "記下來…" : "我也去摸摸看"}
@@ -183,14 +174,14 @@ export function HomePage() {
           <button type="button" className="btn ghost" disabled={accepting} onClick={() => { setShelved(true); setPhase("home"); setFound(null); }}>收進櫃裡</button>
         </article>
       )}
+      </div>
 
       {letterOpen && (
         <Dialog title="小龍的信" onClose={() => setLetterOpen(false)}>
           <p>📮</p>
           <p>小龍寫了一封歪歪扭扭的信：「我想交一個會說話的朋友，幫我去打聽消息。你有認識的嗎？」</p>
-          <Link to="/connect" className="btn primary">我有在用 ChatGPT／Claude</Link>
+          <Link to="/connect" className="btn primary">會說話的朋友</Link>
           <button type="button" className="btn ghost" onClick={() => setLetterOpen(false)}>先收起來</button>
-          <button type="button" className="btn ghost" onClick={() => void dismissLetter()}>先不要這個朋友</button>
         </Dialog>
       )}
       {mailOpen && (

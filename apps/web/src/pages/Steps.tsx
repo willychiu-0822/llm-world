@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Empty, ErrorBox, ExecutorTag, Loading } from "../components/Bits";
+import { GrownGate } from "../components/GrownGate";
 import { api, ApiError } from "../lib/api";
 import { formatDateTime } from "../lib/format";
 import { useSession } from "../lib/session";
@@ -187,6 +188,10 @@ function StepItem({ step, reload, onCompleted, onReviewed, highlighted, completi
 }
 
 export function StepsPage() {
+  return <GrownGate><StepsBody /></GrownGate>;
+}
+
+function StepsBody() {
   const { toast } = useSession();
   const [params, setParams] = useSearchParams();
   const raw = params.get("tab");

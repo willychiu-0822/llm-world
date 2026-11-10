@@ -275,7 +275,8 @@ td, th { text-align: left; padding: 6px 8px; border-bottom: 1px dashed var(--lin
 .outing-dot { position: absolute; top: 14px; font-size: 28px; animation: stroll 2.4s linear forwards; }
 .keepsake-card { width: min(100%, 420px); text-align: center; }
 .keepsake-emoji { font-size: 2.4rem; line-height: 1; margin: 0; }
-.keepsake-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.keepsake-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; justify-content: center; }
+.keepsake-cell.is-new { border-color: var(--leaf); box-shadow: 0 0 0 3px var(--butter); }
 .keepsake-cell { font: inherit; color: var(--ink); background: var(--card); border: 2px solid var(--line); border-radius: 18px; padding: 10px 6px; display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 92px; cursor: pointer; }
 .keepsake-cell.is-missing { filter: grayscale(1); opacity: 0.55; cursor: default; background: var(--paper-2); }
 .keepsake-cell .keepsake-emoji { font-size: 1.8rem; }
@@ -291,10 +292,10 @@ body:has(.veil) main .btn.primary { visibility: hidden; }
 .sticker { font: inherit; font-size: 1.8rem; width: 64px; height: 64px; border-radius: 20px; border: 2px solid var(--line); background: var(--butter-soft); cursor: pointer; }
 .confetti { position: absolute; inset: 0; pointer-events: none; }
 .confetti span { position: absolute; color: var(--butter); font-size: 1.4rem; animation: float 1.6s ease-in-out infinite; }
-.confetti span:nth-child(1) { left: 12%; top: 18%; }
-.confetti span:nth-child(2) { right: 14%; top: 22%; animation-delay: 0.2s; }
-.confetti span:nth-child(3) { left: 18%; top: 36%; animation-delay: 0.4s; }
-.confetti span:nth-child(4) { right: 16%; top: 40%; animation-delay: 0.1s; }
+.confetti span:nth-child(1) { left: 10%; top: 72px; }
+.confetti span:nth-child(2) { right: 16%; top: 78px; animation-delay: 0.2s; }
+.confetti span:nth-child(3) { left: 18%; top: 108px; animation-delay: 0.4s; }
+.confetti span:nth-child(4) { right: 22%; top: 112px; animation-delay: 0.1s; }
 .adopt { max-width: 520px; margin: 0 auto; }
 .adopt-actions { display: flex; gap: 8px; }
 .adopt-actions .btn.primary { flex: 1; }
@@ -316,6 +317,7 @@ body:has(.veil) main .btn.primary { visibility: hidden; }
 .adopt-preview { display: grid; place-items: center; }
 .hatch { min-height: 60vh; display: grid; place-items: center; text-align: center; align-content: center; gap: 12px; }
 .hatch-baby { animation: pop 1.2s ease; }
+.hatch-baby.is-still { animation: none; }
 .map-board { position: relative; min-height: min(68vh, 640px); }
 .gesture-hint { position: absolute; left: 22%; top: 38%; z-index: 3; font-size: 42px; pointer-events: none; animation: nudge 1.4s ease forwards; }
 .more summary { cursor: pointer; list-style: none; color: var(--muted); }
@@ -329,6 +331,27 @@ body:has(.veil) main .btn.primary { visibility: hidden; }
 @keyframes pop { 0% { transform: scale(0.6); } 60% { transform: scale(1.08); } 100% { transform: scale(1); } }
 @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 @keyframes nudge { 0% { transform: translate(0, 0); opacity: 1; } 70% { transform: translate(70px, 8px); opacity: 1; } 100% { transform: translate(90px, 0); opacity: 0; } }
+@media (min-width: 900px) {
+  .baby-home {
+    display: grid;
+    grid-template-columns: minmax(280px, 380px) minmax(300px, 1fr);
+    column-gap: 48px;
+    row-gap: 8px;
+    align-items: center;
+    text-align: left;
+    max-width: 960px;
+    width: 100%;
+  }
+  .baby-home .home-chrome { grid-column: 1 / -1; }
+  .baby-home .baby-stage { justify-self: center; }
+  .baby-home .baby-hit svg { width: 260px; height: 260px; }
+  .baby-home .baby-actions { align-items: flex-start; }
+  .baby-home .baby-actions > .btn,
+  .baby-home .baby-actions > .keepsake-card { width: min(100%, 480px); }
+  .cabinet { max-width: 760px; margin: 0 auto; }
+  .keepsake-grid { grid-template-columns: repeat(auto-fill, 140px); justify-content: start; }
+  .keepsake-cell { width: 140px; }
+}
 @media (prefers-reduced-motion: reduce) {
   .baby-hit.jump, .outing-dot, .hatch-baby, .star-pop, .confetti span, .gesture-hint { animation: none; }
 }

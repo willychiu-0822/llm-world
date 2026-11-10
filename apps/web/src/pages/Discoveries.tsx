@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Avatar } from "../components/Avatar";
 import { Empty, ErrorBox, ExecutorTag, Loading } from "../components/Bits";
+import { GrownGate } from "../components/GrownGate";
 import { api } from "../lib/api";
 import { timeAgo } from "../lib/format";
 import { useSession } from "../lib/session";
@@ -18,6 +19,10 @@ interface Discovery {
 const LINK = { deed: "deeds", trial: "trials", place: "places" } as const;
 
 export function DiscoveriesPage() {
+  return <GrownGate><DiscoveriesBody /></GrownGate>;
+}
+
+function DiscoveriesBody() {
   const { me, reload: reloadMe } = useSession();
   const { data, error, loading } = useFetch<Discovery[]>("/api/discoveries");
   useEffect(() => {

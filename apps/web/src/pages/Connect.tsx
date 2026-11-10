@@ -18,6 +18,7 @@ export function ConnectPage() {
   const url = config?.mcpUrl ?? `${window.location.origin}/mcp`;
   const connections = useFetch<Connection[]>("/api/me/connections");
   const [busy, setBusy] = useState<string | null>(null);
+  const [advanced, setAdvanced] = useState(false);
   const copy = async (text: string, ok = "已複製") => {
     await navigator.clipboard?.writeText(text);
     toast(ok);
@@ -41,9 +42,10 @@ export function ConnectPage() {
       <section className="panel stack">
         <h1>會說話的朋友</h1>
         <p>小龍想找一個會說話的朋友，幫牠去鎮上打聽。你平時聊天的那個，可以來串門子。</p>
-        <Link to="/" className="btn primary">回小龍身邊</Link>
+        <button type="button" className="btn primary" onClick={() => setAdvanced(true)}>開始連接</button>
+        <Link to="/" className="btn ghost">回小龍身邊</Link>
       </section>
-      <details className="panel advanced">
+      <details className="panel advanced" open={advanced} onToggle={(e) => setAdvanced((e.target as HTMLDetailsElement).open)}>
         <summary>進階</summary>
         <div className="stack">
       <section className="panel stack">

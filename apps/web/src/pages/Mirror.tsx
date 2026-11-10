@@ -2,6 +2,7 @@ import { DISTRICT_BY_KEY, type DistrictKey } from "@lj/core";
 import { Link } from "react-router-dom";
 import { Avatar } from "../components/Avatar";
 import { DistrictTag, Empty, ErrorBox, ExecutorTag, Loading } from "../components/Bits";
+import { GrownGate } from "../components/GrownGate";
 import { formatDate } from "../lib/format";
 import { useSession } from "../lib/session";
 import { useFetch } from "../lib/useFetch";
@@ -14,6 +15,10 @@ interface Mirror {
 }
 
 export function MirrorPage() {
+  return <GrownGate><MirrorBody /></GrownGate>;
+}
+
+function MirrorBody() {
   const { me } = useSession();
   const { data, error, loading } = useFetch<Mirror>("/api/mirror");
   if (loading && !data) return <Loading />;

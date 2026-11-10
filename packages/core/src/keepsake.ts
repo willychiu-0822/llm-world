@@ -70,12 +70,24 @@ export function dedupeKeepsakes<T extends { who: string; title: string }>(items:
   return out;
 }
 
+/** Space between Chinese and Latin so 「從Leo」 reads 「從 Leo」. */
+export function joinWords(left: string, right: string): string {
+  if (!left) return right;
+  if (!right) return left;
+  const leftEdge = /[A-Za-z0-9]$/.test(left);
+  const rightEdge = /^[A-Za-z0-9]/.test(right);
+  const leftCjk = /[\u3400-\u9fff]$/.test(left);
+  const rightCjk = /^[\u3400-\u9fff]/.test(right);
+  if ((leftEdge && (rightCjk || rightEdge)) || (leftCjk && rightEdge)) return `${left} ${right}`;
+  return left + right;
+}
+
 /** Who did what, in one short warm line. The object carries the feeling; the line just says the fact. */
 export function warmLine(input: { name: string; title: string; districtKey: string }): string {
   const kind = keepsakeFor(input.districtKey);
   const who = input.name.trim() || "一位鎮民";
   const did = input.title.trim().replace(/[。！!]+$/g, "");
-  return `${who}的${kind.name}。${did}。`;
+  return `${joinWords(who, `的${kind.name}`)}。${did}。`;
 }
 
 export const BABY_LINES = [

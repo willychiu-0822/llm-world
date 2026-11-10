@@ -86,9 +86,9 @@ test("新手：領養、出門、信物、做到了、收藏", async ({ page }) 
   await evidence(page, "novice-05-home-star");
 
   const nav = page.getByRole("navigation", { name: test.info().project.name === "mobile" ? "快速導覽" : "主要導覽" });
-  await nav.getByRole("link", { name: "圖鑑" }).click();
+  await nav.getByRole("link", { name: "收藏櫃" }).click();
   await expect(page.getByRole("heading", { name: "收藏櫃" })).toBeVisible();
-  await expect(page.getByLabel("收藏進度")).toHaveText("1/2");
+  await expect(page.getByLabel("收藏進度")).toHaveText("1/9");
   await expect(page.locator(".is-missing")).toHaveCount(1);
   await expectClean(page);
   await evidence(page, "novice-06-cabinet");

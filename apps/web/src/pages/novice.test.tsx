@@ -61,7 +61,7 @@ describe("novice loop", () => {
     render(<MemoryRouter><Layout><HomePage /></Layout></MemoryRouter>);
     expect(screen.getAllByRole("link", { name: "家" }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole("link", { name: "地圖" }).length).toBeGreaterThan(0);
-    expect(screen.getAllByRole("link", { name: "圖鑑" }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("link", { name: "收藏櫃" }).length).toBeGreaterThan(0);
     expect(screen.queryByRole("link", { name: "鏡子" })).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "連接 AI" })).not.toBeInTheDocument();
     const primary = document.querySelectorAll(".btn.primary");
@@ -86,19 +86,17 @@ describe("novice loop", () => {
     expect(bannedHits(document.body.textContent ?? "")).toEqual([]);
   });
 
-  it("celebrates with a star and a real claim button", async () => {
-    const onClaim = vi.fn();
-    const onDismiss = vi.fn();
-    render(<Celebrate fromStars={0} error="" onClaim={onClaim} onDismiss={onDismiss} />);
+  it("celebrates with one button that keeps the star", async () => {
+    const onClose = vi.fn();
+    render(<Celebrate fromStars={0} onClose={onClose} />);
     const dialog = screen.getByRole("dialog", { name: "做到了" });
     expect(dialog).toHaveTextContent("★ +1");
     expect(dialog).toHaveTextContent("★ 1/3");
     expect(dialog.querySelector("textarea")).toBeNull();
-    expect(dialog).not.toHaveTextContent("點旁邊");
+    expect(screen.queryByRole("button", { name: "先不要" })).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "😆" }));
-    expect(onClaim).not.toHaveBeenCalled();
-    await userEvent.click(screen.getByRole("button", { name: "收下星星" }));
-    expect(onClaim).toHaveBeenCalledWith("😆");
+    await userEvent.click(screen.getByRole("button", { name: "關閉" }));
+    expect(onClose).toHaveBeenCalledWith("😆");
   });
 
   it("greys out keepsakes that are still missing", () => {
@@ -106,7 +104,7 @@ describe("novice loop", () => {
       { deedId: "a", districtKey: "music", placeId: "p", placeName: "音樂坊小廣場", object: "吉他撥片", emoji: "🎸", collected: true, createdAt: "2026-11-10T00:00:00.000Z", warmLine: "小雀的吉他撥片。去上了聲樂課。", mood: "😆" },
       { deedId: "b", districtKey: "music", placeId: "p", placeName: "音樂坊小廣場", object: "吉他撥片", emoji: "🎸", collected: false, createdAt: "2026-11-10T00:00:00.000Z" },
     ]} /></MemoryRouter>);
-    expect(screen.getByLabelText("收藏進度")).toHaveTextContent("1/2");
+    expect(screen.getByLabelText("收藏進度")).toHaveTextContent("1/9");
     expect(document.querySelectorAll(".is-missing")).toHaveLength(1);
     expect(screen.queryByText(/明信片/)).not.toBeInTheDocument();
     expect(bannedHits(document.body.textContent ?? "")).toEqual([]);

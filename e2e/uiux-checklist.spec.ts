@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page } from "@playwright/test";
 import { mkdir } from "node:fs/promises";
-import { test, json, look } from "./helpers";
+import { test, json, look, panToPlace } from "./helpers";
 
 const BANNED = ["AI", "MCP", "token", "agent", "provider", "事蹟", "鏡子", "許可證", "發現匣", "隨筆", "你應該", "越小越好", "映照", "可能的自己"];
 
@@ -98,6 +98,17 @@ test("檢核 A1–A5、B1–B3、C1–C3、F1–F2、D3", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "龍角鎮" })).toBeVisible();
   await checkState(page, "01-guest");
 
+  await page.goto("/map");
+  await panToPlace(page, /萬事屋門口/);
+  await page.getByRole("link", { name: /萬事屋門口/ }).click();
+  await expect(page.getByRole("heading", { name: "萬事屋門口" })).toBeVisible();
+  await checkState(page, "01b-place");
+  await page.getByRole("button", { name: "看看這顆信物" }).click();
+  await expect(page.getByRole("button", { name: "我也去摸摸看" })).toBeVisible();
+  await checkState(page, "01c-keepsake-detail");
+  await page.getByRole("button", { name: "關閉" }).click();
+  await page.goto("/");
+
   await page.getByRole("link", { name: "把牠撿回家" }).click();
   await expect(page.getByRole("heading", { name: "登入後就能把寶寶帶回家" })).toBeVisible();
   await checkState(page, "02-login");
@@ -134,6 +145,10 @@ test("檢核 A1–A5、B1–B3、C1–C3、F1–F2、D3", async ({ page }) => {
   await page.getByRole("button", { name: "去找牠" }).click();
   await expect(page.getByRole("button", { name: "出門逛逛" })).toBeVisible();
   await checkState(page, "07-home");
+  if (test.info().project.name === "desktop") {
+    const baby = await page.locator(".baby-hit").boundingBox();
+    expect(baby?.width ?? 0, "desktop baby width").toBeGreaterThanOrEqual(240);
+  }
 
   let walks = 0;
   const countWalk = (req: { method: () => string; url: () => string }) => {
@@ -162,35 +177,48 @@ test("檢核 A1–A5、B1–B3、C1–C3、F1–F2、D3", async ({ page }) => {
   page.off("request", countAccept);
   await checkState(page, "11-tries");
 
-  await page.getByRole("button", { name: "我做到了！" }).click();
-  taps += 1;
-  const celebrate = page.getByRole("dialog", { name: "做到了" });
-  await expect(celebrate).toBeVisible();
-  await expect(celebrate.getByRole("button", { name: "收下星星" })).toBeVisible();
-  expect(taps, "B1").toBeLessThanOrEqual(3);
-  await checkState(page, "12-celebrate");
-  await page.keyboard.press("Escape");
-  await expect(celebrate).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "我做到了！" })).toBeVisible();
-
-  await page.getByRole("button", { name: "我做到了！" }).click();
   let claims = 0;
   const countClaim = (req: { method: () => string; url: () => string }) => {
     if (req.method() === "POST" && req.url().includes("/complete")) claims += 1;
   };
   page.on("request", countClaim);
-  await page.getByRole("button", { name: "😆" }).click();
-  await page.getByRole("button", { name: "收下星星" }).dblclick();
-  await expect(page.getByText("★ 1/3")).toBeVisible();
+  await page.getByRole("button", { name: "我做到了！" }).dblclick();
+  taps += 1;
+  const celebrate = page.getByRole("dialog", { name: "做到了" });
+  await expect(celebrate).toBeVisible();
+  await expect(celebrate.getByRole("button", { name: "收下星星" })).toBeVisible();
+  await expect(celebrate.getByRole("button", { name: "先不要" })).toHaveCount(0);
+  expect(taps, "B1").toBeLessThanOrEqual(3);
+  expect((await (await page.request.get("/api/me")).json()).pet.stars, "star credited before dismiss").toBe(1);
   expect(claims, "A5 claim").toBe(1);
+  await checkState(page, "12-celebrate");
+  await page.getByRole("button", { name: "關閉" }).click();
+  await expect(page.getByText("★ 1/3")).toBeVisible();
+  await expect(page.getByRole("button", { name: "我做到了！" })).toHaveCount(0);
+
+  await json(page.request.post("/api/first-steps", { data: { executor: "self", text: "再做一件小事" } }));
+  await page.goto("/tries");
+  await page.getByRole("button", { name: "我做到了！" }).click();
+  await expect(page.getByRole("dialog", { name: "做到了" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByText("★ 2/3")).toBeVisible();
+  expect(claims, "Esc keeps the star").toBe(2);
   page.off("request", countClaim);
   await checkState(page, "13-home-star");
   await expect(page.getByRole("link", { name: "去收藏櫃看看" })).toBeVisible();
 
   const nav = page.getByRole("navigation", { name: test.info().project.name === "mobile" ? "快速導覽" : "主要導覽" });
-  await nav.getByRole("link", { name: "圖鑑" }).click();
+  await nav.getByRole("link", { name: "收藏櫃" }).click();
   await expect(page.getByRole("heading", { name: "收藏櫃" })).toBeVisible();
   await expect(page.getByText("那一排")).toHaveCount(0);
+  await expect(page.getByLabel("收藏進度")).toHaveText("1/9");
+  await expect(page.getByText(/收到了/)).toBeVisible();
+  const fresh = page.locator(".keepsake-cell.is-new");
+  await expect(fresh).toHaveCount(1);
+  await expect(page.locator(".keepsake-cell:not(.is-missing)").first()).toHaveClass(/is-new/);
+  const freshBox = await fresh.boundingBox();
+  expect(freshBox!.y).toBeLessThan(test.info().project.use.viewport!.height);
   await checkState(page, "14-cabinet");
   await page.locator(".keepsake-cell:not(.is-missing)").first().click();
   await expect(page.getByRole("dialog")).toBeVisible();
@@ -208,7 +236,14 @@ test("檢核 A1–A5、B1–B3、C1–C3、F1–F2、D3", async ({ page }) => {
   await page.getByRole("link", { name: "設定" }).click();
   await expect(page.getByRole("heading", { name: "設定" })).toBeVisible();
   await checkState(page, "17-settings");
-  await page.getByRole("link", { name: "家" }).first().click();
+  await page.locator("details.advanced summary").click();
+  await page.getByRole("link", { name: "服務條款" }).click();
+  let legal = await textOf(page);
+  for (const word of BANNED) expect(legal, `terms ${word}`).not.toContain(word);
+  await page.goto("/privacy");
+  legal = await textOf(page);
+  for (const word of BANNED) expect(legal, `privacy ${word}`).not.toContain(word);
+  await page.goto("/");
   await expect(page).toHaveURL(/\/$/);
 
   for (let n = 0; n < 6; n++) {
@@ -223,7 +258,7 @@ test("檢核 A1–A5、B1–B3、C1–C3、F1–F2、D3", async ({ page }) => {
   await page.getByRole("button", { name: "關閉" }).click();
   await page.getByRole("button", { name: "郵筒" }).click();
   await expect(letter).toBeVisible();
-  await letter.getByRole("link", { name: "我有在用 ChatGPT／Claude" }).click();
+  await letter.getByRole("link", { name: "會說話的朋友" }).click();
   await expect(page.getByRole("heading", { name: "會說話的朋友" })).toBeVisible();
   await checkState(page, "19-connect");
   await page.getByRole("link", { name: "回小龍身邊" }).click();
@@ -232,7 +267,8 @@ test("檢核 A1–A5、B1–B3、C1–C3、F1–F2、D3", async ({ page }) => {
   await page.goto("/map");
   await expect(page.getByRole("heading", { name: "地圖", exact: true })).toBeVisible();
   await checkState(page, "20-map");
-  await page.getByRole("link", { name: "回小龍身邊" }).click();
+  await expect(page.getByRole("link", { name: "去音樂坊小廣場" })).toBeVisible();
+  await nav.getByRole("link", { name: "家" }).click();
   await expect(page).toHaveURL(/\/$/);
 
   expect(errors, "F1 console").toEqual([]);

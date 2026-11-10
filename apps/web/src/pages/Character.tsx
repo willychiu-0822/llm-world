@@ -1,5 +1,5 @@
 import { DEFAULT_APPEARANCE, type Appearance } from "@lj/core";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AdoptWizard } from "../components/AdoptWizard";
 import { Avatar } from "../components/Avatar";
@@ -24,12 +24,16 @@ export function CharacterPage() {
   const { me, reload } = useSession();
   const nav = useNavigate();
   const [hatch, setHatch] = useState<{ name: string; appearance: Appearance } | null>(readHatch);
+  const [hatchStill] = useState(() => sessionStorage.getItem("lj-hatch-played") === "1");
+  useEffect(() => {
+    if (hatch) sessionStorage.setItem("lj-hatch-played", "1");
+  }, [hatch]);
   if (!me) return null;
   const first = !me.character;
   if (hatch) {
     return (
       <div className="hatch" role="status" aria-live="polite">
-        <div className="hatch-baby"><Avatar appearance={hatch.appearance} name={hatch.name} size={180} /></div>
+        <div className={hatchStill ? "hatch-baby is-still" : "hatch-baby"}><Avatar appearance={hatch.appearance} name={hatch.name} size={180} /></div>
         <p>嗨！我是{hatch.name}。</p>
         <button type="button" className="btn primary" onClick={() => { sessionStorage.removeItem(HATCH_KEY); nav("/"); }}>去找牠</button>
       </div>
