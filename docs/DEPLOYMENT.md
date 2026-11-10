@@ -1,6 +1,6 @@
 # 部署文件
 
-> 先完成 [CLOUD-SETUP.md](./CLOUD-SETUP.md) 的資源準備。以下指令都可以在 Cloud Shell 的 repo 根目錄執行。
+> 還沒有 GCP 帳號、想先用 Render 這類平台時，改看 [CLOUD-DEPLOY.md](./deploy/CLOUD-DEPLOY.md)。下面是已準備好 GCP 之後的步驟，指令都可以在 Cloud Shell 的 repo 根目錄執行。
 
 ## 1. 部署架構
 
@@ -163,13 +163,17 @@ gcloud run services logs read longjiao --region asia-east1 --limit 100
 
 ## 10. 本機開發
 
-用 Docker（最簡單）：
+用 Docker 驗證正式容器（Postgres 17，沒有開發用登入）：
 
 ```bash
 docker compose up --build
 ```
 
-然後打開 http://localhost:8080，用登入頁的「開發用登入」。
+然後打開 http://localhost:8080。要開發用登入時改為：
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+```
 
 不用 Docker：
 
@@ -180,6 +184,8 @@ pnpm install
 ```bash
 cp .env.example .env
 ```
+
+`.env.example` 裡的 `AUTH_DEV_LOGIN` 是 `false`。本機要開發用登入時，把 `.env` 的那個值改成 `true`。正式環境會忽略這個旗標。
 
 ```bash
 pnpm db:migrate && pnpm seed:demo

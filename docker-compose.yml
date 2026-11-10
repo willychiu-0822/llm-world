@@ -1,28 +1,40 @@
-# 本機開發：docker compose up --build，然後打開 http://localhost:8080
+# 本機驗證正式映像（Postgres 17）。不要把這個檔案裡的值用到公開網址。
+#   docker compose up --build
+#   curl -fsS http://localhost:8080/healthz
+# 開發用登入請改疊 docker-compose.dev.yml（見該檔）。
 services:
   db:
-    image: postgres:16
+    image: postgres:17
     environment:
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: longjiao_dev
     ports: ["5432:5432"]
     volumes: [pgdata:/var/lib/postgresql/data]
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d longjiao_dev"]
       interval: 2s
-      retries: 20
+      timeout: 5s
+      retries: 30
   app:
     build: .
     depends_on:
-      db: { condition: service_healthy }
+      db:
+        condition: service_healthy
     ports: ["8080:8080"]
     environment:
-      # NODE_ENV=development keeps the dev login available locally; production never has it.
-      NODE_ENV: development
+      NODE_ENV: production
+      PORT: "8080"
       BASE_URL: http://localhost:8080
       DATABASE_URL: postgres://postgres:postgres@db:5432/longjiao_dev
       SESSION_SECRET: local-dev-session-secret-local-dev-session
-      AUTH_DEV_LOGIN: "true"
       ADMIN_EMAILS: admin@example.com
+      MODERATION_MODE: filter
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8080/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 25s
 volumes:
   pgdata:

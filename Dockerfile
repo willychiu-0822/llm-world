@@ -1,9 +1,13 @@
 # syntax=docker/dockerfile:1
 
+# Production image: one Node process serves the API, MCP, OAuth and the built web app.
+# Migrations run on startup (see apps/server/src/index.ts) using MIGRATIONS_DIR.
+
 # ---- build ----
 FROM node:22-slim AS build
-ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH
-RUN corepack enable
+ENV CI=true \
+    npm_config_update_notifier=false
+RUN npm install -g pnpm@10.28.0
 WORKDIR /app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages/core/package.json packages/core/
@@ -26,4 +30,6 @@ COPY --from=build /app/packages/db/migrations ./migrations
 COPY --from=build /app/apps/web/dist ./web
 USER node
 EXPOSE 8080
+HEALTHCHECK --interval=30s --timeout=5s --start-period=25s --retries=5 \
+  CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||8080)+'/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 CMD ["node", "--enable-source-maps", "dist/index.js"]

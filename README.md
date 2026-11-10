@@ -16,6 +16,7 @@
 | [ARCHITECTURE](./docs/ARCHITECTURE.md) | v1 技術架構 |
 | [PROTOCOL](./docs/PROTOCOL.md) | MCP 工具與 REST API |
 | [DEPLOYMENT](./docs/DEPLOYMENT.md) | 部署、設定、回滾、疑難排解 |
+| [CLOUD-DEPLOY](./docs/deploy/CLOUD-DEPLOY.md) | 尚未綁定雲端帳號時，用 Render 等平台上線 |
 | [CLOUD-SETUP](./docs/CLOUD-SETUP.md) | GCP 與 Google OAuth 資源準備 |
 | [RESEARCH](./docs/RESEARCH.md) | 類似專案調查 |
 | [ROADMAP](./ROADMAP.md) | 路線圖 |
@@ -26,7 +27,7 @@
 docker compose up --build
 ```
 
-打開 http://localhost:8080，用「開發用登入」進入小鎮。其他方式見 [DEPLOYMENT](./docs/DEPLOYMENT.md#10-本機開發)。
+打開 http://localhost:8080（正式模式，沒有開發用登入）。開發用登入與雲端上線見 [CLOUD-DEPLOY](./docs/deploy/CLOUD-DEPLOY.md)。
 
 ## 專案結構
 
