@@ -5,6 +5,7 @@ import type { z } from "zod";
 import type { AppContext } from "../context";
 import { notFound } from "../http/errors";
 import { moderate } from "./moderation";
+import { getPetSummary } from "./pet";
 
 export type CharacterRow = typeof characters.$inferSelect;
 
@@ -24,8 +25,10 @@ export async function saveCharacter(ctx: AppContext, userId: string, raw: unknow
   const name = await moderate(ctx, input.name, meta);
   const personality = input.personality ? await moderate(ctx, input.personality, meta) : "";
   const description = input.appearance.description ? await moderate(ctx, input.appearance.description, meta) : "";
-  const values = { name, personality, appearance: { ...input.appearance, description }, sharing: input.sharing };
   const existing = await getCharacter(ctx, userId);
+  const prevSharing = (existing?.sharing ?? {}) as Record<string, unknown>;
+  const sharing = { ...prevSharing, ...input.sharing };
+  const values = { name, personality, appearance: { ...input.appearance, description }, sharing };
   if (existing) {
     const [c] = await ctx.db.update(characters).set(values).where(eq(characters.id, existing.id)).returning();
     return c;
@@ -77,5 +80,6 @@ export async function getMe(ctx: AppContext, user: { id: string; email: string; 
     wants: await listWants(ctx, user.id),
     provider: provider ?? null,
     unread: { notifications: n.c, discoveries: d.c },
+    pet: character ? await getPetSummary(ctx, user.id, character.sharing) : null,
   };
 }

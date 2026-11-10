@@ -19,6 +19,6 @@ test("UAT-18 登入設定失敗可重試，恢復後可登入且不閃出Google"
   await page.getByLabel("Email").fill("retry@e2e.test");
   await page.getByLabel("名字", { exact: true }).fill("重試的新手");
   await page.getByRole("button", { name: "開發用登入" }).click();
-  await expect(page.getByRole("link", { name: "設定角色", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "把牠撿回家", exact: true })).toBeVisible();
   await evidence(page, "UAT-18-recovered");
 });

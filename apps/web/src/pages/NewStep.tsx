@@ -30,7 +30,7 @@ export function NewStepPage() {
       <p>來源可能已改成私人、下架，或暫時載入不了。你可以再試一次，也可以回地圖找別的靈感。</p>
       <ErrorBox error={sourceError} />
       <div className="row wrap">
-        <Link className="btn primary" to="/#map">回地圖找靈感</Link>
+        <Link className="btn primary" to="/map">回地圖找靈感</Link>
         <button className="btn ghost" disabled={deed.loading || trial.loading || sug.loading} onClick={() => void Promise.all([deed.reload(), trial.reload(), sug.reload()])}>再試一次</button>
       </div>
     </section>

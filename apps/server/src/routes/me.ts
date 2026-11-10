@@ -3,6 +3,7 @@ import { destroySession, requireUser } from "../auth/session";
 import type { AppContext } from "../context";
 import { h } from "../http/errors";
 import { addWant, getMe, saveCharacter, updateWant } from "../services/characters";
+import { listKeepsakes, patchPet, walkOut } from "../services/pet";
 import { deleteUser } from "../services/users";
 
 export function meRoutes(ctx: AppContext) {
@@ -24,6 +25,9 @@ export function meRoutes(ctx: AppContext) {
       res.json(await getMe(ctx, req.user!));
     }),
   );
+  r.post("/walk", h(async (req, res) => res.json(await walkOut(ctx, req.user!.id))));
+  r.get("/keepsakes", h(async (req, res) => res.json(await listKeepsakes(ctx, req.user!.id))));
+  r.patch("/pet", h(async (req, res) => res.json(await patchPet(ctx, req.user!.id, req.body))));
   r.post("/wants", h(async (req, res) => res.status(201).json(await addWant(ctx, req.user!.id, req.body))));
   r.patch("/wants/:id", h(async (req, res) => res.json(await updateWant(ctx, req.user!.id, String(req.params.id), req.body))));
   return r;

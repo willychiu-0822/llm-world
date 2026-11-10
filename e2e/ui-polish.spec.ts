@@ -63,18 +63,16 @@ test("UAT-14c 測試登入說明可照做且寫下願望後可去地圖", async 
   await layoutAndEvidence(page, "UAT-14c-login");
   await signIn(page);
   await page.goto("/me/character");
+  await page.getByRole("button", { name: "下一步" }).click();
+  await page.getByRole("button", { name: "下一步" }).click();
   await page.getByLabel("角色名字").fill("新來的小龍");
-  await page.getByRole("button", { name: "儲存角色" }).click();
-  await expect(page.getByLabel("想做的事", { exact: true })).toBeFocused();
   await expect(page.locator("main .btn.primary:visible")).toHaveCount(1);
-  await page.getByLabel("想做的事", { exact: true }).fill("想學唱歌");
-  await page.getByRole("button", { name: "寫下來" }).click();
-  const next = page.getByRole("link", { name: "去地圖找靈感" });
-  await expect(next).toBeVisible();
+  await page.getByRole("button", { name: "下一步" }).click();
+  await expect(page.getByRole("button", { name: "出門逛逛" })).toBeVisible();
   await expect(page.locator("main .btn.primary:visible")).toHaveCount(1);
-  await layoutAndEvidence(page, "UAT-14c-want-next");
-  await next.click();
-  await expect(page.getByRole("heading", { name: "龍角鎮地圖" })).toBeVisible();
+  await layoutAndEvidence(page, "UAT-14c-home");
+  await page.goto("/map");
+  await expect(page.getByRole("heading", { name: "地圖", exact: true })).toBeVisible();
 });
 
 test("UAT-14d 提供者與管理者的等待畫面和空狀態有下一步", async ({ page }) => {
