@@ -1,6 +1,6 @@
 import { expect } from "@playwright/test";
 import { test } from "./helpers";
-import { loginPage } from "./helpers";
+import { json, loginPage, look } from "./helpers";
 
 /**
  * 情境 B：活動推廣者 Leo
@@ -51,11 +51,8 @@ test("Leo opens a shop, publishes a trial, confirms attendance and sees thanks",
 
   // ② 被發現：店出現在龍角鎮地圖的運動場
   const runner = await loginPage(browser, "runner@e2e.test", "跑者");
-  await runner.goto("/me/character");
-  await runner.getByLabel("角色名字").fill("小跑");
-  await runner.getByRole("button", { name: "儲存角色" }).click();
-  await expect(runner.getByText("角色已儲存")).toBeVisible();
-  await runner.goto("/");
+  await json(runner.request.put("/api/me/character", { data: { name: "小跑", appearance: look(), personality: "", sharing: { allowAiQuotes: true } } }));
+  await runner.goto("/map");
   await runner.getByRole("link", { name: /Leo 慢跑站/ }).click();
   await expect(runner.getByRole("heading", { name: "Leo 慢跑站" })).toBeVisible();
   await runner.getByRole("link", { name: /新手 5K 慢跑/ }).click();

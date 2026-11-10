@@ -67,8 +67,7 @@ function Apply({ onDone }: { onDone(): void }) {
   return (
     <form className="panel stack" onSubmit={(e) => { e.preventDefault(); void run(() => api("/api/provider/apply", { method: "POST", body: { name, description } }), "已送出申請", onDone); }}>
       <h1>成為提供者</h1>
-      <p>如果你帶跑步、教唱歌、辦讀書會……可以在龍角鎮開一間店，提供「試一次」的機會。申請後由管理者核准。</p>
-      <p className="muted">在這裡不能買曝光：你的活動被看見的唯一方式，是把別人的第一次辦好。</p>
+      <p>你開課、帶跑、辦讀書會嗎？來鎮上開一間小店吧。</p>
       <label className="field"><span>名稱</span><input aria-label="提供者名稱" value={name} onChange={(e) => setName(e.target.value)} required maxLength={40} /></label>
       <label className="field"><span>介紹</span><textarea aria-label="提供者介紹" value={description} onChange={(e) => setDescription(e.target.value)} rows={3} maxLength={500} /></label>
       {error && <p role="alert" className="error">{error}</p>}
@@ -276,14 +275,14 @@ export function ProviderPage() {
       <section className="panel stack" style={{ maxWidth: 680, margin: "0 auto" }}>
         <h1>{data.provider.name}</h1>
         <p>{data.provider.status === "pending" ? "申請審核中，核准後會通知你。" : "這個提供者帳號目前已停權，如有疑問請聯絡管理者。"}</p>
-        <Link className="btn primary" to="/">先回地圖逛逛</Link>
+        <Link className="btn primary" to="/map">先回地圖逛逛</Link>
       </section>
     );
   return (
     <div className="stack">
       <section className="panel hero">
         <h1>{data.provider.name}</h1>
-        <p className="muted">把第一次辦好，就是你在龍角鎮唯一的行銷。{data.unansweredQuestions > 0 && <strong> 有 {data.unansweredQuestions} 個問題等你回答。</strong>}</p>
+        <p className="muted">店開著，人就會來聞聞。{data.unansweredQuestions > 0 && <strong> 有 {data.unansweredQuestions} 個問題等你回答。</strong>}</p>
       </section>
       <section className="stack" id="provider-shops">
         <h2>我的店</h2>

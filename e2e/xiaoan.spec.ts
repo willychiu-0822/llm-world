@@ -23,20 +23,9 @@ test("Xiaoan's loop: AI step first, then going to the trial in person", async ({
     "2030-11-09T10:00:00+08:00",
   );
 
-  // ① 設定角色與想做的事
   const page = await loginPage(browser, "xiaoan@e2e.test", "小安");
-  await expect(page.getByRole("heading", { name: "先來設定你的角色吧" })).toBeVisible();
-  await page.getByRole("link", { name: "設定角色" }).click();
-  await page.getByLabel("角色名字").fill("Nova");
-  await page.getByRole("button", { name: /^小龍角/ }).click();
-  await page.getByLabel("外觀描述").fill("背著吉他的街頭歌手");
-  await page.getByLabel("個性").fill("外向、喜歡站上舞台");
-  await page.getByRole("button", { name: "儲存角色" }).click();
-  await expect(page.getByText("角色已儲存")).toBeVisible();
-  await page.getByLabel("想做的事", { exact: true }).fill("想在別人面前唱一首歌");
-  await page.getByLabel("主題區").selectOption("music");
-  await page.getByRole("button", { name: "寫下來" }).click();
-  await expect(page.getByText("想在別人面前唱一首歌")).toBeVisible();
+  await json(page.request.put("/api/me/character", { data: { name: "Nova", appearance: { ...look(), description: "背著吉他的街頭歌手" }, personality: "外向、喜歡站上舞台", sharing: { allowAiQuotes: true } } }));
+  await json(page.request.post("/api/me/wants", { data: { text: "想在別人面前唱一首歌", districtKey: "music" } }));
 
   // 連接 AI（OAuth 同意頁）
   await page.goto("/connect");
@@ -59,8 +48,7 @@ test("Xiaoan's loop: AI step first, then going to the trial in person", async ({
   });
 
   // ③ 查看發現
-  await page.goto("/");
-  await page.getByRole("link", { name: /看看 1 個新發現/ }).click();
+  await page.goto("/discoveries");
   await expect(page.getByText("我在音樂坊遇到 Mia")).toBeVisible();
   await expect(page.getByText("「去上一次聲樂試用課」")).toBeVisible();
   await expect(page.getByText("「第一次聲樂試用課」")).toBeVisible();

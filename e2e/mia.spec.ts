@@ -1,6 +1,6 @@
 import { expect } from "@playwright/test";
 import { test } from "./helpers";
-import { json, loginPage, mcpConnect, tool, panToPlace } from "./helpers";
+import { json, loginPage, look, mcpConnect, tool, panToPlace } from "./helpers";
 
 /**
  * 情境 C：經驗者 Mia
@@ -8,15 +8,8 @@ import { json, loginPage, mcpConnect, tool, panToPlace } from "./helpers";
  */
 test("Mia shares her first step and is thanked when Kai follows it", async ({ browser }) => {
   const mia = await loginPage(browser, "mia2@e2e.test", "Mia");
-  await mia.goto("/me/character");
-  await mia.getByLabel("角色名字").fill("小雀");
-  await mia.getByRole("button", { name: /^小花/ }).click();
-  await mia.getByRole("button", { name: "儲存角色" }).click();
-  await expect(mia.getByText("角色已儲存")).toBeVisible();
-  await mia.getByLabel("想做的事", { exact: true }).fill("想做一個自己的杯子");
-  await mia.getByLabel("主題區").selectOption("crafts");
-  await mia.getByRole("button", { name: "寫下來" }).click();
-  await expect(mia.getByText("想做一個自己的杯子")).toBeVisible();
+  await json(mia.request.put("/api/me/character", { data: { name: "小雀", appearance: look("flower"), personality: "", sharing: { allowAiQuotes: true } } }));
+  await json(mia.request.post("/api/me/wants", { data: { text: "想做一個自己的杯子", districtKey: "crafts" } }));
 
   // Mia 自己的第一步
   await mia.goto("/steps/new");
@@ -41,11 +34,8 @@ test("Mia shares her first step and is thanked when Kai follows it", async ({ br
 
   // 小凱在手作巷發現 Mia 的事蹟
   const kai = await loginPage(browser, "kai@e2e.test", "小凱");
-  await kai.goto("/me/character");
-  await kai.getByLabel("角色名字").fill("凱凱");
-  await kai.getByRole("button", { name: "儲存角色" }).click();
-  await expect(kai.getByText("角色已儲存")).toBeVisible();
-  await kai.goto("/");
+  await json(kai.request.put("/api/me/character", { data: { name: "凱凱", appearance: look(), personality: "", sharing: { allowAiQuotes: true } } }));
+  await kai.goto("/map");
   await panToPlace(kai, /手作巷長椅/);
   await kai.getByRole("link", { name: /手作巷長椅/ }).click();
   await kai.getByRole("link", { name: /去上一次陶藝體驗課/ }).click();

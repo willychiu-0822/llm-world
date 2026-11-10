@@ -1,43 +1,98 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Avatar } from "../components/Avatar";
 import { api } from "../lib/api";
 import { useSession } from "../lib/session";
 
 export function MePage() {
-  const { me } = useSession();
+  const { me, reload } = useSession();
+  const [name, setName] = useState(me?.character?.name ?? "");
+  const [personality, setPersonality] = useState(me?.character?.personality ?? "");
+  const [allow, setAllow] = useState(me?.character?.sharing.allowAiQuotes ?? true);
+  const [notify, setNotify] = useState(me?.pet?.notify !== false);
+  const [error, setError] = useState("");
   if (!me) return null;
   const logout = async () => {
     await api("/api/auth/logout", { method: "POST" });
     window.location.assign("/");
   };
   const remove = async () => {
-    if (!window.confirm("確定要刪除帳號嗎？你的角色、事蹟、隨筆都會被永久刪除。")) return;
+    if (!window.confirm("小龍和做過的事都會不見。真的要刪嗎？")) return;
     await api("/api/me", { method: "DELETE" });
     window.location.assign("/");
   };
-  const isAdmin = me.user.roles.includes("admin");
+  const saveName = async () => {
+    if (!me.character) return;
+    setError("");
+    try {
+      await api("/api/me/character", {
+        method: "PUT",
+        body: { name, appearance: me.character.appearance, personality, sharing: { allowAiQuotes: allow } },
+      });
+      await reload();
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  };
+  const toggleNotify = async (value: boolean) => {
+    setNotify(value);
+    await api("/api/me/pet", { method: "PATCH", body: { notify: value } });
+    await reload();
+  };
   return (
-    <div className="stack" style={{ maxWidth: 640, margin: "0 auto" }}>
-      <section className="panel row">
-        <Avatar appearance={me.character?.appearance} name={me.character?.name ?? "未設定"} size={64} />
-        <div className="grow">
-          <h1 style={{ margin: 0 }}>{me.character?.name ?? "還沒有角色"}</h1>
-          <small>{me.user.displayName}・{me.user.email}（只有你看得到）</small>
+    <div className="stack settings" style={{ maxWidth: 640, margin: "0 auto" }}>
+      <h1>設定</h1>
+      {me.character ? (
+        <section className="panel stack">
+          <div className="row">
+            <Avatar appearance={me.character.appearance} name={me.character.name} size={72} />
+            <div className="grow">
+              <strong>{me.character.name}</strong>
+              <small style={{ display: "block" }}>{me.user.email}</small>
+            </div>
+          </div>
+          <label className="field">
+            <span>寶寶名字</span>
+            <input aria-label="寶寶名字" value={name} maxLength={20} onChange={(e) => setName(e.target.value)} />
+          </label>
+          <label className="check">
+            <input type="checkbox" checked={notify} onChange={(e) => void toggleNotify(e.target.checked)} />
+            新消息提醒
+          </label>
+          {error && <p role="alert" className="error">{error}</p>}
+          <button type="button" className="btn primary" onClick={() => void saveName()}>儲存名字</button>
+        </section>
+      ) : (
+        <section className="panel stack">
+          <p>門口那顆蛋還在滾。</p>
+          <Link to="/me/character" className="btn primary">把牠撿回家</Link>
+        </section>
+      )}
+      <button type="button" className="btn ghost" onClick={() => void logout()}>登出</button>
+      <details className="panel advanced">
+        <summary>進階</summary>
+        <div className="stack">
+          <Link to="/connect">幫手</Link>
+          {me.character && (
+            <>
+              <Link to="/me/character">換個造型</Link>
+              <label className="field">
+                <span>脾氣</span>
+                <textarea aria-label="脾氣" value={personality} maxLength={200} rows={2} onChange={(e) => setPersonality(e.target.value)} />
+              </label>
+              <label className="check">
+                <input type="checkbox" checked={allow} onChange={(e) => setAllow(e.target.checked)} />
+                做過的事可以說給鎮上的朋友聽
+              </label>
+            </>
+          )}
+          <Link to="/provider">開一間小店</Link>
+          <Link to="/terms">服務條款</Link>
+          <Link to="/privacy">隱私權政策</Link>
+          {me.user.roles.includes("admin") && <Link to="/admin">管理</Link>}
+          <button type="button" className="btn danger" onClick={() => void remove()}>刪除帳號</button>
         </div>
-      </section>
-      <nav className="panel stack" aria-label="我的選單">
-        <Link to="/me/character">🙂 角色與想做的事</Link>
-        <Link to="/connect">🔌 連接 AI</Link>
-        <Link to="/notifications">🔔 通知{me.unread.notifications > 0 && <span className="badge">{me.unread.notifications}</span>}</Link>
-        <Link to="/provider">🏠 提供者後台{me.provider ? `（${me.provider.status === "approved" ? "已核准" : me.provider.status === "pending" ? "審核中" : "已停權"}）` : ""}</Link>
-        {isAdmin && <Link to="/admin">🛠 管理</Link>}
-        <Link to="/privacy">隱私權政策</Link>
-        <Link to="/terms">服務條款</Link>
-      </nav>
-      <div className="row wrap">
-        <button className="btn" onClick={logout}>登出</button>
-        <button className="btn danger" onClick={remove}>刪除帳號</button>
-      </div>
+      </details>
     </div>
   );
 }

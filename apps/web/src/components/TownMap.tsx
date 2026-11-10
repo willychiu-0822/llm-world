@@ -213,7 +213,7 @@ const TREES: [number, number, number][] = [
   [50, 850, 1.1], [420, 840, 0.9], [790, 850, 1], [1160, 840, 1.1], [400, 610, 0.8], [800, 615, 0.8],
 ];
 
-export function TownMap({ districts, places, children }: { districts: District[]; places: MapPlace[]; children?: ReactNode }) {
+export function TownMap({ districts, places, children, onInteract }: { districts: District[]; places: MapPlace[]; children?: ReactNode; onInteract?: () => void }) {
   const [view, setView] = useState({ s: 1, x: 0, y: 0 });
   const svgRef = useRef<SVGSVGElement>(null);
   const drag = useRef<{ id: number; sx: number; sy: number; vx: number; vy: number; moved: boolean } | null>(null);
@@ -263,6 +263,7 @@ export function TownMap({ districts, places, children }: { districts: District[]
     zoomAt(e.deltaY < 0 ? 1.12 : 1 / 1.12, p.x, p.y);
   };
   const onPointerDown = (e: RPointerEvent<SVGSVGElement>) => {
+    onInteract?.();
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (pointers.current.size === 2) {
       const [a, b] = [...pointers.current.values()];
