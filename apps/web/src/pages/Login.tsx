@@ -26,8 +26,7 @@ export function LoginPage() {
   return (
     <div className="stack" style={{ maxWidth: 440, margin: "24px auto" }}>
       <section className="panel stack">
-        <h1>進入龍角鎮</h1>
-        <p className="muted">登入後，你可以設定角色、接上自己的 AI，並在鎮上留下你的第一步。</p>
+        <h1>登入後就能把寶寶帶回家</h1>
         {next.startsWith("/oauth/") && <p className="notice">你的 AI 用戶端想連接龍角鎮，登入後會請你確認。</p>}
         {params.get("error") === "google_unavailable" && <p role="status" className="notice">Google 登入尚未開放，請使用下方的開發用登入。</p>}
         {!config && !configError && <p role="status">正在確認可以使用的登入方式……</p>}

@@ -7,12 +7,40 @@ export interface Want {
   status: string;
 }
 
+export interface PetSummary {
+  stars: number;
+  stage: number;
+  nextAt: number | null;
+  accessories: string[];
+  canWalk: boolean;
+  collected: number;
+  total: number;
+  letter: boolean;
+  notify: boolean;
+}
+
 export interface Me {
   user: { id: string; email: string; displayName: string; roles: string[] };
   character: { id: string; name: string; appearance: Appearance; personality: string; sharing: { allowAiQuotes: boolean } } | null;
   wants: Want[];
   provider: { id: string; name: string; status: string } | null;
   unread: { notifications: number; discoveries: number };
+  pet: PetSummary | null;
+}
+
+export interface KeepsakeItem {
+  deedId: string;
+  districtKey: string;
+  placeId: string;
+  placeName: string;
+  object: string;
+  emoji: string;
+  collected: boolean;
+  createdAt: string;
+  who?: string;
+  title?: string;
+  warmLine?: string;
+  mood?: string | null;
 }
 
 export interface Predecessor {
