@@ -61,15 +61,15 @@ export function TriesPage() {
       {!list.length ? (
         <div className="empty">
           <p>還沒有接下的事。</p>
-          <Link to="/">回小龍身邊</Link>
+          <Link to="/" className="btn primary">回小龍身邊</Link>
         </div>
       ) : (
         <ul className="plain">
-          {list.map((step) => (
+          {list.map((step, index) => (
             <li key={step.id}>
               <article className="panel stack">
                 <h2>「{step.text}」</h2>
-                <button type="button" className="btn primary" onClick={() => { setFormError(""); setActive(step); }}>我做到了！</button>
+                <button type="button" className={`btn ${index === 0 ? "primary" : "ghost"}`} onClick={() => { setFormError(""); setActive(step); }}>我做到了！</button>
                 <details className="more">
                   <summary>…</summary>
                   <button type="button" className="btn ghost" onClick={() => void drop(step)}>先收進抽屜</button>

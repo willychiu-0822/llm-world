@@ -81,7 +81,7 @@ describe("novice loop", () => {
     expect(screen.getByRole("heading", { name: "頭上要長什麼？" })).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "下一步" }));
     await userEvent.type(screen.getByLabelText("角色名字"), "小龍");
-    await userEvent.click(screen.getByRole("button", { name: "下一步" }));
+    await userEvent.click(screen.getByRole("button", { name: "帶牠回家" }));
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ name: "小龍" }));
     expect(bannedHits(document.body.textContent ?? "")).toEqual([]);
   });
@@ -102,10 +102,10 @@ describe("novice loop", () => {
   });
 
   it("greys out keepsakes that are still missing", () => {
-    render(<CabinetView collected={1} total={2} items={[
+    render(<MemoryRouter><CabinetView collected={1} total={2} items={[
       { deedId: "a", districtKey: "music", placeId: "p", placeName: "音樂坊小廣場", object: "吉他撥片", emoji: "🎸", collected: true, createdAt: "2026-11-10T00:00:00.000Z", warmLine: "小雀的吉他撥片。去上了聲樂課。", mood: "😆" },
       { deedId: "b", districtKey: "music", placeId: "p", placeName: "音樂坊小廣場", object: "吉他撥片", emoji: "🎸", collected: false, createdAt: "2026-11-10T00:00:00.000Z" },
-    ]} />);
+    ]} /></MemoryRouter>);
     expect(screen.getByLabelText("收藏進度")).toHaveTextContent("1/2");
     expect(document.querySelectorAll(".is-missing")).toHaveLength(1);
     expect(screen.queryByText(/明信片/)).not.toBeInTheDocument();

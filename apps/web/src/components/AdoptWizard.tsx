@@ -1,14 +1,32 @@
 import { ACCESSORIES, ACCESSORY_LABELS, BODY_LABELS, BODY_SHAPES, PALETTE, type Appearance } from "@lj/core";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Avatar } from "./Avatar";
 
-export function AdoptWizard({ initial, onSave }: { initial: { name: string; appearance: Appearance }; onSave: (value: { name: string; appearance: Appearance }) => Promise<void> }) {
-  const [step, setStep] = useState(0);
-  const [name, setName] = useState(initial.name);
-  const [appearance, setAppearance] = useState<Appearance>(initial.appearance);
+function readDraft(key?: string): { step: number; name: string; appearance: Appearance } | null {
+  if (!key) return null;
+  try {
+    const raw = sessionStorage.getItem(key);
+    if (!raw) return null;
+    const value = JSON.parse(raw) as { step?: number; name?: string; appearance?: Appearance };
+    if (!value.appearance || typeof value.step !== "number") return null;
+    return { step: value.step, name: value.name ?? "", appearance: value.appearance };
+  } catch {
+    return null;
+  }
+}
+
+export function AdoptWizard({ initial, draftKey, finishLabel = "帶牠回家", onSave }: { initial: { name: string; appearance: Appearance }; draftKey?: string; finishLabel?: string; onSave: (value: { name: string; appearance: Appearance }) => Promise<void> }) {
+  const draft = readDraft(draftKey);
+  const [step, setStep] = useState(draft?.step ?? 0);
+  const [name, setName] = useState(draft?.name || initial.name);
+  const [appearance, setAppearance] = useState<Appearance>(draft?.appearance ?? initial.appearance);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const set = (patch: Partial<Appearance>) => setAppearance((a) => ({ ...a, ...patch }));
+  useEffect(() => {
+    if (!draftKey) return;
+    sessionStorage.setItem(draftKey, JSON.stringify({ step, name, appearance }));
+  }, [draftKey, step, name, appearance]);
 
   const next = async () => {
     if (step < 2) {
@@ -28,7 +46,7 @@ export function AdoptWizard({ initial, onSave }: { initial: { name: string; appe
   return (
     <div className="stack adopt">
       <div className="adopt-preview">
-        <Avatar appearance={appearance} name={name || "小龍"} size={step === 1 ? 84 : 148} />
+        <Avatar appearance={appearance} name={name || "小龍"} size={132} />
       </div>
       {step === 0 && (
         <section className="stack">
@@ -79,7 +97,12 @@ export function AdoptWizard({ initial, onSave }: { initial: { name: string; appe
         </section>
       )}
       {error && <p role="alert" className="error">{error}</p>}
-      <button className="btn primary" type="button" disabled={busy || (step === 2 && !name.trim())} onClick={() => void next()}>下一步</button>
+      <div className="adopt-actions">
+        {step > 0 && <button className="btn ghost" type="button" disabled={busy} onClick={() => setStep(step - 1)}>上一步</button>}
+        <button className="btn primary" type="button" disabled={busy || (step === 2 && !name.trim())} aria-busy={busy} onClick={() => void next()}>
+          {busy ? "帶回家中…" : step === 2 ? finishLabel : "下一步"}
+        </button>
+      </div>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Dialog } from "./Dialog";
 import { formatDate } from "../lib/format";
 import type { KeepsakeItem } from "../lib/types";
@@ -18,6 +19,7 @@ export function CabinetView({ collected, total, items, pendingId, onAccept }: { 
     <div className="stack cabinet">
       <header className="stack" style={{ gap: 4 }}>
         <h1>信物收藏</h1>
+        <Link to="/" className="btn primary">回小龍身邊</Link>
         <p className="stat" aria-label="收藏進度">{collected}/{total}</p>
         <p className="muted">紀念品櫃。{gap ? `${gap.place}那一排還缺一個喔。` : total ? "這一排都撿到了。" : "櫃裡還沒有東西。小龍說牠今天想去原野。"}</p>
       </header>

@@ -56,6 +56,7 @@ export function PlacePage() {
           </div>
         </section>
       )}
+      {keepsakes.length > 0 && <Link to="/" className="btn primary">回小龍身邊</Link>}
       <section className="stack">
         <h2>留下的信物</h2>
         {keepsakes.length ? (
@@ -76,7 +77,10 @@ export function PlacePage() {
             })}
           </div>
         ) : (
-          <p className="empty">這裡還沒有信物。小龍說牠想去別的地方聞聞。<Link to="/map">回地圖看看</Link></p>
+          <div className="empty stack">
+            <p>這裡還沒有信物。小龍說牠想去別的地方聞聞。</p>
+            <Link to="/" className="btn primary">回小龍身邊</Link>
+          </div>
         )}
       </section>
     </div>

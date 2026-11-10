@@ -53,7 +53,9 @@ export function NotificationsPage() {
     <div className="stack" style={{ maxWidth: 760, margin: "0 auto" }}>
       <h1>通知</h1>
       <ErrorBox error={error} />
-      {!data?.length ? <Empty>還沒有通知。先到<Link to="/">地圖</Link>看看鎮民的故事，有新消息時會在這裡告訴你。</Empty> : (
+      {!data?.length ? <Empty><p>還沒有信。</p><Link to="/" className="btn primary">回小龍身邊</Link></Empty> : (
+        <>
+        <Link to="/" className="btn primary">回小龍身邊</Link>
         <ul className="plain">
           {data.map((n) => {
             const d = describe(n);
@@ -66,6 +68,7 @@ export function NotificationsPage() {
             return <li key={n.id}>{d.to ? <Link to={d.to} className="card-link">{body}</Link> : body}</li>;
           })}
         </ul>
+        </>
       )}
     </div>
   );

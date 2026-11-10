@@ -43,9 +43,10 @@ test("新手：領養、出門、信物、做到了、收藏", async ({ page }) 
   await page.getByRole("button", { name: "下一步" }).click();
   await page.getByLabel("角色名字").fill("小龍");
   await expectClean(page);
-  await page.getByRole("button", { name: "下一步" }).click();
+  await page.getByRole("button", { name: "帶牠回家" }).click();
   await expect(page.getByText("嗨！我是小龍。")).toBeVisible();
   await expect(page.locator(".hatch")).toBeVisible();
+  await page.getByRole("button", { name: "去找牠" }).click();
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole("button", { name: "出門逛逛" })).toBeVisible();
   await expect(page.locator("main .btn.primary")).toHaveCount(1);

@@ -67,7 +67,8 @@ test("UAT-14c 測試登入說明可照做且寫下願望後可去地圖", async 
   await page.getByRole("button", { name: "下一步" }).click();
   await page.getByLabel("角色名字").fill("新來的小龍");
   await expect(page.locator("main .btn.primary:visible")).toHaveCount(1);
-  await page.getByRole("button", { name: "下一步" }).click();
+  await page.getByRole("button", { name: "帶牠回家" }).click();
+  await page.getByRole("button", { name: "去找牠" }).click();
   await expect(page.getByRole("button", { name: "出門逛逛" })).toBeVisible();
   await expect(page.locator("main .btn.primary:visible")).toHaveCount(1);
   await layoutAndEvidence(page, "UAT-14c-home");

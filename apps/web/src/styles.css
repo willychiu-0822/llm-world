@@ -293,15 +293,16 @@ body:has(.veil) main .btn.primary { visibility: hidden; }
 .confetti span:nth-child(3) { left: 22%; bottom: 16%; animation-delay: 0.4s; }
 .confetti span:nth-child(4) { right: 20%; bottom: 18%; animation-delay: 0.1s; }
 .adopt { max-width: 520px; margin: 0 auto; }
+.adopt-actions { display: flex; gap: 8px; }
+.adopt-actions .btn.primary { flex: 1; }
 @media (max-width: 720px) {
-  .adopt { padding-bottom: 92px; }
-  .adopt > .btn.primary {
+  .adopt { padding-bottom: 128px; }
+  .adopt-actions {
     position: fixed;
     left: 16px;
     right: 16px;
     bottom: calc(74px + env(safe-area-inset-bottom));
     z-index: 15;
-    width: auto;
   }
 }
 .adopt .pick { grid-template-columns: repeat(3, minmax(0, 1fr)); }

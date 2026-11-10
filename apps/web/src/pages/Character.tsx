@@ -6,17 +6,32 @@ import { Avatar } from "../components/Avatar";
 import { api } from "../lib/api";
 import { useSession } from "../lib/session";
 
+const HATCH_KEY = "lj-hatch";
+
+function readHatch(): { name: string; appearance: Appearance } | null {
+  try {
+    const raw = sessionStorage.getItem(HATCH_KEY);
+    if (!raw) return null;
+    const value = JSON.parse(raw) as { name?: string; appearance?: Appearance };
+    if (!value.name || !value.appearance) return null;
+    return { name: value.name, appearance: value.appearance };
+  } catch {
+    return null;
+  }
+}
+
 export function CharacterPage() {
   const { me, reload } = useSession();
   const nav = useNavigate();
-  const [hatch, setHatch] = useState<{ name: string; appearance: Appearance } | null>(null);
+  const [hatch, setHatch] = useState<{ name: string; appearance: Appearance } | null>(readHatch);
   if (!me) return null;
   const first = !me.character;
   if (hatch) {
     return (
-      <div className="hatch" role="status" aria-live="assertive">
+      <div className="hatch" role="status" aria-live="polite">
         <div className="hatch-baby"><Avatar appearance={hatch.appearance} name={hatch.name} size={180} /></div>
         <p>嗨！我是{hatch.name}。</p>
+        <button type="button" className="btn primary" onClick={() => { sessionStorage.removeItem(HATCH_KEY); nav("/"); }}>去找牠</button>
       </div>
     );
   }
@@ -24,6 +39,8 @@ export function CharacterPage() {
   return (
     <AdoptWizard
       initial={{ name: me.character?.name ?? "", appearance }}
+      draftKey={first ? "lj-adopt" : undefined}
+      finishLabel={first ? "帶牠回家" : "存好了"}
       onSave={async (value) => {
         await api("/api/me/character", {
           method: "PUT",
@@ -35,12 +52,13 @@ export function CharacterPage() {
           },
         });
         await reload();
+        sessionStorage.removeItem("lj-adopt");
         if (!first) {
           nav("/me");
           return;
         }
+        sessionStorage.setItem(HATCH_KEY, JSON.stringify(value));
         setHatch(value);
-        window.setTimeout(() => nav("/"), 1500);
       }}
     />
   );
