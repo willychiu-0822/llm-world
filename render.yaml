@@ -1,0 +1,42 @@
+# Render Blueprint。這裡沒有任何秘密。
+# 擁有者在 Dashboard 選 New Blueprint 並連上這個 repo 後，Render 會建立服務與 Postgres，
+# 並在畫面上詢問 sync: false 的變數。DATABASE_URL 與 SESSION_SECRET 由平台填入。
+# 步驟見 docs/deploy/CLOUD-DEPLOY.md。
+
+services:
+  - type: web
+    name: longjiao
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    region: singapore
+    plan: 0.5c-512mb
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: longjiao-db
+          property: connectionString
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: ADMIN_EMAILS
+        sync: false
+      - key: AUTH_DEV_LOGIN
+        value: "false"
+      - key: MODERATION_MODE
+        value: filter
+
+databases:
+  - name: longjiao-db
+    region: singapore
+    plan: 0.1c-256mb
+    postgresMajorVersion: "17"
+    databaseName: longjiao
+    diskSizeGB: 1
+    ipAllowList: []

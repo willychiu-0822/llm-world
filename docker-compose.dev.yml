@@ -1,0 +1,7 @@
+# 疊在 docker-compose.yml 上，只給本機開發用登入。不要對公開網址使用。
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+services:
+  app:
+    environment:
+      NODE_ENV: development
+      AUTH_DEV_LOGIN: "true"

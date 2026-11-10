@@ -16,24 +16,49 @@ export interface Config {
   mcpRateLimitPerMinute: number;
 }
 
+function trimmed(value: string | undefined): string {
+  return value?.trim() ?? "";
+}
+
+/**
+ * Public origin for OAuth, MCP and cookies. An explicit BASE_URL always wins.
+ * Platform hostnames are only a fallback so a first deploy can come up before
+ * a custom domain exists. Production never guesses localhost.
+ */
+export function resolveBaseUrl(env: Record<string, string | undefined>, port: number, isProd: boolean): string {
+  const explicit = trimmed(env.BASE_URL).replace(/\/$/, "");
+  if (explicit) return explicit;
+  const render = trimmed(env.RENDER_EXTERNAL_URL).replace(/\/$/, "");
+  if (render) return render;
+  const railway = trimmed(env.RAILWAY_PUBLIC_DOMAIN).replace(/^https?:\/\//, "").replace(/\/$/, "");
+  if (railway) return `https://${railway}`;
+  const flyApp = trimmed(env.FLY_APP_NAME);
+  if (isProd && flyApp) return `https://${flyApp}.fly.dev`;
+  if (isProd) throw new Error("BASE_URL is required in production");
+  return `http://localhost:${port}`;
+}
+
 export function loadConfig(env: Record<string, string | undefined> = process.env): Config {
   const nodeEnv = (env.NODE_ENV as Config["env"]) ?? "development";
   const isProd = nodeEnv === "production";
-  const baseUrl = (env.BASE_URL ?? `http://localhost:${env.PORT ?? 8080}`).replace(/\/$/, "");
+  const port = Number(env.PORT ?? 8080);
+  const baseUrl = resolveBaseUrl(env, port, isProd);
   const sessionSecret = env.SESSION_SECRET ?? (isProd ? "" : "dev-only-session-secret-change-me");
   if (isProd && sessionSecret.length < 32) throw new Error("SESSION_SECRET must be at least 32 characters in production");
+  const databaseUrl = trimmed(env.DATABASE_URL) || (isProd ? "" : "postgres://postgres:postgres@localhost:5432/longjiao_dev");
+  if (isProd && !databaseUrl) throw new Error("DATABASE_URL is required in production");
   const mode = (env.MODERATION_MODE ?? "filter") as ModerationMode;
   if (!["off", "log", "filter", "block"].includes(mode)) throw new Error(`Invalid MODERATION_MODE: ${mode}`);
   return {
     env: nodeEnv,
     isProd,
-    port: Number(env.PORT ?? 8080),
+    port,
     baseUrl,
-    databaseUrl: env.DATABASE_URL ?? "postgres://postgres:postgres@localhost:5432/longjiao_dev",
+    databaseUrl,
     sessionSecret,
     google: { clientId: env.GOOGLE_CLIENT_ID ?? "", clientSecret: env.GOOGLE_CLIENT_SECRET ?? "" },
     adminEmails: (env.ADMIN_EMAILS ?? "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean),
-    // Dev login is never available in production, whatever the flag says.
+    // Unset stays off. Production ignores the flag entirely, even when it is "true".
     devLogin: !isProd && env.AUTH_DEV_LOGIN === "true",
     moderationMode: mode,
     moderationWords: [...DEFAULT_BLOCKLIST, ...(env.MODERATION_WORDS ?? "").split(",").map((s) => s.trim()).filter(Boolean)],
