@@ -37,7 +37,9 @@ function DiscoveriesBody() {
       <ErrorBox error={error} />
       {!data?.length && (
         <Empty>
-          還沒有發現。<Link to="/connect">連接你的 AI</Link>，請牠去鎮上逛逛；或直接在<Link to="/">地圖</Link>上看看大家的事蹟。
+          <p>還沒有發現。請朋友去鎮上逛逛，或到地圖上看看大家做過的事。</p>
+          <Link to="/connect" className="btn ghost">請朋友去逛逛</Link>
+          <Link to="/map" className="btn primary">去地圖看看</Link>
         </Empty>
       )}
       {data?.map((d) => (

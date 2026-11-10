@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Empty, ErrorBox, Loading } from "../components/Bits";
+import { GrownGate } from "../components/GrownGate";
 import { api, ApiError } from "../lib/api";
 import { formatDateTime } from "../lib/format";
 import { useSession } from "../lib/session";
@@ -14,6 +15,10 @@ interface Connection {
 }
 
 export function ConnectPage() {
+  return <GrownGate><ConnectBody /></GrownGate>;
+}
+
+function ConnectBody() {
   const { config, toast } = useSession();
   const url = config?.mcpUrl ?? `${window.location.origin}/mcp`;
   const connections = useFetch<Connection[]>("/api/me/connections");

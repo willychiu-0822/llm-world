@@ -83,7 +83,7 @@ export function MePage() {
       <details className="panel advanced">
         <summary>進階</summary>
         <div className="stack">
-          <Link to="/connect">幫手</Link>
+          {(me.pet?.stage ?? 0) >= 2 && <Link to="/connect">幫手</Link>}
           {me.character && (
             <>
               <Link to="/me/character">換個造型</Link>

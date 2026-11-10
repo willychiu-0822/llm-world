@@ -29,10 +29,10 @@ function MirrorBody() {
       <section className="panel hero row wrap">
         <Avatar appearance={me?.character?.appearance} name={me?.character?.name ?? "我"} size={80} />
         <div className="grow">
-          <h1>鏡子</h1>
-          <p>這裡不計分，只映照你真的做過的事。</p>
+          <h1>足跡</h1>
+          <p>這裡記的是你真的做過的事。</p>
           <p>
-            你踏出了 <strong>{data.stats.deeds}</strong> 步（本人 {data.stats.byExecutor.self}、交給 AI {data.stats.byExecutor.ai}）。
+            你做了 <strong>{data.stats.deeds}</strong> 件（自己 {data.stats.byExecutor.self}、朋友幫忙 {data.stats.byExecutor.ai}）。
             {data.stats.followed.referenced > 0 && <> 有 <strong>{data.stats.followed.referenced}</strong> 個人參考了你的經驗，其中 {data.stats.followed.completed} 個人也做到了。<small>（只有你看得到）</small></>}
           </p>
         </div>
@@ -40,7 +40,7 @@ function MirrorBody() {
 
       <section className="panel stack">
         <h2>角色和你的重疊</h2>
-        {data.overlap.length === 0 ? <Empty>還沒有想做的事。<Link to="/me/character">去寫一件</Link></Empty> : (
+        {data.overlap.length === 0 ? <Empty><p>還沒有想做的事。</p><Link to="/me/character" className="btn ghost">去寫一件</Link></Empty> : (
           <ul className="plain">
             {data.overlap.map((o) => (
               <li key={o.want.id} className="panel soft stack" style={{ gap: 6 }}>
@@ -54,7 +54,7 @@ function MirrorBody() {
 
       <section className="panel stack">
         <h2>足跡</h2>
-        {data.footprints.length === 0 ? <Empty>還沒有足跡。<Link to="/steps">去我的步驟</Link>，完成一件小事，就會在這裡留下足跡。</Empty> : (
+        {data.footprints.length === 0 ? <Empty><p>還沒有足跡。完成一件小事，就會留在這裡。</p><Link to="/steps" className="btn ghost">去我的步驟</Link></Empty> : (
           <div className="chips">
             {data.footprints.map((f) => (
               <Link key={f.placeId} to={`/places/${f.placeId}`} className="chip" style={{ background: DISTRICT_BY_KEY[f.districtKey as DistrictKey]?.color }}>
@@ -67,7 +67,7 @@ function MirrorBody() {
 
       <section className="panel stack">
         <h2>做之前／做之後</h2>
-        {data.notePairs.length === 0 ? <Empty>寫下做之前和做之後的隨筆，就會出現在這裡。不寫也沒關係。<Link to="/steps">到我的步驟寫一點</Link>。</Empty> : (
+        {data.notePairs.length === 0 ? <Empty><p>寫下做之前和做之後的話，就會出現在這裡。不寫也沒關係。</p><Link to="/steps" className="btn ghost">到我的步驟寫一點</Link></Empty> : (
           <ul className="plain">
             {data.notePairs.map((p) => (
               <li key={p.stepId} className="stack" style={{ gap: 6 }}>

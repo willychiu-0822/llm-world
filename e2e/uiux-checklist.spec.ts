@@ -206,13 +206,24 @@ test("檢核 A1–A5、B1–B3、C1–C3、F1–F2、D3", async ({ page }) => {
   expect(claims, "Esc keeps the star").toBe(2);
   page.off("request", countClaim);
   await checkState(page, "13-home-star");
+  if (test.info().project.name === "desktop") {
+    const baby = await page.locator(".baby-hit").boundingBox();
+    const pack = await page.locator(".backpack").boundingBox();
+    expect(baby && pack, "desktop backpack").toBeTruthy();
+    const overlaps = !!baby && !!pack && pack.x < baby.x + baby.width && pack.x + pack.width > baby.x && pack.y < baby.y + baby.height && pack.y + pack.height > baby.y;
+    expect(overlaps, "backpack stays on the baby").toBe(true);
+    await shot(page, "13b-desktop-backpack");
+  }
   await expect(page.getByRole("link", { name: "去收藏櫃看看" })).toBeVisible();
 
   const nav = page.getByRole("navigation", { name: test.info().project.name === "mobile" ? "快速導覽" : "主要導覽" });
   await nav.getByRole("link", { name: "收藏櫃" }).click();
   await expect(page.getByRole("heading", { name: "收藏櫃" })).toBeVisible();
   await expect(page.getByText("那一排")).toHaveCount(0);
-  await expect(page.getByLabel("收藏進度")).toHaveText("1/9");
+  const progress = (await page.getByLabel("收藏進度").innerText()).trim();
+  const catalog = Number(progress.split("/")[1]);
+  await expect(page.locator(".keepsake-cell")).toHaveCount(catalog);
+  await expect(page.locator(".keepsake-cell.is-missing")).toHaveCount(catalog - await page.locator(".keepsake-cell:not(.is-missing)").count());
   await expect(page.getByText(/收到了/)).toBeVisible();
   const fresh = page.locator(".keepsake-cell.is-new");
   await expect(fresh).toHaveCount(1);
@@ -237,6 +248,7 @@ test("檢核 A1–A5、B1–B3、C1–C3、F1–F2、D3", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "設定" })).toBeVisible();
   await checkState(page, "17-settings");
   await page.locator("details.advanced summary").click();
+  await expect(page.getByRole("link", { name: "幫手" })).toHaveCount(0);
   await page.getByRole("link", { name: "服務條款" }).click();
   let legal = await textOf(page);
   for (const word of BANNED) expect(legal, `terms ${word}`).not.toContain(word);
@@ -245,6 +257,14 @@ test("檢核 A1–A5、B1–B3、C1–C3、F1–F2、D3", async ({ page }) => {
   for (const word of BANNED) expect(legal, `privacy ${word}`).not.toContain(word);
   await page.goto("/");
   await expect(page).toHaveURL(/\/$/);
+  await page.goto("/connect");
+  await expect(page.getByRole("heading", { name: "小龍還沒長大" })).toBeVisible();
+  const gated = await textOf(page);
+  expect(gated).not.toContain("MCP");
+  expect(gated).not.toContain("AI");
+  expect(gated).not.toContain("ChatGPT");
+  await checkState(page, "17b-connect-gate");
+  await page.goto("/");
 
   for (let n = 0; n < 6; n++) {
     const step = await json(page.request.post("/api/first-steps", { data: { executor: "self", text: `小事${n}` } }));

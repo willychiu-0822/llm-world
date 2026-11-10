@@ -138,12 +138,12 @@ export function StepForm(props: {
                 {w.text}
               </option>
             ))}
-            <option value="">{props.sourceDistrictKey ? "沿用來源事蹟的主題區" : "先不指定（放在萬事屋）"}</option>
+            <option value="">{props.sourceDistrictKey ? "沿用那件事的地方" : "先不指定（放在萬事屋）"}</option>
           </select>
         </label>
       )}
 
-      <p className="notice" role="status">完成後，事蹟會留在「{destination}」。<small>{props.trialPlace ? "試用課的事蹟會留在提供者的店；願望仍可自由選。" : selectedWant ? "依你選的想做的事決定主題區。" : props.sourceDistrictKey ? "沒指定想做的事時，沿用來源的主題區。" : "先不分類也沒關係。"}</small></p>
+      <p className="notice" role="status">完成後，這件事會留在「{destination}」。<small>{props.trialPlace ? "試用留下的會在店裡；想做的事仍可自由選。" : selectedWant ? "依你選的想做的事決定地方。" : props.sourceDistrictKey ? "沒指定想做的事時，沿用那件事的地方。" : "先不分類也沒關係。"}</small></p>
 
       {executor === "self" && (
         <>
@@ -174,8 +174,8 @@ export function StepForm(props: {
       )}
 
       <label className="field">
-        <span>做之前的隨筆（選填，只有自己看得到）</span>
-        <textarea aria-label="做之前的隨筆（選填，只有自己看得到）" value={noteBefore} onChange={(e) => setNoteBefore(e.target.value)} rows={3} maxLength={2000} placeholder="現在的心情、擔心或期待都可以" />
+        <span>做之前的話（選填，只有自己看得到）</span>
+        <textarea aria-label="做之前的話（選填，只有自己看得到）" value={noteBefore} onChange={(e) => setNoteBefore(e.target.value)} rows={3} maxLength={2000} placeholder="現在的心情、擔心或期待都可以" />
       </label>
 
       {error && (

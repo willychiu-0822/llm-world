@@ -89,7 +89,8 @@ test("新手：領養、出門、信物、做到了、收藏", async ({ page }) 
   await nav.getByRole("link", { name: "收藏櫃" }).click();
   await expect(page.getByRole("heading", { name: "收藏櫃" })).toBeVisible();
   await expect(page.getByLabel("收藏進度")).toHaveText("1/9");
-  await expect(page.locator(".is-missing")).toHaveCount(1);
+  await expect(page.locator(".keepsake-cell")).toHaveCount(9);
+  await expect(page.locator(".is-missing")).toHaveCount(8);
   await expectClean(page);
   await evidence(page, "novice-06-cabinet");
 
@@ -113,7 +114,6 @@ test("新手：領養、出門、信物、做到了、收藏", async ({ page }) 
   await evidence(page, "novice-08-settings");
 
   await page.goto("/connect");
-  await page.locator("details.advanced summary").click();
-  await expect(page.locator("code", { hasText: "/mcp" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "小龍還沒長大" })).toBeVisible();
   expect(errors).toEqual([]);
 });

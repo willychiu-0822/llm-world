@@ -277,7 +277,8 @@ td, th { text-align: left; padding: 6px 8px; border-bottom: 1px dashed var(--lin
 .keepsake-emoji { font-size: 2.4rem; line-height: 1; margin: 0; }
 .keepsake-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; justify-content: center; }
 .keepsake-cell.is-new { border-color: var(--leaf); box-shadow: 0 0 0 3px var(--butter); }
-.keepsake-cell { font: inherit; color: var(--ink); background: var(--card); border: 2px solid var(--line); border-radius: 18px; padding: 10px 6px; display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 92px; cursor: pointer; }
+.keepsake-cell { position: relative; font: inherit; color: var(--ink); background: var(--card); border: 2px solid var(--line); border-radius: 18px; padding: 10px 6px; display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 92px; cursor: pointer; }
+.keepsake-count { position: absolute; top: 6px; right: 6px; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px; background: var(--leaf); color: #1c2416; font-size: 12px; font-weight: 700; display: grid; place-items: center; }
 .keepsake-cell.is-missing { filter: grayscale(1); opacity: 0.55; cursor: default; background: var(--paper-2); }
 .keepsake-cell .keepsake-emoji { font-size: 1.8rem; }
 .cabinet { text-align: center; }
@@ -344,7 +345,7 @@ body:has(.veil) main .btn.primary { visibility: hidden; }
   }
   .baby-home .home-chrome { grid-column: 1 / -1; }
   .baby-home .baby-stage { justify-self: center; }
-  .baby-home .baby-hit svg { width: 260px; height: 260px; }
+  .baby-home .baby-wrap { transform: scale(1.67); transform-origin: center center; }
   .baby-home .baby-actions { align-items: flex-start; }
   .baby-home .baby-actions > .btn,
   .baby-home .baby-actions > .keepsake-card { width: min(100%, 480px); }

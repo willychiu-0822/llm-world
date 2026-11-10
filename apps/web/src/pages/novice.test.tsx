@@ -105,7 +105,8 @@ describe("novice loop", () => {
       { deedId: "b", districtKey: "music", placeId: "p", placeName: "音樂坊小廣場", object: "吉他撥片", emoji: "🎸", collected: false, createdAt: "2026-11-10T00:00:00.000Z" },
     ]} /></MemoryRouter>);
     expect(screen.getByLabelText("收藏進度")).toHaveTextContent("1/9");
-    expect(document.querySelectorAll(".is-missing")).toHaveLength(1);
+    expect(document.querySelectorAll(".keepsake-cell")).toHaveLength(9);
+    expect(document.querySelectorAll(".is-missing")).toHaveLength(8);
     expect(screen.queryByText(/明信片/)).not.toBeInTheDocument();
     expect(bannedHits(document.body.textContent ?? "")).toEqual([]);
   });
@@ -115,7 +116,7 @@ describe("novice loop", () => {
     render(<MemoryRouter><MePage /></MemoryRouter>);
     const advanced = document.querySelector("details.advanced") as HTMLDetailsElement | null;
     expect(advanced?.open).toBe(false);
-    expect(advanced?.textContent).toContain("幫手");
+    expect(advanced?.textContent).not.toContain("幫手");
     expect(advanced?.textContent).toContain("刪除帳號");
     expect(advanced?.textContent).toContain("開一間小店");
     expect(bannedHits(document.body.textContent?.replace(advanced?.textContent ?? "", "") ?? "")).toEqual([]);
