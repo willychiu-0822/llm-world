@@ -1,14 +1,16 @@
 import { BABY_LINES, stageLabel } from "@lj/core";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Avatar } from "../components/Avatar";
+import { Dialog } from "../components/Dialog";
 import { MapBoard } from "../components/MapBoard";
 import { api } from "../lib/api";
+import { acceptKeepsake } from "../lib/keepsake";
 import { useSession } from "../lib/session";
 import type { KeepsakeItem, PetSummary, Step, Town } from "../lib/types";
 import { useFetch } from "../lib/useFetch";
 
-const EMPTY: PetSummary = { stars: 0, stage: 0, nextAt: 3, accessories: [], canWalk: true, collected: 0, total: 0, letter: false, notify: true };
+const EMPTY: PetSummary = { stars: 0, stage: 0, nextAt: 3, accessories: [], canWalk: true, collected: 0, total: 0, letter: false, notify: true, pending: null };
 const OUTING_MS = 2400;
 
 interface WalkResult {
@@ -36,12 +38,17 @@ export function HomePage() {
   const nav = useNavigate();
   const steps = useFetch<Step[]>(me?.character ? "/api/first-steps?status=confirmed" : null);
   const [phase, setPhase] = useState<"home" | "walking" | "found">("home");
-  const [keepsake, setKeepsake] = useState<KeepsakeItem | null>(null);
-  const [reward, setReward] = useState(false);
+  const [found, setFound] = useState<KeepsakeItem | null>(null);
+  const [backpackNote, setBackpackNote] = useState(false);
+  const [shelved, setShelved] = useState(false);
+  const [accepting, setAccepting] = useState(false);
   const [error, setError] = useState("");
   const [bubble, setBubble] = useState<string | null>(null);
   const [jump, setJump] = useState(false);
   const [letterOpen, setLetterOpen] = useState(false);
+  const [mailOpen, setMailOpen] = useState(false);
+  const [didWalk, setDidWalk] = useState(false);
+  const gate = useRef(false);
 
   if (loading && !me) return <p className="empty">載入中……</p>;
   if (!me) return <GuestHome />;
@@ -57,9 +64,10 @@ export function HomePage() {
 
   const pet = me.pet ?? EMPTY;
   const baby = me.character;
-  const backpack = pet.accessories.includes("backpack") || reward;
+  const backpack = pet.accessories.includes("backpack") || backpackNote;
   const goal = pet.nextAt ?? pet.stars;
   const openTries = (steps.data ?? []).length;
+  const card = phase === "walking" || shelved ? null : (found ?? (phase === "home" ? pet.pending : null));
 
   const poke = () => {
     setBubble(BABY_LINES[Math.floor(Math.random() * BABY_LINES.length)] ?? BABY_LINES[0]);
@@ -68,41 +76,68 @@ export function HomePage() {
   };
 
   const walk = async () => {
-    if (!pet.canWalk || phase !== "home") return;
+    if (!pet.canWalk || phase !== "home" || gate.current) return;
+    gate.current = true;
     setError("");
+    setShelved(false);
     setPhase("walking");
     try {
       const res = await api<WalkResult>("/api/me/walk", { method: "POST" });
-      setKeepsake(res.keepsake);
+      setFound(res.keepsake);
+      setBackpackNote(res.reward === "backpack");
       await new Promise((r) => window.setTimeout(r, OUTING_MS));
-      setReward(res.reward === "backpack");
+      setDidWalk(true);
       setPhase("found");
       await reload();
     } catch (err) {
       setPhase("home");
       setError((err as Error).message || "咦，小龍迷路了。再試一次？");
+    } finally {
+      gate.current = false;
+    }
+  };
+
+  const accept = async (item: KeepsakeItem) => {
+    if (gate.current) return;
+    gate.current = true;
+    setAccepting(true);
+    setError("");
+    try {
+      await acceptKeepsake(item);
+      await reload();
+      nav("/tries", { state: { hello: true } });
+    } catch (err) {
+      const msg = (err as Error).message;
+      setError(msg.includes("事蹟") || msg.includes("參考") ? "這顆信物先放著。換一顆摸摸看？" : "咦，小龍迷路了。再試一次？");
+      gate.current = false;
+      setAccepting(false);
     }
   };
 
   const dismissLetter = async () => {
-    await api("/api/me/pet", { method: "PATCH", body: { letterDismissed: true } });
-    await reload();
-    setLetterOpen(false);
+    if (gate.current) return;
+    gate.current = true;
+    try {
+      await api("/api/me/pet", { method: "PATCH", body: { letterDismissed: true } });
+      await reload();
+      setLetterOpen(false);
+    } finally {
+      gate.current = false;
+    }
   };
+
+  const walkedToday = (!pet.canWalk || didWalk) && phase !== "walking";
+  const walkLabel = phase === "walking" ? "小龍還在外面晃…" : "出門逛逛";
 
   return (
     <div className="stack baby-home">
       <div className="home-chrome">
         <p className="star-line">★ {pet.stars}/{goal || 0}　{stageLabel(pet.stage)}</p>
         <div className="row">
-          {pet.letter ? (
-            <button type="button" className="icon-btn" aria-label="郵筒" onClick={() => setLetterOpen(true)}>✉️</button>
-          ) : (
-            <Link to="/notifications" className="icon-btn" aria-label="郵筒">
-              ✉️
-              {pet.notify && me.unread.notifications > 0 && <span className="badge">{me.unread.notifications}</span>}
-            </Link>
-          )}
+          <button type="button" className="icon-btn" aria-label="郵筒" onClick={() => (pet.letter ? setLetterOpen(true) : setMailOpen(true))}>
+            ✉️
+            {!pet.letter && pet.notify && me.unread.notifications > 0 && <span className="badge">{me.unread.notifications}</span>}
+          </button>
           <Link to="/me" className="icon-btn" aria-label="設定">⚙️</Link>
         </div>
       </div>
@@ -117,52 +152,53 @@ export function HomePage() {
         <strong>{baby.name}</strong>
       </div>
 
-      {phase !== "found" && (
-        <button type="button" className="btn primary walk-btn" disabled={!pet.canWalk || phase === "walking"} onClick={() => void walk()}>
-          {phase === "walking" || !pet.canWalk ? "寶寶在外面，晚點回來" : "出門逛逛"}
+      {!card && phase !== "found" && ((pet.canWalk && !didWalk) || phase === "walking") && (
+        <button type="button" className="btn primary walk-btn" disabled={phase === "walking"} aria-busy={phase === "walking"} onClick={() => void walk()}>
+          {walkLabel}
         </button>
       )}
-      {phase === "home" && openTries > 0 && <Link to="/tries">我接下的事</Link>}
+      {!card && walkedToday && (
+        <>
+          <p>今天已經出門了。收藏櫃還有位子。</p>
+          <Link to="/cabinet" className="btn primary">去收藏櫃看看</Link>
+        </>
+      )}
+      {phase === "home" && !card && openTries > 0 && <Link to="/tries" className="btn ghost">我接下的事</Link>}
       {phase === "walking" && (
         <div className="outing" aria-live="polite">
-          <p>小龍出門了，大概在{keepsake?.placeName || "草叢"}附近亂聞。</p>
+          <p>小龍出門了，大概在{found?.placeName || "草叢"}附近亂聞。</p>
           <div className="outing-track" aria-hidden><span className="outing-dot">🐾</span></div>
         </div>
       )}
       {error && <p role="alert" className="error">{/[㐀-鿿]/.test(error) ? error : "咦，小龍迷路了。再試一次？"}</p>}
-      {phase === "found" && keepsake && (
+      {card && (
         <article className="panel keepsake-card stack">
-          <p className="keepsake-emoji" aria-hidden>{keepsake.emoji}</p>
-          <p>從{keepsake.placeName || "鎮上"}撿到的{keepsake.object}</p>
-          <p>{keepsake.warmLine}</p>
-          {!reward && (
-            <>
-              <button type="button" className="btn primary" onClick={() => nav(`/tries/new?deed=${keepsake.deedId}`)}>我也去摸摸看</button>
-              <button type="button" className="btn ghost" onClick={() => { setPhase("home"); setKeepsake(null); }}>收進櫃裡</button>
-            </>
-          )}
+          {backpackNote && <p className="notice" role="status">小背包背好了。</p>}
+          <p className="keepsake-emoji" aria-hidden>{card.emoji}</p>
+          <p>從{card.placeName || "鎮上"}撿到的{card.object}</p>
+          <p>{card.warmLine}</p>
+          <button type="button" className="btn primary" disabled={accepting} aria-busy={accepting} onClick={() => void accept(card)}>
+            {accepting ? "記下來…" : "我也去摸摸看"}
+          </button>
+          <button type="button" className="btn ghost" disabled={accepting} onClick={() => { setShelved(true); setPhase("home"); setFound(null); }}>收進櫃裡</button>
         </article>
       )}
 
-      {reward && (
-        <div className="veil" role="dialog" aria-label="新配件" onClick={() => setReward(false)}>
-          <div className="celebrate" onClick={(e) => e.stopPropagation()}>
-            <p className="star-pop">🎒</p>
-            <h2>新配件！</h2>
-            <p>小背包。小龍背好了。</p>
-            <button type="button" className="btn primary" onClick={() => setReward(false)}>好耶</button>
-          </div>
-        </div>
-      )}
       {letterOpen && (
-        <div className="veil" role="dialog" aria-label="小龍的信">
-          <div className="celebrate stack">
-            <p>📮</p>
-            <p>小龍寫了一封歪歪扭扭的信：「我想交一個會說話的朋友，幫我去打聽消息。你有認識的嗎？」</p>
-            <Link to="/connect" className="btn primary">我有在用 ChatGPT／Claude</Link>
-            <button type="button" className="btn ghost" onClick={() => void dismissLetter()}>沒有，下次再說</button>
-          </div>
-        </div>
+        <Dialog title="小龍的信" onClose={() => setLetterOpen(false)}>
+          <p>📮</p>
+          <p>小龍寫了一封歪歪扭扭的信：「我想交一個會說話的朋友，幫我去打聽消息。你有認識的嗎？」</p>
+          <Link to="/connect" className="btn primary">我有在用 ChatGPT／Claude</Link>
+          <button type="button" className="btn ghost" onClick={() => setLetterOpen(false)}>先收起來</button>
+          <button type="button" className="btn ghost" onClick={() => void dismissLetter()}>先不要這個朋友</button>
+        </Dialog>
+      )}
+      {mailOpen && (
+        <Dialog title="郵筒" onClose={() => setMailOpen(false)}>
+          <p>📮</p>
+          <p>還沒有信。小龍說有信會塞進來。</p>
+          <button type="button" className="btn primary" onClick={() => setMailOpen(false)}>好</button>
+        </Dialog>
       )}
     </div>
   );

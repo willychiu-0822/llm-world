@@ -42,7 +42,7 @@ const baby = (): Me => ({
   wants: [],
   provider: null,
   unread: { notifications: 0, discoveries: 0 },
-  pet: { stars: 0, stage: 0, nextAt: 3, accessories: [], canWalk: true, collected: 0, total: 4, letter: false, notify: true },
+  pet: { stars: 0, stage: 0, nextAt: 3, accessories: [], canWalk: true, collected: 0, total: 4, letter: false, notify: true, pending: null },
 });
 
 describe("novice loop", () => {
@@ -86,15 +86,19 @@ describe("novice loop", () => {
     expect(bannedHits(document.body.textContent ?? "")).toEqual([]);
   });
 
-  it("celebrates with a star and no writing box", async () => {
-    const onClose = vi.fn();
-    render(<Celebrate fromStars={0} error="" onClose={onClose} />);
+  it("celebrates with a star and a real claim button", async () => {
+    const onClaim = vi.fn();
+    const onDismiss = vi.fn();
+    render(<Celebrate fromStars={0} error="" onClaim={onClaim} onDismiss={onDismiss} />);
     const dialog = screen.getByRole("dialog", { name: "做到了" });
     expect(dialog).toHaveTextContent("★ +1");
     expect(dialog).toHaveTextContent("★ 1/3");
     expect(dialog.querySelector("textarea")).toBeNull();
+    expect(dialog).not.toHaveTextContent("點旁邊");
     await userEvent.click(screen.getByRole("button", { name: "😆" }));
-    expect(onClose).toHaveBeenCalledWith("😆");
+    expect(onClaim).not.toHaveBeenCalled();
+    await userEvent.click(screen.getByRole("button", { name: "收下星星" }));
+    expect(onClaim).toHaveBeenCalledWith("😆");
   });
 
   it("greys out keepsakes that are still missing", () => {

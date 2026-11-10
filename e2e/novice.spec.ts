@@ -56,19 +56,14 @@ test("新手：領養、出門、信物、做到了、收藏", async ({ page }) 
   await expect(page.getByRole("status")).toBeVisible();
 
   await page.getByRole("button", { name: "出門逛逛" }).click();
-  await expect(page.getByRole("dialog", { name: "新配件" })).toBeVisible();
-  await expect(page.getByText("新配件！")).toBeVisible();
-  await expect(page.locator("[aria-label='小背包']")).toBeVisible();
-  await page.getByRole("button", { name: "好耶" }).click();
   await expect(page.getByRole("button", { name: "我也去摸摸看" })).toBeVisible();
+  await expect(page.getByText("小背包背好了。")).toBeVisible();
+  await expect(page.locator("[aria-label='小背包']")).toBeVisible();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
   await expectClean(page);
   await evidence(page, "novice-03-keepsake");
 
   await page.getByRole("button", { name: "我也去摸摸看" }).click();
-  await expect(page.getByRole("textbox", { name: "我要做的是" })).toBeVisible();
-  await expect(page.locator("main input, main textarea, main select")).toHaveCount(1);
-  await expectClean(page);
-  await page.getByRole("button", { name: "好，接下了！" }).click();
   await expect(page.getByText("我幫你記著喔。")).toBeVisible();
   await expect(page.getByRole("button", { name: "我做到了！" })).toBeVisible();
   await expect(page.getByRole("tab")).toHaveCount(0);
@@ -80,8 +75,11 @@ test("新手：領養、出門、信物、做到了、收藏", async ({ page }) 
   await expect(dialog).toBeVisible();
   await expect(dialog).toContainText("★ +1");
   await expect(dialog).toContainText("★ 1/3");
+  await expect(dialog).toContainText("收下星星");
+  await expect(dialog).not.toContainText("點旁邊");
   await expect(page.locator("textarea")).toHaveCount(0);
   await page.getByRole("button", { name: "😆" }).click();
+  await page.getByRole("button", { name: "收下星星" }).click();
   await expect(page.getByText(/★ 1\/3/)).toBeVisible();
   await expectClean(page);
   await evidence(page, "novice-05-home-star");

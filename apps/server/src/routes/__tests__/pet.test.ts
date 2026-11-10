@@ -22,9 +22,13 @@ describe("novice keepsakes", () => {
     expect(walked.body.keepsake.warmLine).toContain("小雀的");
     expect(walked.body.keepsake.warmLine).not.toContain("明信片");
     expect(walked.body.pet).toMatchObject({ collected: 1, total: 2, accessories: ["backpack"], canWalk: false, stars: 0, stage: 0 });
+    expect(walked.body.pet.pending.deedId).toBe(walked.body.keepsake.deedId);
 
     const again = await baby.post("/api/me/walk");
     expect(again.status).toBe(409);
+    const taken = await baby.post("/api/first-steps").send({ executor: "self", text: "我也去摸摸看", sourceDeedIds: [walked.body.keepsake.deedId] });
+    expect(taken.status).toBe(201);
+    expect((await baby.get("/api/me")).body.pet.pending).toBeNull();
 
     const dex = (await baby.get("/api/me/keepsakes")).body;
     expect(dex.collected).toBe(1);

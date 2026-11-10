@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Celebrate } from "../components/Celebrate";
 import { ErrorBox, Loading } from "../components/Bits";
@@ -17,9 +17,11 @@ export function TriesPage() {
   const [busy, setBusy] = useState(false);
   const [formError, setFormError] = useState("");
   const [drawer, setDrawer] = useState("");
+  const gate = useRef(false);
 
   const finish = async (sticker?: Sticker) => {
-    if (!active || busy) return;
+    if (!active || gate.current) return;
+    gate.current = true;
     setBusy(true);
     setFormError("");
     try {
@@ -37,6 +39,7 @@ export function TriesPage() {
       nav("/");
     } catch (err) {
       setFormError((err as Error).message || "咦，小龍迷路了。再試一次？");
+      gate.current = false;
       setBusy(false);
     }
   };
@@ -76,7 +79,15 @@ export function TriesPage() {
           ))}
         </ul>
       )}
-      {active && <Celebrate fromStars={me?.pet?.stars ?? 0} error={formError} onClose={(sticker) => void finish(sticker)} />}
+      {active && (
+        <Celebrate
+          fromStars={me?.pet?.stars ?? 0}
+          error={formError}
+          busy={busy}
+          onClaim={(sticker) => void finish(sticker)}
+          onDismiss={() => { if (!busy) { setActive(null); setFormError(""); } }}
+        />
+      )}
     </div>
   );
 }

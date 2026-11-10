@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { Dialog } from "./Dialog";
 import { formatDate } from "../lib/format";
 import type { KeepsakeItem } from "../lib/types";
 
-export function CabinetView({ collected, total, items }: { collected: number; total: number; items: KeepsakeItem[] }) {
+export function CabinetView({ collected, total, items, pendingId, onAccept }: { collected: number; total: number; items: KeepsakeItem[]; pendingId?: string | null; onAccept?: (item: KeepsakeItem) => Promise<void> }) {
   const [open, setOpen] = useState<KeepsakeItem | null>(null);
+  const [busy, setBusy] = useState(false);
   const groups: { place: string; items: KeepsakeItem[] }[] = [];
   for (const item of items) {
     const place = item.placeName || "鎮上";
@@ -40,14 +42,17 @@ export function CabinetView({ collected, total, items }: { collected: number; to
         </section>
       ))}
       {open && (
-        <div className="veil" role="dialog" aria-label={open.object} onClick={() => setOpen(null)}>
-          <div className="celebrate" onClick={(e) => e.stopPropagation()}>
-            <p className="keepsake-emoji">{open.emoji}</p>
-            <p>{open.warmLine}</p>
-            <small>{formatDate(open.createdAt)}</small>
-            {open.mood ? <p>當時的表情是 {open.mood}</p> : <p className="muted">這顆還沒貼表情。</p>}
-          </div>
-        </div>
+        <Dialog title={open.object} busy={busy} onClose={() => { if (!busy) setOpen(null); }}>
+          <p className="keepsake-emoji">{open.emoji}</p>
+          <p>{open.warmLine}</p>
+          <small>{formatDate(open.createdAt)}</small>
+          {open.mood ? <p>當時的表情是 {open.mood}</p> : <p className="muted">這顆還沒貼表情。</p>}
+          {open.deedId === pendingId && onAccept ? (
+            <button type="button" className="btn primary" disabled={busy} onClick={() => { setBusy(true); void onAccept(open).catch(() => setBusy(false)); }}>{busy ? "記下來…" : "我也去摸摸看"}</button>
+          ) : (
+            <button type="button" className="btn primary" onClick={() => setOpen(null)}>好</button>
+          )}
+        </Dialog>
       )}
     </div>
   );

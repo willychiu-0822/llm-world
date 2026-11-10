@@ -75,7 +75,11 @@ export async function getPetSummary(ctx: AppContext, userId: string, sharing: un
   const pet = readPet(sharing);
   const stars = await countStars(ctx, userId);
   const stage = growthStage(stars);
-  const [collected, total] = await Promise.all([countCollected(ctx, userId, pet.collectedDeedIds), countOthers(ctx, userId)]);
+  const [collected, total, pending] = await Promise.all([
+    countCollected(ctx, userId, pet.collectedDeedIds),
+    countOthers(ctx, userId),
+    pendingKeepsake(ctx, userId, pet),
+  ]);
   return {
     stars,
     stage,
@@ -86,7 +90,27 @@ export async function getPetSummary(ctx: AppContext, userId: string, sharing: un
     total,
     letter: stage >= 2 && !pet.letterDismissed,
     notify: pet.notify,
+    pending,
   };
+}
+
+/** Today's find, until the baby actually takes it on. Refresh brings the card back; it does not replay the walk. */
+async function pendingKeepsake(ctx: AppContext, userId: string, pet: PetState) {
+  if (!pet.lastKeepsakeId || pet.lastWalkOn !== taipeiDay(ctx.now())) return null;
+  const steps = await ctx.db
+    .select({ sourceDeedIds: firstSteps.sourceDeedIds, status: firstSteps.status })
+    .from(firstSteps)
+    .where(eq(firstSteps.userId, userId));
+  if (steps.some((s) => s.status !== "dropped" && s.sourceDeedIds.includes(pet.lastKeepsakeId!))) return null;
+  const [row] = await ctx.db
+    .select({ deed: deeds, characterName: characters.name, placeName: places.name })
+    .from(deeds)
+    .leftJoin(characters, eq(characters.userId, deeds.userId))
+    .leftJoin(places, eq(places.id, deeds.placeId))
+    .where(and(eq(deeds.id, pet.lastKeepsakeId), visibleDeed(), ne(deeds.userId, userId)))
+    .limit(1);
+  if (!row) return null;
+  return present(row, true, pet.moods[row.deed.id] ?? null);
 }
 
 interface KeepsakeRow {

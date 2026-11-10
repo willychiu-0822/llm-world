@@ -279,7 +279,10 @@ td, th { text-align: left; padding: 6px 8px; border-bottom: 1px dashed var(--lin
 .cabinet { text-align: center; }
 .cabinet h2 { font-size: 1rem; }
 .veil { position: fixed; inset: 0; z-index: 40; background: color-mix(in srgb, #2a2118 45%, transparent); display: grid; place-items: center; padding: 24px; }
-.celebrate { position: relative; width: min(360px, 100%); background: var(--card); border: 3px solid var(--ink); border-radius: 28px; padding: 28px 20px; text-align: center; box-shadow: var(--shadow); overflow: hidden; }
+.celebrate { position: relative; width: min(360px, 100%); background: var(--card); border: 3px solid var(--ink); border-radius: 28px; padding: 56px 20px 24px; text-align: center; box-shadow: var(--shadow); overflow: hidden; }
+.dialog-x { position: absolute; top: 8px; right: 8px; z-index: 2; background: var(--card); }
+body:has(.veil) main .btn.primary { visibility: hidden; }
+.celebrate .btn { width: 100%; }
 .star-pop { font-size: 3rem; font-weight: 800; margin: 0; animation: pop 0.55s ease; }
 .stickers { display: flex; justify-content: center; gap: 10px; }
 .sticker { font: inherit; font-size: 1.8rem; width: 64px; height: 64px; border-radius: 20px; border: 2px solid var(--line); background: var(--butter-soft); cursor: pointer; }
