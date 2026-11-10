@@ -16,7 +16,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <nav className="nav" aria-label="主要導覽">
           <NavLink to="/" end>家</NavLink>
           <NavLink to="/map">地圖</NavLink>
-          <NavLink to="/cabinet">圖鑑</NavLink>
+          <NavLink to="/cabinet">收藏櫃</NavLink>
           {!loading && !me && <NavLink to="/login">登入</NavLink>}
         </nav>
       </header>
@@ -24,7 +24,7 @@ export function Layout({ children }: { children: ReactNode }) {
       <nav className="tabbar" aria-label="快速導覽">
         <NavLink to="/" end><span className="icon" aria-hidden>🏠</span>家</NavLink>
         <NavLink to="/map"><span className="icon" aria-hidden>🗺️</span>地圖</NavLink>
-        <NavLink to="/cabinet"><span className="icon" aria-hidden>🧺</span>圖鑑</NavLink>
+        <NavLink to="/cabinet"><span className="icon" aria-hidden>🧺</span>收藏櫃</NavLink>
       </nav>
     </div>
   );

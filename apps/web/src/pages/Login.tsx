@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
 import { api } from "../lib/api";
 import { useSession } from "../lib/session";
@@ -12,13 +12,21 @@ export function LoginPage() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const gate = useRef(false);
 
   const devLogin = async (e: FormEvent) => {
     e.preventDefault();
+    if (gate.current) return;
+    gate.current = true;
+    setBusy(true);
+    setError("");
     try {
       await api("/api/auth/dev-login", { method: "POST", body: { email, name: name || undefined } });
       window.location.assign(next);
     } catch (err) {
+      gate.current = false;
+      setBusy(false);
       setError((err as Error).message);
     }
   };
@@ -36,9 +44,11 @@ export function LoginPage() {
             使用 Google 帳號登入
           </a>
         )}
-        <small>
-          登入即表示你同意<a href="/terms">服務條款</a>與<a href="/privacy">隱私權政策</a>。
-        </small>
+        <p className="muted">登入即表示你同意下面兩份說明。</p>
+        <div className="row wrap">
+          <a className="btn ghost" href="/terms">服務條款</a>
+          <a className="btn ghost" href="/privacy">隱私權政策</a>
+        </div>
       </section>
       {config?.devLogin && (
         <form className="panel soft stack" onSubmit={devLogin} aria-label="開發用登入">
@@ -53,7 +63,7 @@ export function LoginPage() {
             <input aria-label="名字" value={name} onChange={(e) => setName(e.target.value)} />
           </label>
           {error && <p role="alert" className="error">{error}</p>}
-          <button className={`btn ${config.googleLogin ? "ghost" : "primary"}`} type="submit">開發用登入</button>
+          <button className={`btn ${config.googleLogin ? "ghost" : "primary"}`} type="submit" disabled={busy} aria-busy={busy}>{busy ? "進去中…" : "開發用登入"}</button>
         </form>
       )}
     </div>

@@ -1,15 +1,20 @@
 import { Link, useParams } from "react-router-dom";
 import { Avatar } from "../components/Avatar";
 import { DistrictTag, ErrorBox, ExecutorTag, Loading, RealTag } from "../components/Bits";
+import { GrownGate } from "../components/GrownGate";
 import { api } from "../lib/api";
 import { formatDate } from "../lib/format";
 import { useSession } from "../lib/session";
 import type { DeedView } from "../lib/types";
 import { useFetch } from "../lib/useFetch";
 
-const SOURCE: Record<string, string> = { provider_confirmed: "提供者確認出席", self: "本人紀錄", ai: "AI 角色回報" };
+const SOURCE: Record<string, string> = { provider_confirmed: "店家確認出席", self: "自己記下", ai: "朋友帶回" };
 
 export function DeedPage() {
+  return <GrownGate><DeedBody /></GrownGate>;
+}
+
+function DeedBody() {
   const { id } = useParams();
   const { me, toast } = useSession();
   const { data, error, loading, reload } = useFetch<DeedView>(`/api/deeds/${id}`);
@@ -65,7 +70,7 @@ export function DeedPage() {
         )}
         {data.isMine ? (
           <div className="panel soft stack" style={{ gap: 8 }}>
-            <strong>這是你的事蹟</strong>
+            <strong>這是你做過的事</strong>
             {data.followers && (
               <p>
                 {data.followers.referenced > 0
@@ -84,7 +89,7 @@ export function DeedPage() {
             <Link className="btn primary" to={me ? `/steps/new?deedId=${data.id}` : `/login?next=${encodeURIComponent(`/steps/new?deedId=${data.id}`)}`}>
               我也想做
             </Link>
-            <small className="muted">定義一個你自己的小小第一步</small>
+            <small className="muted">寫下你要做的一件小事</small>
           </div>
         )}
       </article>

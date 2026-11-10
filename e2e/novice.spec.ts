@@ -43,9 +43,10 @@ test("新手：領養、出門、信物、做到了、收藏", async ({ page }) 
   await page.getByRole("button", { name: "下一步" }).click();
   await page.getByLabel("角色名字").fill("小龍");
   await expectClean(page);
-  await page.getByRole("button", { name: "下一步" }).click();
+  await page.getByRole("button", { name: "帶牠回家" }).click();
   await expect(page.getByText("嗨！我是小龍。")).toBeVisible();
   await expect(page.locator(".hatch")).toBeVisible();
+  await page.getByRole("button", { name: "去找牠" }).click();
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole("button", { name: "出門逛逛" })).toBeVisible();
   await expect(page.locator("main .btn.primary")).toHaveCount(1);
@@ -56,19 +57,14 @@ test("新手：領養、出門、信物、做到了、收藏", async ({ page }) 
   await expect(page.getByRole("status")).toBeVisible();
 
   await page.getByRole("button", { name: "出門逛逛" }).click();
-  await expect(page.getByRole("dialog", { name: "新配件" })).toBeVisible();
-  await expect(page.getByText("新配件！")).toBeVisible();
-  await expect(page.locator("[aria-label='小背包']")).toBeVisible();
-  await page.getByRole("button", { name: "好耶" }).click();
   await expect(page.getByRole("button", { name: "我也去摸摸看" })).toBeVisible();
+  await expect(page.getByText("小背包背好了。")).toBeVisible();
+  await expect(page.locator("[aria-label='小背包']")).toBeVisible();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
   await expectClean(page);
   await evidence(page, "novice-03-keepsake");
 
   await page.getByRole("button", { name: "我也去摸摸看" }).click();
-  await expect(page.getByRole("textbox", { name: "我要做的是" })).toBeVisible();
-  await expect(page.locator("main input, main textarea, main select")).toHaveCount(1);
-  await expectClean(page);
-  await page.getByRole("button", { name: "好，接下了！" }).click();
   await expect(page.getByText("我幫你記著喔。")).toBeVisible();
   await expect(page.getByRole("button", { name: "我做到了！" })).toBeVisible();
   await expect(page.getByRole("tab")).toHaveCount(0);
@@ -80,17 +76,21 @@ test("新手：領養、出門、信物、做到了、收藏", async ({ page }) 
   await expect(dialog).toBeVisible();
   await expect(dialog).toContainText("★ +1");
   await expect(dialog).toContainText("★ 1/3");
+  await expect(dialog).toContainText("收下星星");
+  await expect(dialog).not.toContainText("點旁邊");
   await expect(page.locator("textarea")).toHaveCount(0);
   await page.getByRole("button", { name: "😆" }).click();
+  await page.getByRole("button", { name: "收下星星" }).click();
   await expect(page.getByText(/★ 1\/3/)).toBeVisible();
   await expectClean(page);
   await evidence(page, "novice-05-home-star");
 
   const nav = page.getByRole("navigation", { name: test.info().project.name === "mobile" ? "快速導覽" : "主要導覽" });
-  await nav.getByRole("link", { name: "圖鑑" }).click();
-  await expect(page.getByRole("heading", { name: "信物收藏" })).toBeVisible();
-  await expect(page.getByLabel("收藏進度")).toHaveText("1/2");
-  await expect(page.locator(".is-missing")).toHaveCount(1);
+  await nav.getByRole("link", { name: "收藏櫃" }).click();
+  await expect(page.getByRole("heading", { name: "收藏櫃" })).toBeVisible();
+  await expect(page.getByLabel("收藏進度")).toHaveText("1/9");
+  await expect(page.locator(".keepsake-cell")).toHaveCount(9);
+  await expect(page.locator(".is-missing")).toHaveCount(8);
   await expectClean(page);
   await evidence(page, "novice-06-cabinet");
 
@@ -114,6 +114,6 @@ test("新手：領養、出門、信物、做到了、收藏", async ({ page }) 
   await evidence(page, "novice-08-settings");
 
   await page.goto("/connect");
-  await expect(page.locator("code", { hasText: "/mcp" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "小龍還沒長大" })).toBeVisible();
   expect(errors).toEqual([]);
 });

@@ -1,11 +1,16 @@
 import { Link, useParams } from "react-router-dom";
 import { DistrictTag, ErrorBox, Loading } from "../components/Bits";
+import { GrownGate } from "../components/GrownGate";
 import { formatDateTime } from "../lib/format";
 import { useSession } from "../lib/session";
 import type { TrialView } from "../lib/types";
 import { useFetch } from "../lib/useFetch";
 
 export function TrialPage() {
+  return <GrownGate><TrialBody /></GrownGate>;
+}
+
+function TrialBody() {
   const { id } = useParams();
   const { me } = useSession();
   const { data, error, loading } = useFetch<TrialView>(`/api/trials/${id}`);

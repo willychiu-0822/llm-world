@@ -17,6 +17,7 @@ export interface PetSummary {
   total: number;
   letter: boolean;
   notify: boolean;
+  pending: KeepsakeItem | null;
 }
 
 export interface Me {

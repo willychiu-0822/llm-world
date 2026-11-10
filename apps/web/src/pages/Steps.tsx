@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Empty, ErrorBox, ExecutorTag, Loading } from "../components/Bits";
+import { GrownGate } from "../components/GrownGate";
 import { api, ApiError } from "../lib/api";
 import { formatDateTime } from "../lib/format";
 import { useSession } from "../lib/session";
@@ -23,7 +24,7 @@ function NoteEditor({ step, kind, onSaved }: { step: Step; kind: "before" | "aft
   const [shared, setShared] = useState(cur?.shared ?? false);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
-  const label = kind === "before" ? "做之前的隨筆" : "做之後的隨筆";
+  const label = kind === "before" ? "做之前的話" : "做之後的話";
   const save = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
@@ -52,7 +53,7 @@ function NoteEditor({ step, kind, onSaved }: { step: Step; kind: "before" | "aft
         <span>{label}</span>
         <textarea aria-label={label} value={body} onChange={(e) => setBody(e.target.value)} rows={3} maxLength={2000} disabled={saving} />
       </label>
-      <label className="check"><input type="checkbox" checked={shared} onChange={(e) => setShared(e.target.checked)} disabled={saving} />分享到事蹟，讓後來的人看到</label>
+      <label className="check"><input type="checkbox" checked={shared} onChange={(e) => setShared(e.target.checked)} disabled={saving} />說給後來的人聽</label>
       {error && <p role="alert" className="error">還沒存好：{error}。內容還在，可以再按一次儲存。</p>}
       <div className="row"><button className="btn small" type="submit" disabled={saving}>儲存</button><button className="btn small ghost" type="button" disabled={saving} onClick={() => { setError(""); setOpen(false); }}>取消</button></div>
     </form>
@@ -114,12 +115,12 @@ function CompleteForm({ step, onDone, onCancel }: { step: Step; onDone(): void; 
     <form className="panel soft stack" onSubmit={submit} aria-label="完成這一步">
       <strong>你做到了！想留下什麼嗎？</strong>
       <label className="field">
-        <span>做之後的隨筆（選填）</span>
-        <textarea aria-label="做之後的隨筆（選填）" value={noteAfter} onChange={(e) => setNoteAfter(e.target.value)} rows={3} maxLength={2000} placeholder="發生了什麼？跟想像的哪裡不一樣？" />
+        <span>做之後的話（選填）</span>
+        <textarea aria-label="做之後的話（選填）" value={noteAfter} onChange={(e) => setNoteAfter(e.target.value)} rows={3} maxLength={2000} placeholder="發生了什麼？跟想像的哪裡不一樣？" />
       </label>
-      <label className="check"><input type="checkbox" checked={noteShared} onChange={(e) => setNoteShared(e.target.checked)} />把這段隨筆分享到事蹟</label>
+      <label className="check"><input type="checkbox" checked={noteShared} onChange={(e) => setNoteShared(e.target.checked)} />把這段話留給後來的人</label>
       <fieldset className="row wrap" style={{ border: "none", padding: 0 }}>
-        <legend className="sr-only">事蹟可見度</legend>
+        <legend className="sr-only">誰看得到</legend>
         <label className="check"><input type="radio" name={`vis-${step.id}`} checked={visibility === "public"} onChange={() => setVisibility("public")} />公開到鎮上（成為別人的發現）</label>
         <label className="check"><input type="radio" name={`vis-${step.id}`} checked={visibility === "private"} onChange={() => setVisibility("private")} />只有自己看得到</label>
       </fieldset>
@@ -158,7 +159,7 @@ function StepItem({ step, reload, onCompleted, onReviewed, highlighted, completi
         {step.status !== "draft" && (
           <div className="notes-pair">
             <NoteEditor step={step} kind="before" onSaved={reload} />
-            {step.status === "done" ? <NoteEditor step={step} kind="after" onSaved={reload} /> : <div className="after"><small>做之後的隨筆</small><p className="muted">做完之後再寫</p></div>}
+            {step.status === "done" ? <NoteEditor step={step} kind="after" onSaved={reload} /> : <div className="after"><small>做之後的話</small><p className="muted">做完之後再寫</p></div>}
           </div>
         )}
 
@@ -177,16 +178,20 @@ function StepItem({ step, reload, onCompleted, onReviewed, highlighted, completi
           )}
           {step.status === "confirmed" && when && <a className="btn ghost small" href={`/api/first-steps/${step.id}/ics`}>加入行事曆</a>}
           {step.status === "confirmed" && <button className="btn ghost small" onClick={() => act("drop", "先放下也沒關係")}>先放下</button>}
-          {step.status === "done" && step.deedId && <Link className={`btn small ${primary ? "primary" : "ghost"}`} to={`/deeds/${step.deedId}`}>看看這個事蹟</Link>}
+          {step.status === "done" && step.deedId && <Link className={`btn small ${primary ? "primary" : "ghost"}`} to={`/deeds/${step.deedId}`}>看看這件事</Link>}
         </div>
         {step.status === "review" && <ReviewForm step={step} onDone={onReviewed} />}
-        {completing && <CompleteForm step={step} onCancel={onCancel} onDone={() => { onCancel(); toast("太好了！這成為你的新事蹟"); onCompleted(step.id); void reloadMe(); }} />}
+        {completing && <CompleteForm step={step} onCancel={onCancel} onDone={() => { onCancel(); toast("太好了！這件事留下了"); onCompleted(step.id); void reloadMe(); }} />}
       </article>
     </li>
   );
 }
 
 export function StepsPage() {
+  return <GrownGate><StepsBody /></GrownGate>;
+}
+
+function StepsBody() {
   const { toast } = useSession();
   const [params, setParams] = useSearchParams();
   const raw = params.get("tab");

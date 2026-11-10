@@ -1,5 +1,5 @@
 import { lazy, Suspense, type ReactElement } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Link, Route, Routes } from "react-router-dom";
 import { Loading, RequireLogin } from "./components/Bits";
 import { Layout } from "./components/Layout";
 import { HomePage } from "./pages/Home";
@@ -51,7 +51,7 @@ export function App() {
         <Route path="/notifications" element={guard(<NotificationsPage />)} />
         <Route path="/provider" element={guard(<ProviderPage />)} />
         <Route path="/admin" element={guard(<AdminPage />)} />
-        <Route path="*" element={<p className="empty">這條路還沒蓋好。回到<a href="/">地圖</a>看看吧。</p>} />
+        <Route path="*" element={<div className="empty stack"><p>這條路還沒蓋好。</p><Link to="/" className="btn primary">回小龍身邊</Link></div>} />
       </Routes></Suspense>
     </Layout>
   );

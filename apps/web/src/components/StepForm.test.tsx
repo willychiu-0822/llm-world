@@ -18,7 +18,7 @@ describe("StepForm", () => {
     await u.clear(screen.getByLabelText("第一步"));
     await u.type(screen.getByLabelText("第一步"), "週六去上試用課");
     await u.selectOptions(screen.getByLabelText("報名場次"), "ses_1");
-    await u.type(screen.getByLabelText(/做之前的隨筆/), "應該會很尷尬吧");
+    await u.type(screen.getByLabelText(/做之前的話/), "應該會很尷尬吧");
     await u.click(screen.getByRole("button", { name: "確定這一步" }));
     expect(onSubmit).toHaveBeenCalledWith({
       executor: "self",

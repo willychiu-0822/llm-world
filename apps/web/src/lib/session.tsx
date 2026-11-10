@@ -64,7 +64,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       {children}
       {message && (
         <div className="toast" role="status">
-          {message}
+          <span>{message}</span>
+          <button type="button" onClick={() => setMessage("")}>好</button>
         </div>
       )}
     </Ctx.Provider>
