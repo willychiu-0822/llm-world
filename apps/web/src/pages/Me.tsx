@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Avatar } from "../components/Avatar";
 import { api } from "../lib/api";
@@ -11,6 +11,9 @@ export function MePage() {
   const [allow, setAllow] = useState(me?.character?.sharing.allowAiQuotes ?? true);
   const [notify, setNotify] = useState(me?.pet?.notify !== false);
   const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const gate = useRef(false);
   if (!me) return null;
   const logout = async () => {
     await api("/api/auth/logout", { method: "POST" });
@@ -22,7 +25,10 @@ export function MePage() {
     window.location.assign("/");
   };
   const saveName = async () => {
-    if (!me.character) return;
+    if (!me.character || gate.current) return;
+    gate.current = true;
+    setBusy(true);
+    setSaved(false);
     setError("");
     try {
       await api("/api/me/character", {
@@ -30,8 +36,12 @@ export function MePage() {
         body: { name, appearance: me.character.appearance, personality, sharing: { allowAiQuotes: allow } },
       });
       await reload();
+      setSaved(true);
     } catch (err) {
       setError((err as Error).message);
+    } finally {
+      gate.current = false;
+      setBusy(false);
     }
   };
   const toggleNotify = async (value: boolean) => {
@@ -60,7 +70,8 @@ export function MePage() {
             新消息提醒
           </label>
           {error && <p role="alert" className="error">{error}</p>}
-          <button type="button" className="btn primary" onClick={() => void saveName()}>儲存名字</button>
+          {saved && <p role="status">存好了。</p>}
+          <button type="button" className="btn primary" disabled={busy} aria-busy={busy} onClick={() => void saveName()}>{busy ? "儲存中…" : "儲存名字"}</button>
         </section>
       ) : (
         <section className="panel stack">

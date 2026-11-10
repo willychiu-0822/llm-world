@@ -405,7 +405,7 @@ export function TownMap({ districts, places, children, onInteract }: { districts
                     <g key={s.id}>
                       <Link to={`/places/${s.id}`} aria-label={`${s.name}（${s.deedCount} 個信物、${s.trialCount} 個試用機會）`} className="map-place">
                         <g transform={`translate(${L.x + ox} ${L.y + oy})`}>
-                          <circle r="24" fill="transparent" />
+                          <rect x={-36} y={-40} width={72} height={72} fill="transparent" />
                           <Shop color={s.roofColor} />
                           <text y="34" textAnchor="middle" fontSize="14" fill={INK} className="map-label">
                             {s.name.length > 7 ? `${s.name.slice(0, 7)}…` : s.name}
