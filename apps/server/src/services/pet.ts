@@ -1,6 +1,6 @@
 import { growthStage, keepsakeFor, nextGrowthAt, petPatchInput, warmLine, type Sticker } from "@lj/core";
 import { characters, deeds, firstSteps, places } from "@lj/db";
-import { and, count, desc, eq, inArray, ne } from "drizzle-orm";
+import { and, count, desc, eq, inArray, ne, sql } from "drizzle-orm";
 import type { AppContext } from "../context";
 import { AppError } from "../http/errors";
 import { visibleDeed } from "./deeds";
@@ -179,7 +179,7 @@ export async function walkOut(ctx: AppContext, userId: string) {
   if (first) pet.earnedAccessories = [...pet.earnedAccessories, "backpack"];
   await ctx.db
     .update(characters)
-    .set({ sharing: sharingWith(character.sharing, pet), lastActivePlaceId: row.deed.placeId, lastActiveAt: ctx.now() })
+    .set({ sharing: sql`${characters.sharing} || ${JSON.stringify(sharingWith({}, pet))}::jsonb`, lastActivePlaceId: row.deed.placeId, lastActiveAt: ctx.now() })
     .where(eq(characters.id, character.id));
   const summary = await getPetSummary(ctx, userId, sharingWith(character.sharing, pet));
   return { keepsake: present(row, true, null), reward: first ? "backpack" : null, pet: summary };
@@ -196,6 +196,6 @@ export async function patchPet(ctx: AppContext, userId: string, raw: unknown) {
     pet.moods = { ...pet.moods, [input.mood.deedId]: input.mood.sticker };
   }
   const sharing = sharingWith(character.sharing, pet);
-  await ctx.db.update(characters).set({ sharing }).where(eq(characters.id, character.id));
+  await ctx.db.update(characters).set({ sharing: sql`${characters.sharing} || ${JSON.stringify(sharingWith({}, pet))}::jsonb` }).where(eq(characters.id, character.id));
   return getPetSummary(ctx, userId, sharing);
 }

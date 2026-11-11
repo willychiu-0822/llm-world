@@ -1,6 +1,6 @@
 import { expect } from "@playwright/test";
 import { test } from "./helpers";
-import { json, loginPage, look } from "./helpers";
+import { growToStageTwo, json, loginPage, look } from "./helpers";
 
 /**
  * 情境 B：活動推廣者 Leo
@@ -52,6 +52,7 @@ test("Leo opens a shop, publishes a trial, confirms attendance and sees thanks",
   // ② 被發現：店出現在龍角鎮地圖的運動場
   const runner = await loginPage(browser, "runner@e2e.test", "跑者");
   await json(runner.request.put("/api/me/character", { data: { name: "小跑", appearance: look(), personality: "", sharing: { allowAiQuotes: true } } }));
+  await growToStageTwo(runner, "小跑");
   await runner.goto("/map");
   await runner.getByRole("link", { name: /Leo 慢跑站/ }).click();
   await expect(runner.getByRole("heading", { name: "Leo 慢跑站" })).toBeVisible();
@@ -64,7 +65,7 @@ test("Leo opens a shop, publishes a trial, confirms attendance and sees thanks",
   await expect(runner.getByText("提供者建議的第一步")).toBeVisible();
   await runner.getByLabel("報名場次").selectOption({ index: 1 });
   await runner.getByLabel("第一步").fill("週日去跑新手 5K");
-  await runner.getByLabel(/做之前的隨筆/).fill("我連 1 公里都沒跑過。");
+  await runner.getByLabel(/做之前的話/).fill("我連 1 公里都沒跑過。");
   await runner.getByRole("button", { name: "確定這一步" }).click();
   await runner.waitForURL("**/steps");
   await expect(runner.getByRole("heading", { name: "「週日去跑新手 5K」" })).toBeVisible();
@@ -83,9 +84,10 @@ test("Leo opens a shop, publishes a trial, confirms attendance and sees thanks",
   await runner.goto("/steps");
   await runner.getByRole("tab", { name: /完成了/ }).click();
   await expect(runner.getByText("提供者已確認出席")).toBeVisible();
-  await runner.getByRole("button", { name: "寫一點" }).click();
-  await runner.getByLabel("做之後的隨筆").fill("走了一半的路，但教練一直陪著最後一個人。");
-  await runner.getByLabel("分享到事蹟，讓後來的人看到").check();
+  const finished = runner.getByRole("article").filter({ hasText: "週日去跑新手 5K" });
+  await finished.locator(".after").getByRole("button", { name: "寫一點" }).click();
+  await runner.getByLabel("做之後的話").fill("走了一半的路，但教練一直陪著最後一個人。");
+  await runner.getByLabel("說給後來的人聽").check();
   await runner.getByRole("button", { name: "儲存" }).click();
   await expect(runner.getByText("走了一半的路，但教練一直陪著最後一個人。")).toBeVisible();
 

@@ -7,6 +7,7 @@ import { PrivacyPage, TermsPage } from "./pages/Legal";
 import { LoginPage } from "./pages/Login";
 import { MapPage } from "./pages/Map";
 
+const LifePage = lazy(() => import("./pages/Life").then(m => ({ default: m.LifePage })));
 const AdminPage = lazy(() => import("./pages/Admin").then(m => ({ default: m.AdminPage })));
 const CabinetPage = lazy(() => import("./pages/Cabinet").then(m => ({ default: m.CabinetPage })));
 const CharacterPage = lazy(() => import("./pages/Character").then(m => ({ default: m.CharacterPage })));
@@ -38,6 +39,8 @@ export function App() {
         <Route path="/trials/:id" element={<TrialPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/terms" element={<TermsPage />} />
+        <Route path="/life" element={guard(<LifePage />)} />
+        <Route path="/life/cabinet" element={guard(<LifePage cabinet />)} />
         <Route path="/me" element={guard(<MePage />)} />
         <Route path="/me/character" element={guard(<CharacterPage />)} />
         <Route path="/connect" element={guard(<ConnectPage />)} />

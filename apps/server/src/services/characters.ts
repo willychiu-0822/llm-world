@@ -1,6 +1,6 @@
 import { characterInput, wantInput, wantUpdate } from "@lj/core";
 import { characters, discoveries, newId, notifications, providers, wants } from "@lj/db";
-import { and, asc, count, eq, isNull, ne } from "drizzle-orm";
+import { and, asc, count, eq, isNull, ne, sql } from "drizzle-orm";
 import type { z } from "zod";
 import type { AppContext } from "../context";
 import { notFound } from "../http/errors";
@@ -30,7 +30,7 @@ export async function saveCharacter(ctx: AppContext, userId: string, raw: unknow
   const sharing = { ...prevSharing, ...input.sharing };
   const values = { name, personality, appearance: { ...input.appearance, description }, sharing };
   if (existing) {
-    const [c] = await ctx.db.update(characters).set(values).where(eq(characters.id, existing.id)).returning();
+    const [c] = await ctx.db.update(characters).set({ ...values, sharing: sql`${characters.sharing} || ${JSON.stringify(input.sharing)}::jsonb` }).where(eq(characters.id, existing.id)).returning();
     return c;
   }
   const [c] = await ctx.db.insert(characters).values({ id: newId("chr"), userId, ...values }).returning();

@@ -32,7 +32,7 @@ function describe(n: N): { text: string; to?: string } {
     case "question_answered":
       return { text: `「${p.trialTitle}」回答了你的 AI 問的問題：「${p.question}」→ ${p.answer}`, to: `/trials/${p.trialId}` };
     case "attendance_confirmed":
-      return { text: `「${p.trialTitle}」確認了你的出席。要不要寫一段做之後的隨筆？`, to: "/steps?tab=done" };
+      return { text: `「${p.trialTitle}」確認了你的出席。要不要寫一段做之後的紀錄？`, to: "/steps?tab=done" };
     case "provider_approved":
       return { text: `你的提供者申請「${p.name}」通過了，可以在鎮上開店了。`, to: "/provider" };
     case "new_question":

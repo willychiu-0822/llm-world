@@ -10,8 +10,8 @@ export function ExecutorTag({ executor }: { executor: string }) {
   return executor === "ai" ? <span className="tag tag-ai">朋友做的</span> : <span className="tag tag-self">自己做的</span>;
 }
 
-export function RealTag({ demo }: { demo: boolean }) {
-  return demo ? <span className="tag tag-demo">示範</span> : <span className="tag tag-real">真人做過</span>;
+export function RealTag({ demo, executor }: { demo: boolean; executor: string }) {
+  return demo ? <span className="tag tag-demo">示範</span> : executor === "ai" ? null : <span className="tag tag-real">真人做過</span>;
 }
 
 export function DistrictTag({ k }: { k: string }) {
@@ -53,7 +53,7 @@ export function DeedCard({ deed }: { deed: Deed }) {
           <div className="grow">
             <strong>{deed.character?.name ?? "某位鎮民"}</strong>
             <div className="row wrap" style={{ gap: 6 }}>
-              <RealTag demo={deed.isDemo} />
+              <RealTag demo={deed.isDemo} executor={deed.executor} />
               <ExecutorTag executor={deed.executor} />
               {deed.isFirst && <span className="tag tag-first">第一次</span>}
             </div>

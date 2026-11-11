@@ -79,7 +79,7 @@ export function CabinetView({ total, items, pendingId, onAccept }: { collected: 
           {open.deedId === pendingId && onAccept ? (
             <button type="button" className="btn primary" disabled={busy} onClick={() => { setBusy(true); void onAccept(open).catch(() => setBusy(false)); }}>{busy ? "記下來…" : "我也去摸摸看"}</button>
           ) : (
-            <button type="button" className="btn primary" onClick={() => setPile(null)}>好</button>
+            <button type="button" className="btn primary" onClick={() => setPile(null)}>收好信物</button>
           )}
         </Dialog>
       )}

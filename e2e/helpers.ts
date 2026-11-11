@@ -59,6 +59,16 @@ export async function json<T = any>(p: Promise<import("@playwright/test").APIRes
 
 export const look = (accessory = "dragon_horns") => ({ body: "round", accessory, main: "#F2C6A8", accent: "#A9C7DE", description: "" });
 
+/** Grow the signed-in character through the same completion API used by the product. */
+export async function growToStageTwo(page: Page, name = "小龍") {
+  await json(page.request.put("/api/me/character", { data: { name, appearance: look() } }));
+  for (let i = 0; i < 7; i++) {
+    const step = await json(page.request.post("/api/first-steps", { data: { executor: "self", text: `成長的小事 ${i + 1}` } }));
+    await json(page.request.post(`/api/first-steps/${step.id}/complete`, { data: { visibility: "private" } }));
+  }
+  expect((await json(page.request.get("/api/me"))).pet.stage).toBeGreaterThanOrEqual(2);
+}
+
 export async function approvedProvider(email: string, name: string, shop: { districtKey: string; name: string; realAddress: string }, trial: Record<string, unknown>, faqs: { question: string; answer: string }[], startsAt: string) {
   const p = await apiAs(email);
   const applied = await json(p.post("/api/provider/apply", { data: { name } }));

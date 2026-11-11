@@ -1,5 +1,5 @@
 import { dedupeKeepsakes, joinWords, keepsakeFor, townFolk, warmLine } from "@lj/core";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Dialog } from "../components/Dialog";
 import { ErrorBox, Loading } from "../components/Bits";
@@ -35,23 +35,30 @@ export function PlacePage() {
   const { data, error, loading } = useFetch<PlaceView>(`/api/places/${id}`);
   const [open, setOpen] = useState<Deed | null>(null);
   const [busy, setBusy] = useState(false);
+  const [acceptError, setAcceptError] = useState("");
+  const gate = useRef(false);
   if (loading && !data) return <Loading />;
   if (error) return <ErrorBox error={error} />;
   if (!data) return null;
   const folk = townFolk(data.districtKey);
-  const keepsakes = uniqueKeepsakes(data.deeds);
+  const keepsakes = uniqueKeepsakes(data.deeds.filter(d => !d.isMine));
   const grown = (me?.pet?.stage ?? 0) >= 2;
   const accept = async (deed: Deed) => {
     if (!me) {
       nav(`/login?next=${encodeURIComponent(`/places/${data.id}`)}`);
       return;
     }
-    if (busy) return;
+    if (gate.current) return;
+    gate.current = true;
+    setAcceptError("");
     setBusy(true);
     try {
       await acceptKeepsake({ deedId: deed.id, title: deed.title, object: keepsakeFor(deed.districtKey).name });
       nav("/tries", { state: { hello: true } });
+    } catch {
+      setAcceptError("這顆先放著，再試一次或換一顆看看。");
     } finally {
+      gate.current = false;
       setBusy(false);
     }
   };
@@ -110,7 +117,9 @@ export function PlacePage() {
         <Dialog title={keepsakeFor(open.districtKey).name} busy={busy} onClose={() => { if (!busy) setOpen(null); }}>
           <p className="keepsake-emoji" aria-hidden>{keepsakeFor(open.districtKey).emoji}</p>
           <p>{warmLine({ name: open.character?.name ?? "一位鎮民", title: open.title, districtKey: open.districtKey })}</p>
-          <button type="button" className="btn primary" disabled={busy} onClick={() => void accept(open)}>{busy ? "記下來…" : "我也去摸摸看"}</button>
+          {acceptError && <p role="alert" className="error">{acceptError}</p>}
+          <button type="button" className="btn primary" disabled={busy} aria-busy={busy} onClick={() => void accept(open)}>{busy ? "記下來…" : "我也去摸摸看"}</button>
+          {grown && <Link className="btn ghost" to={`/deeds/${open.id}`}>看看完整分享</Link>}
         </Dialog>
       )}
     </div>

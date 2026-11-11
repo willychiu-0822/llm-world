@@ -1,9 +1,11 @@
+import { Link } from "react-router-dom";
 const Draft = () => <p className="notice">草稿：上線前需由營運方審閱並依實際情況修改。</p>;
 
 export function PrivacyPage() {
   return (
     <article className="panel stack" style={{ maxWidth: 760, margin: "0 auto" }}>
       <h1>隱私權政策</h1>
+      <Link to="/" className="btn primary">回小龍身邊</Link>
       <Draft />
       <h2>我們收集什麼</h2>
       <ul>
@@ -41,6 +43,7 @@ export function TermsPage() {
         <li>龍角鎮不是醫療或心理諮商服務。如果你正處於危機中，請聯絡當地緊急服務或心理支持專線（台灣：1925 安心專線）。</li>
         <li>標示「示範」的內容是範例，不是真人。</li>
       </ul>
+      <Link to="/" className="btn primary">回小龍身邊</Link>
     </article>
   );
 }

@@ -1,18 +1,22 @@
 import { expect } from "@playwright/test";
-import { test, evidence, json, look, seedPredecessor } from "./helpers";
+import { test, evidence, growToStageTwo, json, look, seedPredecessor } from "./helpers";
 
-test("UAT-15 訪客從事蹟登入後回到原第一步，重新整理仍可完成", async ({ page }) => {
+test("UAT-15 登入後回到原第一步，長大後從來源接下並重新整理完成", async ({ page }) => {
   const errors: string[] = [];
   page.on("console", m => { if (m.type() === "error") errors.push(m.text()); });
   page.on("pageerror", e => errors.push(e.message));
   const deed = await seedPredecessor();
-  await page.goto(`/deeds/${deed.id}`);
-  await page.getByRole("link", { name: "我也想做", exact: true }).click();
+  await page.goto(`/steps/new?deedId=${deed.id}`);
   await expect(page).toHaveURL(/\/login\?next=/);
   await evidence(page, "UAT-15-return-login");
   await page.getByLabel("Email").fill("deep-link@e2e.test");
   await page.getByLabel("名字", { exact: true }).fill("直接從故事來的新手");
   await page.getByRole("button", { name: "開發用登入" }).click();
+  await expect(page).toHaveURL(new RegExp(`/steps/new\\?deedId=${deed.id}`));
+  await expect(page.getByRole("heading", { name: "小龍還沒長大" })).toBeVisible();
+  await growToStageTwo(page);
+  await page.goto(`/deeds/${deed.id}`);
+  await page.getByRole("link", { name: "我也想做", exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`/steps/new\\?deedId=${deed.id}`));
   await page.reload();
   await expect(page.getByRole("heading", { name: "前人的第一步" })).toBeVisible();
@@ -25,7 +29,7 @@ test("UAT-15 訪客從事蹟登入後回到原第一步，重新整理仍可完�
   await page.reload();
   await page.getByRole("button", { name: "我做到了", exact: true }).click();
   await page.getByRole("button", { name: "完成", exact: true }).click();
-  await page.getByRole("link", { name: "看看這個事蹟" }).click();
+  await page.getByRole("article").filter({ hasText: "今天跟著一首歌哼唱" }).getByRole("link", { name: "看看這件事" }).click();
   await expect(page.getByRole("heading", { name: "「今天跟著一首歌哼唱」" })).toBeVisible();
   await expect(page.getByRole("link", { name: "音樂坊小廣場", exact: true })).toBeVisible();
   await evidence(page, "UAT-15-own-deed");
@@ -51,6 +55,7 @@ test("UAT-17 長Email與長英文內容在個人頁、步驟、事蹟與鏡子�
   const email = "first.time.longjiao.novice.with.a.long.name@example.test";
   await json(page.request.post("/api/auth/dev-login", { data: { email, name: "第一次來的小鎮居民" } }));
   await json(page.request.put("/api/me/character", { data: { name: "探索畫面的小龍", appearance: look(), personality: "", sharing: { allowAiQuotes: true } } }));
+  await growToStageTwo(page);
   const text = "https://example.test/" + "a".repeat(160);
   const want = await json(page.request.post("/api/me/wants", { data: { text: "想學會唱一首英文歌", districtKey: "music" } }));
   const step = await json(page.request.post("/api/first-steps", { data: { text, executor: "self", wantId: want.id } }));

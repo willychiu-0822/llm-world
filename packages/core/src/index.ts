@@ -7,3 +7,5 @@ export * from "./moderation";
 export * from "./schemas";
 export * from "./text";
 export const APP_NAME = "龍角鎮";
+
+export * from "./life";

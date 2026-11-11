@@ -1,6 +1,6 @@
 import { expect } from "@playwright/test";
 import { test } from "./helpers";
-import { apiAs, approvedProvider, json, loginPage, look, mcpConnect, tool } from "./helpers";
+import { apiAs, approvedProvider, growToStageTwo, json, loginPage, look, mcpConnect, tool } from "./helpers";
 
 /**
  * 情境 A：用戶小安（內向、想唱歌）與角色 Nova
@@ -24,6 +24,7 @@ test("Xiaoan's loop: AI step first, then going to the trial in person", async ({
   );
 
   const page = await loginPage(browser, "xiaoan@e2e.test", "小安");
+  await growToStageTwo(page, "Nova");
   await json(page.request.put("/api/me/character", { data: { name: "Nova", appearance: { ...look(), description: "背著吉他的街頭歌手" }, personality: "外向、喜歡站上舞台", sharing: { allowAiQuotes: true } } }));
   await json(page.request.post("/api/me/wants", { data: { text: "想在別人面前唱一首歌", districtKey: "music" } }));
 
@@ -58,7 +59,7 @@ test("Xiaoan's loop: AI step first, then going to the trial in person", async ({
   const want = me.wants[0];
   await tool(ai, "first_step_propose", { executor: "ai", text: "Nova 去問老師試用課的流程", wantId: want.id, sourceDeedIds: [miaDeed.id], trialId: voice.trial.id, reason: "先知道會發生什麼，比較不怕" });
   await page.goto("/steps");
-  await page.getByRole("tab", { name: /AI 的建議/ }).click();
+  await page.getByRole("tab", { name: /朋友的建議/ }).click();
   await expect(page.getByText("AI 的理由：先知道會發生什麼，比較不怕")).toBeVisible();
   await page.getByRole("button", { name: "確認這一步" }).click();
   await expect(page.getByText("這一步成立了")).toBeVisible();
@@ -80,9 +81,11 @@ test("Xiaoan's loop: AI step first, then going to the trial in person", async ({
   await notice.click();
   await expect(page).toHaveURL(/\/steps\?tab=review/);
   await page.getByRole("button", { name: "公開到鎮上" }).click();
-  await expect(page.getByRole("status")).toHaveText("已公開到鎮上");
-  await page.getByRole("link", { name: "看看這個事蹟" }).click();
-  await expect(page.getByText("AI 角色執行")).toBeVisible();
+  await expect(page.getByRole("status")).toContainText("已公開到鎮上");
+  await page.getByRole("article").filter({ hasText: "Nova 去問老師試用課的流程" }).getByRole("link", { name: "看看這件事" }).click();
+  await expect(page).toHaveURL(/\/deeds\/deed_/);
+  await expect(page.getByText("朋友做的", { exact: true })).toBeVisible();
+  await expect(page.getByText("真人做過", { exact: true })).toHaveCount(0);
   await expect(page.getByText(/前十分鐘練呼吸/)).toBeVisible();
 
   // 提供者回答轉來的問題 → 小安收到通知
@@ -96,7 +99,7 @@ test("Xiaoan's loop: AI step first, then going to the trial in person", async ({
   await page.getByRole("link", { name: "我也想試試" }).click();
   await page.getByLabel("報名場次").selectOption({ index: 1 });
   await page.getByLabel("第一步").fill("週六 10:00 去上試用課");
-  await page.getByLabel(/做之前的隨筆/).fill("應該會很尷尬吧，萬一破音怎麼辦……");
+  await page.getByLabel(/做之前的話/).fill("應該會很尷尬吧，萬一破音怎麼辦……");
   await page.getByRole("button", { name: "確定這一步" }).click();
   await page.waitForURL("**/steps");
 
@@ -109,8 +112,8 @@ test("Xiaoan's loop: AI step first, then going to the trial in person", async ({
   await page.getByRole("tab", { name: /完成了/ }).click();
   const item = page.getByRole("listitem").filter({ hasText: "週六 10:00 去上試用課" });
   await item.getByRole("button", { name: "寫一點" }).click();
-  await item.getByLabel("做之後的隨筆").fill("其實沒破音，老師說我的低音很特別。根本沒人在看我。");
-  await item.getByLabel("分享到事蹟，讓後來的人看到").check();
+  await item.getByLabel("做之後的話").fill("其實沒破音，老師說我的低音很特別。根本沒人在看我。");
+  await item.getByLabel("說給後來的人聽").check();
   await item.getByRole("button", { name: "儲存" }).click();
 
   // 成就鏡子

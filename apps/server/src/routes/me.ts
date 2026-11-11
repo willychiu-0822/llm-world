@@ -5,6 +5,7 @@ import { h } from "../http/errors";
 import { addWant, getMe, saveCharacter, updateWant } from "../services/characters";
 import { disconnectClient, listConnections } from "../services/connections";
 import { listKeepsakes, patchPet, walkOut } from "../services/pet";
+import { getLife, playLife, patchLife } from "../services/life";
 import { deleteUser } from "../services/users";
 
 export function meRoutes(ctx: AppContext) {
@@ -34,6 +35,9 @@ export function meRoutes(ctx: AppContext) {
       res.json(await getMe(ctx, req.user!));
     }),
   );
+  r.get("/life", h(async (req, res) => res.json(await getLife(ctx, req.user!.id))));
+  r.post("/life/activities", h(async (req, res) => res.json(await playLife(ctx, req.user!.id, req.body))));
+  r.patch("/life", h(async (req, res) => res.json(await patchLife(ctx, req.user!.id, req.body))));
   r.post("/walk", h(async (req, res) => res.json(await walkOut(ctx, req.user!.id))));
   r.get("/keepsakes", h(async (req, res) => res.json(await listKeepsakes(ctx, req.user!.id))));
   r.patch("/pet", h(async (req, res) => res.json(await patchPet(ctx, req.user!.id, req.body))));

@@ -1,10 +1,14 @@
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useSession } from "../lib/session";
 import { Avatar } from "./Avatar";
 
 export function Layout({ children }: { children: ReactNode }) {
-  const { me, loading } = useSession();
+  const { me, loading, message, dismissMessage } = useSession();
+  const noticeRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (message) noticeRef.current?.scrollIntoView({ block: "start" });
+  }, [message]);
   return (
     <div className="app">
       <header className="topbar">
@@ -20,6 +24,7 @@ export function Layout({ children }: { children: ReactNode }) {
           {!loading && !me && <NavLink to="/login">登入</NavLink>}
         </nav>
       </header>
+      {message && <div ref={noticeRef} className="toast" role="status"><span>{message}</span><button type="button" onClick={dismissMessage}>關閉提示</button></div>}
       <main className="page">{children}</main>
       <nav className="tabbar" aria-label="快速導覽">
         <NavLink to="/" end><span className="icon" aria-hidden>🏠</span>家</NavLink>

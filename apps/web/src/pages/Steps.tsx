@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Empty, ErrorBox, ExecutorTag, Loading } from "../components/Bits";
 import { GrownGate } from "../components/GrownGate";
@@ -10,7 +10,7 @@ import { useFetch } from "../lib/useFetch";
 
 type Tab = "draft" | "confirmed" | "review" | "done";
 const TABS: { key: Tab; label: string }[] = [
-  { key: "draft", label: "AI 的建議" },
+  { key: "draft", label: "朋友的建議" },
   { key: "confirmed", label: "進行中" },
   { key: "review", label: "等你看過" },
   { key: "done", label: "完成了" },
@@ -102,38 +102,45 @@ function CompleteForm({ step, onDone, onCancel }: { step: Step; onDone(): void; 
   const [noteShared, setNoteShared] = useState(false);
   const [visibility, setVisibility] = useState<"public" | "private">("public");
   const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const submitting = useRef(false);
   const submit = async (e: FormEvent) => {
     e.preventDefault();
+    if (submitting.current) return;
+    submitting.current = true;
+    setSaving(true);
+    setError("");
     try {
       await api(`/api/first-steps/${step.id}/complete`, { method: "POST", body: { noteAfter: noteAfter || undefined, noteShared, visibility } });
       onDone();
     } catch (err) {
       setError((err as Error).message);
+    } finally {
+      submitting.current = false;
+      setSaving(false);
     }
   };
   return (
-    <form className="panel soft stack" onSubmit={submit} aria-label="完成這一步">
+    <form className="panel soft stack" onSubmit={submit} aria-label="完成這一步" aria-busy={saving}>
       <strong>你做到了！想留下什麼嗎？</strong>
       <label className="field">
         <span>做之後的話（選填）</span>
-        <textarea aria-label="做之後的話（選填）" value={noteAfter} onChange={(e) => setNoteAfter(e.target.value)} rows={3} maxLength={2000} placeholder="發生了什麼？跟想像的哪裡不一樣？" />
+        <textarea aria-label="做之後的話（選填）" value={noteAfter} onChange={(e) => setNoteAfter(e.target.value)} rows={3} maxLength={2000} placeholder="發生了什麼？跟想像的哪裡不一樣？" disabled={saving} />
       </label>
-      <label className="check"><input type="checkbox" checked={noteShared} onChange={(e) => setNoteShared(e.target.checked)} />把這段話留給後來的人</label>
-      <fieldset className="row wrap" style={{ border: "none", padding: 0 }}>
+      <label className="check"><input type="checkbox" checked={noteShared} onChange={(e) => setNoteShared(e.target.checked)} disabled={saving} />把這段話留給後來的人</label>
+      <fieldset className="row wrap" style={{ border: "none", padding: 0 }} disabled={saving}>
         <legend className="sr-only">誰看得到</legend>
         <label className="check"><input type="radio" name={`vis-${step.id}`} checked={visibility === "public"} onChange={() => setVisibility("public")} />公開到鎮上（成為別人的發現）</label>
         <label className="check"><input type="radio" name={`vis-${step.id}`} checked={visibility === "private"} onChange={() => setVisibility("private")} />只有自己看得到</label>
       </fieldset>
       {error && <p role="alert" className="error">{error}</p>}
-      <div className="row wrap"><button className="btn primary" type="submit">完成</button><button className="btn ghost" type="button" onClick={onCancel}>取消</button></div>
+      <div className="row wrap"><button className="btn primary" type="submit" disabled={saving}>{saving ? "正在收好…" : "完成"}</button><button className="btn ghost" type="button" onClick={onCancel} disabled={saving}>取消</button></div>
     </form>
   );
 }
 
 function StepItem({ step, reload, onCompleted, onReviewed, highlighted, completing, onStart, onCancel, primary }: { step: Step; reload(): void; onCompleted(id: string): void; onReviewed(message: string, published: boolean): void; highlighted: boolean; completing: boolean; onStart(): void; onCancel(): void; primary: boolean }) {
   const { toast, reload: reloadMe } = useSession();
-  const completedCard = useRef<HTMLElement>(null);
-  useEffect(() => { if (highlighted) completedCard.current?.scrollIntoView({ block: "start" }); }, [highlighted]);
   const act = async (path: string, msg: string) => {
     await api(`/api/first-steps/${step.id}/${path}`, { method: "POST" });
     toast(msg);
@@ -143,7 +150,7 @@ function StepItem({ step, reload, onCompleted, onReviewed, highlighted, completi
   const when = step.session?.startsAt ?? step.plannedAt;
   return (
     <li>
-      <article ref={completedCard} className={`panel stack ${highlighted ? "just-completed" : ""}`} style={{ gap: 10 }}>
+      <article className={`panel stack ${highlighted ? "just-completed" : ""}`} style={{ gap: 10 }}>
         {highlighted && <strong className="notice">剛剛完成的這一步</strong>}
         <div className="row wrap" style={{ gap: 6 }}>
           <ExecutorTag executor={step.executor} />
@@ -152,7 +159,7 @@ function StepItem({ step, reload, onCompleted, onReviewed, highlighted, completi
         </div>
         <h3 style={{ margin: 0 }}>「{step.text}」</h3>
         {step.proposalReason && <p className="muted">AI 的理由：{step.proposalReason}</p>}
-        {step.trial && <p>試用機會：<Link to={`/trials/${step.trial.id}`}>{step.trial.title}</Link></p>}
+        {step.trial && <p>試用機會：<Link className="btn ghost" to={`/trials/${step.trial.id}`}>{step.trial.title}</Link></p>}
         {(when || step.where) && <p>🗓 {when ? formatDateTime(when) : ""}{step.where ? `・${step.where}` : ""}</p>}
         {step.result && step.status !== "review" && <div className="bubble"><small>AI 角色帶回的結果</small><p style={{ whiteSpace: "pre-wrap" }}>{step.result}</p></div>}
 
@@ -206,7 +213,7 @@ function StepsBody() {
   const [completedId, setCompletedId] = useState<string | null>(null);
   const [completingId, setCompletingId] = useState<string | null>(null);
   const { data, error, loading, reload } = useFetch<Step[]>("/api/first-steps");
-  const list = (data ?? []).filter((s) => s.status === tab);
+  const list = (data ?? []).filter((s) => s.status === tab).sort((a, b) => Number(b.id === completedId) - Number(a.id === completedId));
   const primaryId = list.find(s => s.status === "draft" || s.status === "review" || (s.status === "confirmed" && s.executor === "self") || (s.status === "done" && s.deedId))?.id;
   const count = (t: Tab) => (data ?? []).filter((s) => s.status === t).length;
   return (
@@ -225,7 +232,7 @@ function StepsBody() {
       <ErrorBox error={error} />
       {loading && !data ? <Loading /> : list.length ? <ul className="plain">{list.map((s) => <StepItem key={s.id} step={s} primary={!completingId && s.id === primaryId} completing={completingId === s.id} onStart={() => setCompletingId(s.id)} onCancel={() => setCompletingId(null)} reload={reload} highlighted={s.id === completedId} onCompleted={(id) => { setCompletedId(id); setTab("done"); reload(); }} onReviewed={(message, published) => { toast(message); setCompletedId(published ? s.id : null); setTab(published ? "done" : "confirmed"); reload(); }} />)}</ul> : (
         <Empty>
-          {tab === "draft" ? <>AI 角色還沒有建議。先<Link to="/connect">連接你的 AI</Link>，請牠找一個小小的第一步。</> : tab === "review" ? <>還沒有等你看過的結果。到<button className="text-link" onClick={() => setTab("confirmed")}>進行中</button>看交給 AI 的步驟，做完之後會先放在這裡。</> : tab === "confirmed" ? <>沒有進行中的步驟。去<Link to="/">地圖</Link>看看大家的第一步吧。</> : <>還沒有完成的步驟。到<button className="text-link" onClick={() => setTab("confirmed")}>進行中</button>選一步，做完再回來看看。</>}
+          {tab === "draft" ? <>AI 角色還沒有建議。先<Link className="btn ghost" to="/connect">找會說話的朋友</Link>，請牠找一個小小的第一步。</> : tab === "review" ? <>還沒有等你看過的結果。到<button className="text-link" onClick={() => setTab("confirmed")}>進行中</button>看交給 AI 的步驟，做完之後會先放在這裡。</> : tab === "confirmed" ? <>沒有進行中的步驟。去<Link className="btn ghost" to="/map">地圖</Link>看看大家的第一步吧。</> : <>還沒有完成的步驟。到<button className="text-link" onClick={() => setTab("confirmed")}>進行中</button>選一步，做完再回來看看。</>}
         </Empty>
       )}
     </div>

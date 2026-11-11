@@ -34,6 +34,9 @@ describe("town, places and moderation admin", () => {
     expect(place.deeds.map((d: { title: string }) => d.title)).toEqual(["公開的", "示範的"]);
     expect(place.deeds[1].isDemo).toBe(true);
     expect(place.deeds[0].character.name).toBe("Nova");
+    expect((await u.get("/api/places/pub_music")).body.deeds[0].isMine).toBe(true);
+    const visitor = await userWithCharacter(env.app, "visitor@example.com");
+    expect((await visitor.get("/api/places/pub_music")).body.deeds[0].isMine).toBe(false);
     expect((await request(env.app).get("/api/places/nope")).status).toBe(404);
   });
 

@@ -1,3 +1,4 @@
+import { readLife } from "@lj/core";
 import { BABY_LINES, joinWords, stageLabel } from "@lj/core";
 import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -64,6 +65,7 @@ export function HomePage() {
 
   const pet = me.pet ?? EMPTY;
   const baby = me.character;
+  const life = readLife(baby.sharing);
   const backpack = pet.accessories.includes("backpack") || backpackNote;
   const goal = pet.nextAt ?? pet.stars;
   const openTries = (steps.data ?? []).length;
@@ -132,13 +134,17 @@ export function HomePage() {
 
       <div className="baby-stage">
         {bubble && <p className="bubble baby-bubble" role="status">{bubble}</p>}
+        {life.decoration && <span className="life-decoration" aria-hidden>🏮</span>}
         <div className={`baby-wrap stage-${pet.stage}`}>
           <button type="button" className={jump ? "baby-hit jump" : "baby-hit"} onClick={poke} aria-label={baby.name}>
             <Avatar appearance={baby.appearance} name={baby.name} size={156} />
             {backpack && <span className="backpack" aria-label="小背包">🎒</span>}
-            {pet.stage >= 2 && baby.appearance.accessory !== "scarf" && <span className="scarf-extra" aria-hidden>🧣</span>}
+            {pet.stage >= 2 && !life.outfit && baby.appearance.accessory !== "scarf" && <span className="scarf-extra" aria-hidden>🧣</span>}
+            {life.outfit && <span className="life-outfit" aria-hidden>🧣</span>}
           </button>
           <strong>{baby.name}</strong>
+          {life.outfit && <span className="life-home-item" aria-label="穿著雲朵圍巾">🧣 雲朵圍巾</span>}
+          {life.decoration && <span className="life-home-item" aria-label="房間的四季小燈">🏮 四季小燈</span>}
         </div>
       </div>
       <div className="baby-actions stack">
@@ -174,6 +180,7 @@ export function HomePage() {
           <button type="button" className="btn ghost" disabled={accepting} onClick={() => { setShelved(true); setPhase("home"); setFound(null); }}>收進櫃裡</button>
         </article>
       )}
+      <Link to="/life" className="btn ghost">小龍的今天</Link>
       </div>
 
       {letterOpen && (
@@ -188,7 +195,7 @@ export function HomePage() {
         <Dialog title="郵筒" onClose={() => setMailOpen(false)}>
           <p>📮</p>
           <p>還沒有信。小龍說有信會塞進來。</p>
-          <button type="button" className="btn primary" onClick={() => setMailOpen(false)}>好</button>
+          <button type="button" className="btn primary" onClick={() => setMailOpen(false)}>關上郵筒</button>
         </Dialog>
       )}
     </div>

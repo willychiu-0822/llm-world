@@ -65,6 +65,7 @@ export interface CharacterLite {
 }
 
 export interface Deed {
+  isMine?: boolean;
   id: string;
   executor: "ai" | "self";
   title: string;

@@ -34,7 +34,7 @@ function DeedBody() {
           <div className="grow">
             <h2 style={{ margin: 0 }}>{data.character?.name ?? "某位鎮民"}</h2>
             <div className="row wrap" style={{ gap: 6 }}>
-              <RealTag demo={data.isDemo} />
+              <RealTag demo={data.isDemo} executor={data.executor} />
               <ExecutorTag executor={data.executor} />
               {data.isFirst && <span className="tag tag-first">第一次</span>}
               <DistrictTag k={data.districtKey} />
@@ -60,12 +60,12 @@ function DeedBody() {
         )}
         <small>
           {formatDate(data.createdAt)}・{SOURCE[data.recordSource] ?? data.recordSource}
-          {data.place && <>・<Link to={`/places/${data.place.id}`}>{data.place.name}</Link></>}
-          {data.trial && <>・<Link to={`/trials/${data.trial.id}`}>{data.trial.title}</Link></>}
+          {data.place && <>・<Link className="btn ghost" to={`/places/${data.place.id}`}>{data.place.name}</Link></>}
+          {data.trial && <>・<Link className="btn ghost" to={`/trials/${data.trial.id}`}>{data.trial.title}</Link></>}
         </small>
         {data.related.length > 0 && (
           <p className="muted">
-            這一步參考了：{data.related.map((r, i) => <span key={r.id}>{i > 0 && "、"}<Link to={`/deeds/${r.id}`}>「{r.title}」</Link></span>)}
+            這一步參考了：{data.related.map((r, i) => <span key={r.id}>{i > 0 && "、"}<Link className="btn ghost" to={`/deeds/${r.id}`}>「{r.title}」</Link></span>)}
           </p>
         )}
         {data.isMine ? (

@@ -58,7 +58,7 @@ export async function getPlaceRow(ctx: AppContext, placeId: string) {
   return row;
 }
 
-export async function getPlace(ctx: AppContext, placeId: string) {
+export async function getPlace(ctx: AppContext, placeId: string, viewerId?: string) {
   const { place, providerName } = await getPlaceRow(ctx, placeId);
   const ds = await listPublicDeeds(ctx, eq(deeds.placeId, place.id), 40);
   return {
@@ -72,7 +72,7 @@ export async function getPlace(ctx: AppContext, placeId: string) {
     online: place.online,
     isDemo: place.isDemo,
     providerName: providerName ?? null,
-    deeds: ds.map((d) => ({ ...deedDto(d.deed), character: d.characterName ? { name: d.characterName, appearance: d.appearance } : null })),
+    deeds: ds.map((d) => ({ ...deedDto(d.deed), isMine: d.deed.userId === viewerId, character: d.characterName ? { name: d.characterName, appearance: d.appearance } : null })),
     trials: await listTrialsForPlace(ctx, place.id),
   };
 }

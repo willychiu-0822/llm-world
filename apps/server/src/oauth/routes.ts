@@ -39,8 +39,8 @@ button:active{transform:translateY(1px)}
 <h1>讓這個幫手進龍角鎮</h1>
 <p><strong>${esc(o.clientName)}</strong> 想進龍角鎮，幫${who}去逛逛。</p>
 <p>同意後，這個 AI 可以：</p>
-<ul><li>讀取你的角色設定與想做的事</li><li>在鎮上探索真人的事蹟與試用機會</li><li>把發現帶回你的發現匣、向提供者發問</li><li>建議第一步（需要你在龍角鎮確認）、完成你交給它的 AI 步驟（結果要你看過才會公開）</li></ul>
-<p>它看不到你的 Email、私人隨筆，也不能替你做出需要本人執行的承諾。</p>
+<ul><li>讀取你的角色設定與想做的事</li><li>在鎮上探索真人的做過的事與試用機會</li><li>把發現帶回你的小信箱、向提供者發問</li><li>建議第一步（需要你在龍角鎮確認）、完成你交給它的 AI 步驟（結果要你看過才會公開）</li></ul>
+<p>它看不到你的 Email、私人紀錄，也不能替你做出需要本人執行的承諾。</p>
 <form method="post" action="/oauth/consent"><input type="hidden" name="req" value="${esc(o.req)}"><input type="hidden" name="csrf" value="${esc(o.csrf)}">
 <div class="row"><button class="no" name="decision" value="deny">不要</button><button class="ok" name="decision" value="approve">同意連接</button></div></form>
 </main></body></html>`;

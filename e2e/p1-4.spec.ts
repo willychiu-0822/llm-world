@@ -1,10 +1,11 @@
 import { expect } from "@playwright/test";
 import { test } from "./helpers";
-import { evidence, json, seedPredecessor } from "./helpers";
+import { evidence, growToStageTwo, json, seedPredecessor } from "./helpers";
 
 test("UAT-05 P1-4 前人第一步引用文字有完整寬度", async ({ page }) => {
   const deed = await seedPredecessor();
   await json(page.request.post("/api/auth/dev-login", { data: { email: "reference-layout@e2e.test" } }));
+  await growToStageTwo(page);
   await page.goto(`/steps/new?deedId=${deed.id}`);
   const card = page.locator(".predecessor").filter({ hasText: deed.title });
   await expect(card).toBeVisible();

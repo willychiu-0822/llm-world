@@ -1,5 +1,5 @@
 import { expect } from "@playwright/test";
-import { test, apiAs, evidence, json, seedPredecessor } from "./helpers";
+import { test, apiAs, evidence, growToStageTwo, json, seedPredecessor } from "./helpers";
 
 test("UAT-19 來源事蹟改為私人或試用連結失效時，先說明並引導回地圖", async ({ page }) => {
   const deed = await seedPredecessor();
@@ -7,6 +7,7 @@ test("UAT-19 來源事蹟改為私人或試用連結失效時，先說明並引�
   await json(owner.patch(`/api/deeds/${deed.id}`, { data: { visibility: "private" } }));
   await owner.dispose();
   await json(page.request.post("/api/auth/dev-login", { data: { email: "saved-link@e2e.test", name: "從收藏回來的新手" } }));
+  await growToStageTwo(page);
   const errors: string[] = [];
   page.on("pageerror", e => errors.push(e.message));
   for (const [kind, query] of [["deed", `deedId=${deed.id}`], ["trial", "trialId=trl_no_longer_available"]]) {
@@ -25,6 +26,7 @@ test("UAT-19 來源事蹟改為私人或試用連結失效時，先說明並引�
 test("UAT-19b 來源建議載入暫時失敗後，重試仍保留原主題與參考", async ({ page }) => {
   const deed = await seedPredecessor();
   await json(page.request.post("/api/auth/dev-login", { data: { email: "source-retry@e2e.test", name: "想再試一次的新手" } }));
+  await growToStageTwo(page);
   let attempts = 0;
   await page.route("**/api/first-steps/suggestions?*", async route => {
     if (++attempts === 1) return route.fulfill({ status: 503, json: { error: { code: "internal" } } });

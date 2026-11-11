@@ -26,7 +26,7 @@ import { getTrialView } from "../services/trials";
 export function worldRoutes(ctx: AppContext) {
   const r = Router();
   r.get("/town", h(async (_req, res) => res.json(await getTown(ctx))));
-  r.get("/places/:id", h(async (req, res) => res.json(await getPlace(ctx, String(req.params.id)))));
+  r.get("/places/:id", h(async (req, res) => res.json(await getPlace(ctx, String(req.params.id), req.user?.id))));
   r.get("/trials/:id", h(async (req, res) => res.json(await getTrialView(ctx, String(req.params.id)))));
   return r;
 }

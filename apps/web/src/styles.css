@@ -226,7 +226,7 @@ input[type="checkbox"], input[type="radio"] { width: auto; accent-color: var(--l
 .stat { font-size: 1.8rem; font-weight: 700; }
 table { width: 100%; border-collapse: collapse; }
 td, th { text-align: left; padding: 6px 8px; border-bottom: 1px dashed var(--line); vertical-align: top; }
-.toast { position: fixed; left: 50%; top: 72px; transform: translateX(-50%); display: flex; align-items: center; gap: 12px; background: var(--ink); color: var(--paper); padding: 8px 8px 8px 18px; border-radius: 999px; z-index: 50; box-shadow: var(--shadow); max-width: min(420px, calc(100% - 32px)); }
+.toast { position: relative; scroll-margin-top: 80px; margin: 8px auto 0; display: flex; align-items: center; gap: 12px; background: var(--ink); color: var(--paper); padding: 8px 8px 8px 18px; border-radius: 999px; box-shadow: var(--shadow); width: fit-content; max-width: min(420px, calc(100% - 32px)); }
 .toast button { min-height: 44px; min-width: 44px; font: inherit; font-weight: 700; color: var(--paper); background: transparent; border: 2px solid var(--paper); border-radius: 999px; cursor: pointer; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
@@ -254,11 +254,15 @@ td, th { text-align: left; padding: 6px 8px; border-bottom: 1px dashed var(--lin
 .text-link { border: 0; padding: 0; background: transparent; color: inherit; font: inherit; text-decoration: underline; cursor: pointer; }
 
 .baby-home { align-items: center; text-align: center; }
+.baby-actions { width: min(100%, 420px); }
 .home-chrome { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .star-line { margin: 0; font-weight: 700; }
 .icon-btn { position: relative; display: inline-grid; place-items: center; width: 44px; height: 44px; min-width: 44px; min-height: 44px; border-radius: 50%; border: 2px solid var(--line); background: var(--card); color: var(--ink); text-decoration: none; font-size: 1.2rem; cursor: pointer; }
 .icon-btn:active, .pick button:active, .sticker:active, .swatch:active, .keepsake-cell:active, .tabs button:active { transform: translateY(1px); }
 .icon-btn .badge { position: absolute; top: -4px; right: -4px; }
+.baby-stage { position: relative; }
+.life-decoration { position: absolute; right: -42px; top: 8px; font-size: 2rem; }
+.life-outfit { position: absolute; left: 6px; bottom: 28px; font-size: 1.6rem; filter: drop-shadow(0 2px 0 var(--line)); }
 .baby-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .baby-wrap.stage-1 .baby-hit { transform: scale(1.06); }
 .baby-wrap.stage-2 .baby-hit { transform: scale(1.14); }
@@ -301,13 +305,10 @@ body:has(.veil) main .btn.primary { visibility: hidden; }
 .adopt-actions { display: flex; gap: 8px; }
 .adopt-actions .btn.primary { flex: 1; }
 @media (max-width: 720px) {
-  .adopt { padding-bottom: 128px; }
+  .adopt { height: calc(100dvh - 160px - env(safe-area-inset-bottom)); }
+  .adopt > section { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
   .adopt-actions {
-    position: fixed;
-    left: 16px;
-    right: 16px;
-    bottom: calc(74px + env(safe-area-inset-bottom));
-    z-index: 15;
+    flex: none;
   }
 }
 .adopt .pick { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -316,6 +317,9 @@ body:has(.veil) main .btn.primary { visibility: hidden; }
 .adopt .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 8px; }
 .adopt .swatch { width: 100%; height: auto; aspect-ratio: 1; }
 .adopt-preview { display: grid; place-items: center; }
+@media (min-width: 721px) {
+  .adopt-preview svg { width: 96px; height: 96px; }
+}
 .hatch { min-height: 60vh; display: grid; place-items: center; text-align: center; align-content: center; gap: 12px; }
 .hatch-baby { animation: pop 1.2s ease; }
 .hatch-baby.is-still { animation: none; }
@@ -344,9 +348,10 @@ body:has(.veil) main .btn.primary { visibility: hidden; }
     width: 100%;
   }
   .baby-home .home-chrome { grid-column: 1 / -1; }
-  .baby-home .baby-stage { justify-self: center; }
+  .baby-home .baby-stage { justify-self: center; align-self: start; margin-top: 64px; }
+  .baby-home .life-decoration { right: -105px; top: -12px; font-size: 2.8rem; }
   .baby-home .baby-wrap { transform: scale(1.67); transform-origin: center center; }
-  .baby-home .baby-actions { align-items: flex-start; }
+  .baby-home .baby-actions { align-items: flex-start; width: 100%; }
   .baby-home .baby-actions > .btn,
   .baby-home .baby-actions > .keepsake-card { width: min(100%, 480px); }
   .cabinet { max-width: 760px; margin: 0 auto; }
@@ -359,3 +364,29 @@ body:has(.veil) main .btn.primary { visibility: hidden; }
 @media (max-width: 720px) {
   html { scroll-padding-top: 76px; scroll-padding-bottom: calc(90px + env(safe-area-inset-bottom)); }
 }
+
+/* Little everyday adventures share the town's existing buttons and dialogs. */
+.life-page { width: 100%; max-width: 1040px; margin: 0 auto; }
+.life-columns { display: grid; gap: 24px; grid-template-columns: minmax(0,1fr); }
+.life-today { background: var(--butter-soft); }
+.life-wish { display: grid; gap: 8px; border-top: 2px dashed var(--line); padding-top: 16px; }
+.life-wish p { margin: 0 0 8px; }
+.life-scene { color: var(--muted); }
+.life-entry { border-bottom: 2px dashed var(--line); padding-bottom: 16px; }
+.life-shelf { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
+.life-item { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 8px; border: 2px solid var(--line); border-radius: 20px; background: var(--card); color: var(--ink); font: inherit; cursor: pointer; }
+.life-item.is-missing { background: var(--paper-2); }
+.life-item.is-missing .life-object { filter: grayscale(1); opacity: .4; }
+.life-object { font-size: 40px; line-height: 1.2; margin: 0; }
+.life-progress { font-size: 24px; font-weight: 700; }
+.life-choices { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+.life-choices .btn { font-size: 14px; padding: 8px; }
+.life-choices .is-chosen { background: var(--butter); border-color: var(--ink); }
+.life-home-item { display: block; font-size: 12px; line-height: 1.5; }
+.celebrate { max-height: calc(100dvh - 32px); overflow-y: auto; }
+@media (min-width:900px) {
+  .life-columns { grid-template-columns: minmax(0,1fr) minmax(0,1fr); align-items: start; }
+  .life-shelf { grid-template-columns: repeat(4,minmax(0,1fr)); }
+}
+
+.chip { min-height: 44px; min-width: 44px; }

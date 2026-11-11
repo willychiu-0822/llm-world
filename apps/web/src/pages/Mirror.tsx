@@ -29,7 +29,7 @@ function MirrorBody() {
       <section className="panel hero row wrap">
         <Avatar appearance={me?.character?.appearance} name={me?.character?.name ?? "我"} size={80} />
         <div className="grow">
-          <h1>足跡</h1>
+          <div className="row between"><h1>足跡</h1><Link to="/" className="btn primary">回小龍身邊</Link></div>
           <p>這裡記的是你真的做過的事。</p>
           <p>
             你做了 <strong>{data.stats.deeds}</strong> 件（自己 {data.stats.byExecutor.self}、朋友幫忙 {data.stats.byExecutor.ai}）。

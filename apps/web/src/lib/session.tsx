@@ -17,9 +17,11 @@ interface SessionValue {
   loading: boolean;
   reload(): Promise<void>;
   toast(msg: string): void;
+  message: string;
+  dismissMessage(): void;
 }
 
-const Ctx = createContext<SessionValue>({ me: null, config: null, configError: false, reloadConfig: async () => {}, loading: true, reload: async () => {}, toast: () => {} });
+const Ctx = createContext<SessionValue>({ me: null, config: null, configError: false, reloadConfig: async () => {}, loading: true, reload: async () => {}, toast: () => {}, message: "", dismissMessage: () => {} });
 
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [me, setMe] = useState<Me | null>(null);
@@ -54,20 +56,12 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     void reloadConfig();
   }, [reload, reloadConfig]);
 
-  const toast = useCallback((msg: string) => {
-    setMessage(msg);
-    window.setTimeout(() => setMessage(""), 2800);
-  }, []);
+  const toast = useCallback((msg: string) => setMessage(msg), []);
+  const dismissMessage = useCallback(() => setMessage(""), []);
 
   return (
-    <Ctx.Provider value={{ me, config, configError, reloadConfig, loading, reload, toast }}>
+    <Ctx.Provider value={{ me, config, configError, reloadConfig, loading, reload, toast, message, dismissMessage }}>
       {children}
-      {message && (
-        <div className="toast" role="status">
-          <span>{message}</span>
-          <button type="button" onClick={() => setMessage("")}>好</button>
-        </div>
-      )}
     </Ctx.Provider>
   );
 }

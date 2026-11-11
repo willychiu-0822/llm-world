@@ -1,5 +1,5 @@
 import { expect, type Page } from "@playwright/test";
-import { test, evidence, json } from "./helpers";
+import { test, evidence, growToStageTwo, json } from "./helpers";
 
 async function signIn(page: Page) {
   await json(page.request.post("/api/auth/dev-login", { data: { email: "ui@e2e.test", name: "第一次來" } }));
@@ -20,16 +20,19 @@ async function layoutAndEvidence(page: Page, name: string) {
 
 test("UAT-14a 空狀態都能直接走到下一步", async ({ page }) => {
   await signIn(page);
-  for (const [route, heading] of [["/steps", "我的步驟"], ["/mirror", "鏡子"], ["/notifications", "通知"], ["/discoveries", "發現匣"]]) {
+  await growToStageTwo(page);
+  // Growth requires seven completed steps; exercise the otherwise unreachable empty list explicitly.
+  await page.route("**/api/first-steps", route => route.fulfill({ json: [] }));
+  for (const [route, heading] of [["/steps", "我的步驟"], ["/mirror", "足跡"], ["/notifications", "通知"], ["/discoveries", "發現匣"]]) {
     await page.goto(route);
-    await expect(page.getByRole("heading", { name: heading, exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: heading, exact: true, level: 1 })).toBeVisible();
     await expect(page.getByText("載入中……", { exact: true })).toHaveCount(0);
     const empties = page.locator("main .empty");
     for (const empty of await empties.all()) await expect(empty.locator("a, button").first()).toBeVisible();
     await layoutAndEvidence(page, `UAT-14a-${route.slice(1)}`);
   }
   await page.goto("/steps");
-  for (const tab of [/AI 的建議/, /完成了/]) {
+  for (const tab of [/朋友的建議/, /完成了/]) {
     await page.getByRole("tab", { name: tab }).click();
     await expect(page.locator("main .empty").locator("a, button").first()).toBeVisible();
     await evidence(page, `UAT-14a-steps-${tab.source === "完成了" ? "done" : "ai"}`);
@@ -42,6 +45,7 @@ test("UAT-14a 空狀態都能直接走到下一步", async ({ page }) => {
 
 test("UAT-14b 多筆步驟與完成表單只有一個主要操作且可取消", async ({ page }) => {
   await signIn(page);
+  await growToStageTwo(page);
   for (const text of ["先在家唱一首歌", "再跟朋友唱一次"]) await json(page.request.post("/api/first-steps", { data: { executor: "self", text } }));
   await page.goto("/steps");
   await expect(page.getByRole("button", { name: "我做到了", exact: true })).toHaveCount(2);
