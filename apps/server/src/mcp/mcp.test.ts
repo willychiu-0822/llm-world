@@ -5,6 +5,7 @@ import type { AddressInfo } from "node:net";
 import http from "node:http";
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { characters, deeds } from "@lj/db";
 import { approvedProvider, leoTrial } from "../test/fixtures";
 import { login, nova, userWithCharacter, useTestApp } from "../test/helpers";
 
@@ -158,6 +159,7 @@ describe("MCP tools", () => {
       "first_step_complete",
       "first_step_list",
       "first_step_propose",
+      "life_get",
       "place_get",
       "provider_ask",
       "trial_get",
@@ -165,7 +167,7 @@ describe("MCP tools", () => {
     ]);
     const prompts = (await client.listPrompts()).prompts.map((p) => p.name);
     const annotations = Object.fromEntries(listed.map((t) => [t.name, t.annotations]));
-    for (const name of ["character_get", "world_discover", "place_get", "deed_get", "trial_get", "first_step_list"]) {
+    for (const name of ["character_get", "world_discover", "place_get", "deed_get", "trial_get", "first_step_list", "life_get"]) {
       expect(annotations[name], name).toMatchObject({ readOnlyHint: true, destructiveHint: false, idempotentHint: true });
     }
     for (const name of ["discovery_bring_back", "first_step_propose", "provider_ask"]) {
@@ -175,6 +177,35 @@ describe("MCP tools", () => {
     expect(prompts).toEqual(["be_my_character"]);
     const prompt = await client.getPrompt({ name: "be_my_character" });
     expect(JSON.stringify(prompt.messages)).toContain("Nova");
+    await client.close();
+  });
+
+  it("life_get reads only my dragon's made-up day: read-only, no other players, no stars, no real deeds", async () => {
+    const other = await userWithCharacter(env.app, "visitor@example.com", { ...nova, name: "路過的小綠" });
+    await other.patch("/api/me/life").send({ allowVisits: true });
+    const agent = await userWithCharacter(env.app, "lifer@example.com", { ...nova, name: "小米" });
+    await agent.post("/api/me/life/activities").send({ activityId: "music" });
+    const before = JSON.stringify(await env.ctx.db.select().from(characters));
+    const client = await connect((await tokenFor(env, agent)).access_token);
+    const tools = (await client.listTools()).tools;
+    expect(tools.find((t) => t.name === "life_get")!.annotations).toMatchObject({ readOnlyHint: true, destructiveHint: false, idempotentHint: true });
+    const res = await call<{
+      note: string;
+      today: { mood: string; wish: string; help: string; autonomous: string; doneToday: { name: string; reward: string }[]; canStillDo: string[] };
+      collection: { owned: string[]; total: number };
+      recentDays: unknown[];
+    }>(client, "life_get");
+    expect(res.isError).toBe(false);
+    expect(res.data.note).toContain("虛構");
+    expect(res.data.today.mood).toBe("滿足");
+    expect(res.data.today.doneToday).toMatchObject([{ name: "聽一首小曲", reward: "小鈴鐺" }]);
+    expect(res.data.today.canStillDo).toHaveLength(6);
+    expect(res.data.collection).toEqual({ owned: ["小鈴鐺"], total: 7 });
+    const text = JSON.stringify(res.data);
+    for (const leak of ["路過的小綠", "visitor@example.com", "lifer@example.com", "encounter", "allowVisits", "inspiration", "pq_"]) expect(text).not.toContain(leak);
+    expect(JSON.stringify(await env.ctx.db.select().from(characters))).toBe(before);
+    expect((await agent.get("/api/me")).body.pet.stars).toBe(0);
+    expect(await env.ctx.db.select().from(deeds)).toEqual([]);
     await client.close();
   });
 

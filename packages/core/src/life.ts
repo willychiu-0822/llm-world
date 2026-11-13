@@ -81,6 +81,8 @@ export interface LifeView {
   scene: string;
   recommendedId: LifeActivityId;
   activities: Array<Omit<typeof LIFE_ACTIVITIES[number], "story"> & { story: string; done: boolean }>;
-  encounter?: { name: string; appearance: unknown } | null;
-  inspiration?: { placeId: string; title: string; who: string } | null;
+  /** 串門遇到的人：鎮民小栗，或同意串門的玩家小龍（只有名字與外觀，只在當下顯示）。 */
+  encounter: { kind: "town"; name: string } | { kind: "player"; name: string; appearance: unknown };
+  /** 鎮民的心意：別人公開分享、仍可見的一則經驗；沒有就是 null。 */
+  inspiration: { placeId: string; placeName: string; title: string; who: string; isDemo: boolean } | null;
 }

@@ -390,3 +390,5 @@ body:has(.veil) main .btn.primary { visibility: hidden; }
 }
 
 .chip { min-height: 44px; min-width: 44px; }
+.life-meeting { display: flex; align-items: center; gap: 12px; padding: 12px; border: 2px dashed var(--line); border-radius: 16px; background: var(--paper-2); }
+.life-meeting p { margin: 0; }

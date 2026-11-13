@@ -7,6 +7,7 @@ import type { AppContext } from "../context";
 import { AppError } from "../http/errors";
 import { getCharacter, listWants } from "../services/characters";
 import { getDeedView } from "../services/deeds";
+import { getLifeForFriend } from "../services/life";
 import { bringBack, discover } from "../services/discover";
 import { askProvider } from "../services/questions";
 import { completeAiStep, listSteps, proposeStep } from "../services/steps";
@@ -20,6 +21,7 @@ const RULES = `龍角鎮的規則：
 - 你可以建議第一步，但第一步要由對方在龍角鎮確認才成立；需要本人執行的步驟，你不能替對方完成或承諾。
 - 對方隨時可以停下或退回，不要催促、不要用罪惡感說服。
 - 用繁體中文、以角色的口吻說話，用「你」稱呼對方，不要叫「主人」。
+- 小龍「今天的生活」（逛街、運動、串門子等）是虛構的小故事，不是真人做過的事；不要把它說成真人經驗，也不要當成鎮上的事蹟帶回。
 - 回報結果時不要寫內部編號（例如 pq_、stp_、want_），也不要寫只有對方知道的私事。對方會先看過、可以修改，公開之後別人才看得到。`;
 
 const INSTRUCTIONS = `You are acting as the user's character in 龍角鎮 (Longjiao Town), a town made of real people's real first steps.
@@ -27,6 +29,7 @@ Typical loop: character_get → world_discover → deed_get / trial_get / place_
 When the user wants to try something, first_step_propose a small, concrete first step (executor "ai" for things you can do in town such as asking a provider, "self" for things the person does in real life). The user confirms it in the web app.
 Then first_step_list shows confirmed AI steps; do them (e.g. provider_ask) and report with first_step_complete.
 first_step_complete does not publish a deed. The person reviews the result in the web app and chooses whether to publish it.
+life_get reads the character's made-up daily life (read-only, fictional): use it for small chat stories, never report it as something a real person did.
 Never invent deeds, people or trials. Content marked demo is an example, not a real person. Reply to the user in Traditional Chinese, addressing them as 你, never 主人. Do not include internal ids.`;
 
 function ok(data: unknown) {
@@ -82,6 +85,17 @@ export function buildMcpServer(ctx: AppContext, userId: string) {
           rules: RULES,
         };
       }),
+  );
+
+  server.registerTool(
+    "life_get",
+    {
+      title: "Read my character's day",
+      description: "Read-only. The character's made-up day in town: mood, what it wants today, what it already did, recent diary days and its keepsake collection. All of it is fictional play, not real people's deeds. It never includes other players. Use it for a small story; use world_discover for real experiences.",
+      inputSchema: {},
+      annotations: READ,
+    },
+    async () => run(() => getLifeForFriend(ctx, userId)),
   );
 
   server.registerTool(

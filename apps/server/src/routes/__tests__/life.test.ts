@@ -84,4 +84,65 @@ describe("a dragon's own life", () => {
     const noDragon = await login(env.app, "no-dragon@example.com");
     expect((await noDragon.get("/api/me/life")).status).toBe(409);
   });
+
+  async function sharedDeed(email: string, name: string, title: string) {
+    const agent = await userWithCharacter(env.app, email, { ...nova, name });
+    const w = (await agent.post("/api/me/wants").send({ text: "想唱歌", districtKey: "music" })).body;
+    const s = (await agent.post("/api/first-steps").send({ executor: "self", text: title, wantId: w.id })).body;
+    const deed = (await agent.post(`/api/first-steps/${s.id}/complete`).send({ noteAfter: "只有我知道的私事 A123", noteShared: false })).body.deed;
+    return { agent, deed };
+  }
+
+  it("G9: visits are off by default, need an explicit opt-in, and never leak private details", async () => {
+    env.ctx.now = () => new Date("2026-11-10T04:00:00Z");
+    const me = await userWithCharacter(env.app, "me@example.com", { ...nova, name: "我家小龍" });
+    const friend = await userWithCharacter(env.app, "friend@example.com", { ...nova, name: "阿綠" });
+    const first = (await me.get("/api/me/life")).body;
+    expect(first.allowVisits).toBe(false);
+    expect(first.encounter).toEqual({ kind: "town", name: "小栗" });
+    // 朋友預設不串門，所以不會被選到
+    expect((await friend.get("/api/me/life")).body.allowVisits).toBe(false);
+    expect((await me.get("/api/me/life")).body.encounter.kind).toBe("town");
+    // 朋友同意後才會遇到
+    expect((await friend.patch("/api/me/life").send({ allowVisits: true })).body.allowVisits).toBe(true);
+    const met = (await me.get("/api/me/life")).body;
+    expect(met.encounter).toMatchObject({ kind: "player", name: "阿綠", appearance: { body: "round" } });
+    expect(JSON.stringify(met)).not.toContain("friend@example.com");
+    expect(Object.keys(met.encounter).sort()).toEqual(["appearance", "kind", "name"]);
+    expect((await me.get("/api/me/life")).body.encounter).toEqual(met.encounter); // 同一天穩定
+    // 不會遇到自己
+    expect((await friend.get("/api/me/life")).body.encounter.kind).toBe("town");
+    // 結果日記沒有複製對方資料
+    const played = (await me.post("/api/me/life/activities").send({ activityId: "visit" })).body;
+    expect(played.encounter.name).toBe("阿綠");
+    const stored = (await env.ctx.db.select().from(characters).where(eq(characters.name, "我家小龍")))[0]!;
+    expect(JSON.stringify(stored.sharing)).not.toContain("阿綠");
+    // 撤回後未來不再出現
+    expect((await friend.patch("/api/me/life").send({ allowVisits: false })).body.allowVisits).toBe(false);
+    expect((await me.get("/api/me/life")).body.encounter).toEqual({ kind: "town", name: "小栗" });
+    expect((await friend.patch("/api/me/life").send({ allowVisits: "yes" })).status).toBe(400);
+  });
+
+  it("G10: the town-heart entry only shows public, unremoved deeds from other people and vanishes when pulled", async () => {
+    env.ctx.now = () => new Date("2026-11-10T04:00:00Z");
+    const me = await userWithCharacter(env.app, "me2@example.com");
+    expect((await me.get("/api/me/life")).body.inspiration).toBeNull();
+    const own = await sharedDeed("own@example.com", "小米", "去上一次聲樂試用課");
+    const seen = (await me.get("/api/me/life")).body.inspiration;
+    expect(seen).toMatchObject({ title: "去上一次聲樂試用課", who: "小米", placeId: own.deed.placeId, isDemo: false });
+    expect(JSON.stringify(seen)).not.toContain("A123");
+    expect(JSON.stringify(seen)).not.toContain("own@example.com");
+    expect((await own.agent.get("/api/me/life")).body.inspiration).toBeNull(); // 看不到自己的
+    // 設成私密後立刻消失
+    expect((await own.agent.patch(`/api/deeds/${own.deed.id}`).send({ visibility: "private" })).status).toBe(200);
+    expect((await me.get("/api/me/life")).body.inspiration).toBeNull();
+    await own.agent.patch(`/api/deeds/${own.deed.id}`).send({ visibility: "public" });
+    expect((await me.get("/api/me/life")).body.inspiration?.title).toBe("去上一次聲樂試用課");
+    // 管理者下架後消失
+    const admin = await login(env.app, "admin@example.com");
+    expect((await admin.post(`/api/admin/deeds/${own.deed.id}/remove`)).status).toBe(200);
+    expect((await me.get("/api/me/life")).body.inspiration).toBeNull();
+    // 讀取不寫入，也沒有生成任何真人事蹟或星星
+    expect((await me.get("/api/me")).body.pet.stars).toBe(0);
+  });
 });
