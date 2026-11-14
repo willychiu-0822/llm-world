@@ -5,6 +5,7 @@ const baseURL = `http://localhost:${PORT}`;
 
 export default defineConfig({
   testDir: "e2e",
+  testIgnore: ["**/assert-e2e-database.test.mjs"],
   timeout: 90_000,
   expect: { timeout: 10_000 },
   fullyParallel: false,
