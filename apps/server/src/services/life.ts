@@ -1,11 +1,14 @@
-import { autonomousLife, LIFE_ACTIVITIES, lifeActivityInput, lifeActivityStory, lifeClock, lifePatchInput, lifePick, lifeScene, readLife, type LifeState } from "@lj/core";
+import { autonomousLife, commitLife, LIFE_ACTIVITIES, lifeActivityInput, lifeActivityStory, lifeClock, lifePatchInput, lifePick, lifeScene, migrateLife, type LifeRecord, type LifeState } from "@lj/core";
 import { characters } from "@lj/db";
 import { eq, sql } from "drizzle-orm";
 import type { AppContext } from "../context";
 import { AppError } from "../http/errors";
 
-function present(sharing: unknown, id: string, now: Date) {
-  const life = readLife(sharing);
+function logLife(characterId: string, record: LifeRecord) {
+  if (record.issues.length === 0) return;
+  console.error(record.canWrite ? "life record: unreadable parts were left in place" : "life record: refusing to overwrite", { characterId, issues: record.issues });
+}
+function present(life: LifeState, id: string, now: Date) {
   const clock = lifeClock(now);
   const today = life.days.find(d => d.day === clock.day) ?? { day: clock.day, autonomous: autonomousLife(id, clock.day), entries: [] };
   const recommended = LIFE_ACTIVITIES[lifePick(`${id}:${clock.day}:wish`, LIFE_ACTIVITIES.length)]!;
@@ -27,14 +30,20 @@ async function own(ctx: AppContext, userId: string) {
 }
 export async function getLife(ctx: AppContext, userId: string) {
   const c = await own(ctx, userId);
-  return present(c.sharing, c.id, ctx.now());
+  const record = migrateLife(c.sharing);
+  logLife(c.id, record);
+  return present(record.state, c.id, ctx.now());
 }
 async function mutate(ctx: AppContext, userId: string, change: (life: LifeState, id: string, now: Date) => void) {
   await ctx.db.transaction(async tx => {
     const [c] = await tx.select().from(characters).where(eq(characters.userId, userId)).for("update");
     if (!c) throw new AppError("conflict", "先把小龍帶回家");
-    const life = readLife(c.sharing);
-    change(life, c.id, ctx.now());
+    const record = migrateLife(c.sharing);
+    logLife(c.id, record);
+    if (!record.canWrite) throw new AppError("conflict", "小龍的日記這頁皺了，先留著沒改。");
+    const before = structuredClone(record.state);
+    change(record.state, c.id, ctx.now());
+    const life = commitLife(record, before, record.state);
     await tx.update(characters).set({ sharing: sql`jsonb_set(${characters.sharing}, '{life}', ${JSON.stringify(life)}::jsonb)` }).where(eq(characters.id, c.id));
   });
   return getLife(ctx, userId);
@@ -46,7 +55,10 @@ export async function playLife(ctx: AppContext, userId: string, raw: unknown) {
     let today = life.days.find(d => d.day === day);
     if (!today) {
       today = { day, autonomous: autonomousLife(id, day), entries: [] };
-      life.days = [...life.days, today].sort((a,b) => b.day.localeCompare(a.day)).slice(0,60);
+      const alreadyStored = life.days.length;
+      const next = [...life.days, today].sort((a,b) => b.day.localeCompare(a.day));
+      // A normal diary stays within 60 days. An older save that is already longer is not trimmed.
+      life.days = alreadyStored > 60 ? next : next.slice(0, 60);
     }
     if (today.entries.some(e => e.activityId === activityId)) return;
     today.entries.push({activityId, at: now.toISOString()});
