@@ -27,20 +27,185 @@ export function lifeActivityStory(id: LifeActivityId, now: Date): string {
   return id === "festival" ? FESTIVAL_STORIES[lifeClock(now).season] : LIFE_ACTIVITIES.find(a => a.id === id)!.story;
 }
 const entry = z.object({ activityId: lifeActivityId, at: z.string() });
+// New play is capped in the server. Reading must not discard a whole record
+// because one entry is unknown or an older save is longer than today's cap.
 export const lifeStateSchema = z.object({
   version: z.literal(1).default(1),
-  days: z.array(z.object({ day: z.string(), autonomous: z.string(), entries: z.array(entry).max(7) })).max(60).default([]),
-  inventory: z.array(z.object({ activityId: lifeActivityId, earnedOn: z.string() })).max(7).default([]),
+  days: z.array(z.object({ day: z.string(), autonomous: z.string(), entries: z.array(entry) })).default([]),
+  inventory: z.array(z.object({ activityId: lifeActivityId, earnedOn: z.string() })).default([]),
   outfit: z.literal("shop").nullable().default(null),
   decoration: z.literal("festival").nullable().default(null),
   allowVisits: z.boolean().default(false),
 });
 export type LifeState = z.infer<typeof lifeStateSchema>;
-export const readLife = (sharing: unknown): LifeState => {
-  const raw = sharing && typeof sharing === "object" ? (sharing as Record<string, unknown>).life : undefined;
-  const parsed = lifeStateSchema.safeParse(raw ?? {});
-  return parsed.success ? parsed.data : lifeStateSchema.parse({});
+export type LifeIssue = { path: string; reason: string };
+export type LifeRecord = {
+  state: LifeState;
+  /** Original `sharing.life` object, when there was one. */
+  raw: Record<string, unknown> | null;
+  /** False when saving the migrated state would replace data we could not carry forward. */
+  canWrite: boolean;
+  issues: LifeIssue[];
+  opaque: { outfit: boolean; decoration: boolean; allowVisits: boolean };
 };
+const KNOWN_ACTIVITIES = new Set<string>(LIFE_ACTIVITIES.map(activity => activity.id));
+const emptyOpaque = { outfit: false, decoration: false, allowVisits: false };
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
+function emptyLife(): LifeState {
+  return lifeStateSchema.parse({});
+}
+function isKnownEntry(value: unknown): value is { activityId: LifeActivityId; at: string } {
+  return isPlainObject(value) && typeof value.activityId === "string" && KNOWN_ACTIVITIES.has(value.activityId) && typeof value.at === "string" && value.at.length > 0;
+}
+function isKnownInventory(value: unknown): value is { activityId: LifeActivityId; earnedOn: string } {
+  return isPlainObject(value) && typeof value.activityId === "string" && KNOWN_ACTIVITIES.has(value.activityId) && typeof value.earnedOn === "string";
+}
+function isMergeableDay(value: unknown): value is Record<string, unknown> & { day: string; entries: unknown[] } {
+  return isPlainObject(value) && typeof value.day === "string" && value.day.length > 0 && Array.isArray(value.entries);
+}
+
+/** Reads what it can. Missing life is an empty record. A broken document is not writable. */
+export function migrateLife(sharing: unknown): LifeRecord {
+  if (!isPlainObject(sharing) || !Object.prototype.hasOwnProperty.call(sharing, "life")) {
+    return { state: emptyLife(), raw: null, canWrite: true, issues: [], opaque: { ...emptyOpaque } };
+  }
+  const raw = sharing.life;
+  if (!isPlainObject(raw)) {
+    return { state: emptyLife(), raw: null, canWrite: false, issues: [{ path: "life", reason: "life record is not an object" }], opaque: { ...emptyOpaque } };
+  }
+  const issues: LifeIssue[] = [];
+  const versionBlocked = "version" in raw && raw.version !== 1;
+  if (versionBlocked) issues.push({ path: "life.version", reason: "unknown life version" });
+  const days = salvageDays(raw.days, issues);
+  const inventory = salvageInventory(raw.inventory, issues);
+  const outfit = salvageLiteral(raw, "outfit", "shop", issues);
+  const decoration = salvageLiteral(raw, "decoration", "festival", issues);
+  const allowVisits = salvageBoolean(raw, issues);
+  return {
+    state: lifeStateSchema.parse({ version: 1, days: days.known, inventory: inventory.known, outfit: outfit.value, decoration: decoration.value, allowVisits: allowVisits.value }),
+    raw, canWrite: !versionBlocked && !days.fatal && !inventory.fatal, issues,
+    opaque: { outfit: outfit.opaque, decoration: decoration.opaque, allowVisits: allowVisits.opaque },
+  };
+}
+export const readLife = (sharing: unknown): LifeState => migrateLife(sharing).state;
+
+function salvageDays(value: unknown, issues: LifeIssue[]) {
+  if (value === undefined) return { known: [] as LifeState["days"], fatal: false };
+  if (!Array.isArray(value)) {
+    issues.push({ path: "life.days", reason: "not an array" });
+    return { known: [] as LifeState["days"], fatal: true };
+  }
+  const known: LifeState["days"] = [];
+  value.forEach((item, index) => {
+    if (!isMergeableDay(item)) {
+      issues.push({ path: `life.days[${index}]`, reason: "day was left untouched" });
+      return;
+    }
+    const entries: LifeState["days"][number]["entries"] = [];
+    item.entries.forEach((entry, entryIndex) => {
+      if (!isKnownEntry(entry)) {
+        issues.push({ path: `life.days[${index}].entries[${entryIndex}]`, reason: "unrecognized entry left in place" });
+        return;
+      }
+      entries.push({ activityId: entry.activityId, at: entry.at });
+    });
+    if (typeof item.autonomous !== "string") issues.push({ path: `life.days[${index}].autonomous`, reason: "unreadable note left in place" });
+    known.push({ day: item.day, autonomous: typeof item.autonomous === "string" ? item.autonomous : "", entries });
+  });
+  return { known, fatal: false };
+}
+function salvageInventory(value: unknown, issues: LifeIssue[]) {
+  if (value === undefined) return { known: [] as LifeState["inventory"], fatal: false };
+  if (!Array.isArray(value)) {
+    issues.push({ path: "life.inventory", reason: "not an array" });
+    return { known: [] as LifeState["inventory"], fatal: true };
+  }
+  const known: LifeState["inventory"] = [];
+  value.forEach((item, index) => {
+    if (!isKnownInventory(item)) {
+      issues.push({ path: `life.inventory[${index}]`, reason: "unrecognized keepsake left in place" });
+      return;
+    }
+    known.push({ activityId: item.activityId, earnedOn: item.earnedOn });
+  });
+  return { known, fatal: false };
+}
+function salvageLiteral<T extends string>(raw: Record<string, unknown>, key: "outfit" | "decoration", allowed: T, issues: LifeIssue[]) {
+  if (!(key in raw) || raw[key] === null) return { value: null as T | null, opaque: false };
+  if (raw[key] === allowed) return { value: allowed, opaque: false };
+  issues.push({ path: `life.${key}`, reason: "unrecognized value left in place" });
+  return { value: null as T | null, opaque: true };
+}
+function salvageBoolean(raw: Record<string, unknown>, issues: LifeIssue[]) {
+  if (!("allowVisits" in raw)) return { value: false, opaque: false };
+  if (typeof raw.allowVisits === "boolean") return { value: raw.allowVisits, opaque: false };
+  issues.push({ path: "life.allowVisits", reason: "unreadable value left in place" });
+  return { value: false, opaque: true };
+}
+
+/** Writes the played state back without dropping entries the migration could not interpret. */
+export function commitLife(record: LifeRecord, before: LifeState, after: LifeState): Record<string, unknown> {
+  const raw = record.raw ?? {};
+  return {
+    ...(record.raw ? { ...record.raw } : {}),
+    version: 1,
+    days: mergeDays(raw.days, after.days),
+    inventory: mergeInventory(raw.inventory, after.inventory),
+    outfit: pickStored(record.opaque.outfit, raw.outfit, before.outfit, after.outfit),
+    decoration: pickStored(record.opaque.decoration, raw.decoration, before.decoration, after.decoration),
+    allowVisits: pickStored(record.opaque.allowVisits, raw.allowVisits, before.allowVisits, after.allowVisits),
+  };
+}
+function pickStored<T>(opaque: boolean, rawValue: unknown, before: T, after: T): unknown {
+  if (after !== before) return after;
+  return opaque ? rawValue : after;
+}
+function mergeDays(rawDays: unknown, stateDays: LifeState["days"]): unknown[] {
+  const rawList = Array.isArray(rawDays) ? rawDays : [];
+  const used = new Set<number>();
+  const merged = stateDays.map(day => {
+    const index = rawList.findIndex((item, itemIndex) => !used.has(itemIndex) && isMergeableDay(item) && item.day === day.day);
+    if (index < 0) return { day: day.day, autonomous: day.autonomous, entries: day.entries };
+    used.add(index);
+    const rawDay = rawList[index] as Record<string, unknown> & { entries: unknown[] };
+    const pending = day.entries.map(item => ({ activityId: item.activityId, at: item.at }));
+    const entries: unknown[] = [];
+    for (const entry of rawDay.entries) {
+      if (!isKnownEntry(entry)) {
+        entries.push(entry);
+        continue;
+      }
+      const next = pending.shift();
+      entries.push(next ? { ...entry, ...next } : entry);
+    }
+    entries.push(...pending);
+    const stored: Record<string, unknown> = { ...rawDay, day: day.day, entries };
+    if (typeof rawDay.autonomous === "string") stored.autonomous = day.autonomous;
+    return stored;
+  });
+  rawList.forEach((item, index) => {
+    if (!used.has(index) && !isMergeableDay(item)) merged.push(item);
+  });
+  return merged;
+}
+function mergeInventory(rawInventory: unknown, stateItems: LifeState["inventory"]): unknown[] {
+  const rawList = Array.isArray(rawInventory) ? rawInventory : [];
+  const pending = stateItems.map(item => ({ activityId: item.activityId, earnedOn: item.earnedOn }));
+  const merged: unknown[] = [];
+  for (const item of rawList) {
+    if (!isKnownInventory(item)) {
+      merged.push(item);
+      continue;
+    }
+    const next = pending.shift();
+    merged.push(next ? { ...item, ...next } : item);
+  }
+  merged.push(...pending);
+  return merged;
+}
 export function lifePick(seed: string, length: number) {
   let n = 2166136261;
   for (const c of seed) n = Math.imul(n ^ c.charCodeAt(0), 16777619);
