@@ -90,6 +90,25 @@ export function warmLine(input: { name: string; title: string; districtKey: stri
   return `${joinWords(who, `的${kind.name}`)}。${did}。`;
 }
 
+export interface TownSight {
+  emoji: string;
+  line: string;
+}
+
+/** What the baby brings back when the town has no new keepsake. Needs nobody else's content. */
+export const TOWN_SIGHTS: readonly TownSight[] = [
+  { emoji: "🍃", line: "小龍在路邊撿到一片會打轉的葉子。" },
+  { emoji: "🐦", line: "小龍聽見屋簷上的小鳥在練歌，練了三次才成功。" },
+  { emoji: "🌤️", line: "小龍曬了一下午的太陽，回來的時候暖呼呼的。" },
+  { emoji: "🪨", line: "小龍滾了一顆圓圓的石頭回來，說牠很重要。" },
+  { emoji: "🥖", line: "麵包店飄出香味，小龍站在門口聞了很久。" },
+  { emoji: "🌼", line: "小龍在牆角找到一朵偷偷開的小花。" },
+];
+
+export function townSightFor(seed: number): TownSight {
+  return TOWN_SIGHTS[Math.abs(seed) % TOWN_SIGHTS.length] ?? TOWN_SIGHTS[0]!;
+}
+
 export const BABY_LINES = [
   "嗨！這裡好大喔。",
   "我們出去晃晃？",

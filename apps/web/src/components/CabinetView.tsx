@@ -37,6 +37,8 @@ export function CabinetView({ total, items, pendingId, onAccept }: { collected: 
         </div>
         {newest ? (
           <button type="button" className="btn primary" onClick={() => show(slots.find((s) => s.got.some((i) => i.deedId === newest.deedId))?.got ?? [newest])}>看看剛撿到的</button>
+        ) : total === 0 ? (
+          <Link to="/life" className="btn primary">小龍的今天</Link>
         ) : (
           <Link to="/" className="btn primary">去找一顆信物</Link>
         )}
