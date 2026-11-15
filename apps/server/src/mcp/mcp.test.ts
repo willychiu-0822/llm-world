@@ -184,7 +184,10 @@ describe("MCP tools", () => {
     const other = await userWithCharacter(env.app, "visitor@example.com", { ...nova, name: "路過的小綠" });
     await other.patch("/api/me/life").send({ allowVisits: true });
     const agent = await userWithCharacter(env.app, "lifer@example.com", { ...nova, name: "小米" });
-    await agent.post("/api/me/life/activities").send({ activityId: "music" });
+    const life = (await agent.get("/api/me/life")).body as { activities: { id: string; name: string; reward: string; open: boolean }[] };
+    const open = life.activities.filter((a) => a.open);
+    const played = open[0]!;
+    await agent.post("/api/me/life/activities").send({ activityId: played.id });
     const before = JSON.stringify(await env.ctx.db.select().from(characters));
     const client = await connect((await tokenFor(env, agent)).access_token);
     const tools = (await client.listTools()).tools;
@@ -198,9 +201,10 @@ describe("MCP tools", () => {
     expect(res.isError).toBe(false);
     expect(res.data.note).toContain("虛構");
     expect(res.data.today.mood).toBe("滿足");
-    expect(res.data.today.doneToday).toMatchObject([{ name: "聽一首小曲", reward: "小鈴鐺" }]);
-    expect(res.data.today.canStillDo).toHaveLength(6);
-    expect(res.data.collection).toEqual({ owned: ["小鈴鐺"], total: 7 });
+    expect(res.data.today.doneToday).toMatchObject([{ name: played.name, reward: played.reward }]);
+    // 沒開的地方不列在「還能做」
+    expect(res.data.today.canStillDo).toHaveLength(open.length - 1);
+    expect(res.data.collection).toEqual({ owned: [played.reward], total: 7 });
     const text = JSON.stringify(res.data);
     for (const leak of ["路過的小綠", "visitor@example.com", "lifer@example.com", "encounter", "allowVisits", "inspiration", "pq_"]) expect(text).not.toContain(leak);
     expect(JSON.stringify(await env.ctx.db.select().from(characters))).toBe(before);

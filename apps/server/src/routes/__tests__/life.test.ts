@@ -220,7 +220,8 @@ describe("a dragon's own life", () => {
     // 不會遇到自己
     expect((await friend.get("/api/me/life")).body.encounter.kind).toBe("town");
     // 結果日記沒有複製對方資料
-    const played = (await me.post("/api/me/life/activities").send({ activityId: "visit" })).body;
+    const todayId = (await openIds(me))[0];
+    const played = (await me.post("/api/me/life/activities").send({ activityId: todayId })).body;
     expect(played.encounter.name).toBe("阿綠");
     const stored = (await env.ctx.db.select().from(characters).where(eq(characters.name, "我家小龍")))[0]!;
     expect(JSON.stringify(stored.sharing)).not.toContain("阿綠");
