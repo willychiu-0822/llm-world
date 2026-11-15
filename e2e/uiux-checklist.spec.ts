@@ -2,6 +2,8 @@ import { LIFE_ACTIVITIES } from "../packages/core/src/life";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page } from "@playwright/test";
 import { mkdir } from "node:fs/promises";
+import pg from "pg";
+import { assertE2eDatabase } from "./assert-e2e-database.mjs";
 import { test, json, look, panToPlace, growToStageTwo } from "./helpers";
 
 const BANNED = ["AI", "MCP", "token", "agent", "provider", "事蹟", "鏡子", "許可證", "發現匣", "隨筆", "你應該", "越小越好", "映照", "可能的自己"];
@@ -326,7 +328,16 @@ test("檢核 G1–G8：小龍有自己的今天、七種生活與四類收藏", 
   expect((await json(page.request.get("/api/me/life"))).today.entries).toHaveLength(0);
   let submissions = 0;
   page.on("request", req => { if (req.method() === "POST" && req.url().endsWith("/life/activities")) submissions++; });
-  for (const [i, a] of LIFE_ACTIVITIES.entries()) {
+  // Only one or two places are open on the first day; the rest say so and cannot be chosen.
+  const openToday = LIFE_ACTIVITIES.filter(a => before.activities.find((x: {id: string; open: boolean}) => x.id === a.id)?.open);
+  expect(openToday.length).toBeGreaterThanOrEqual(1);
+  expect(openToday.length).toBeLessThanOrEqual(2);
+  await page.getByRole("button", {name: "陪牠去玩", exact:true}).click();
+  for (const a of LIFE_ACTIVITIES.filter(a => !openToday.includes(a))) {
+    await expect(page.getByRole("radio", {name: new RegExp(`${a.name}.*今天沒開`)})).toBeDisabled();
+  }
+  await page.getByRole("button", {name: "先待在家"}).click();
+  for (const [i, a] of openToday.entries()) {
     await page.getByRole("button", {name: "陪牠去玩", exact:true}).click();
     await page.getByRole("radio", {name: new RegExp(a.name), exact:false}).click();
     await checkState(page, `G04-${a.id}-preview`);
@@ -335,7 +346,6 @@ test("檢核 G1–G8：小龍有自己的今天、七種生活與四類收藏", 
     expect(submissions).toBe(i+1);
     await checkState(page, `G05-${a.id}-result`);
     if (i === 0) await page.keyboard.press("Escape");
-    else if (i === 1) await page.getByRole("button", {name: "關閉", exact:true}).click();
     else await page.getByRole("button", {name: "收好紀念品"}).click();
     await page.reload();
     await expect(page.locator(".life-entry")).toHaveCount(i+1);
@@ -344,6 +354,17 @@ test("檢核 G1–G8：小龍有自己的今天、七種生活與四類收藏", 
   }
   expect((await json(page.request.get("/api/me"))).pet.stars).toBe(0);
   await page.getByRole("link", {name: "看看今天帶回來的"}).click();
+  await expect(page.getByLabel("生活收藏進度")).toHaveText(`${openToday.length}/7`);
+  // The other keepsakes come on other days; hand them over directly so the cabinet can be checked in full.
+  const dbUrl = process.env.E2E_DATABASE_URL ?? "postgres://postgres:postgres@127.0.0.1:5433/longjiao_laned_e2e";
+  assertE2eDatabase(dbUrl);
+  const db = new pg.Client({ connectionString: dbUrl });
+  await db.connect();
+  try {
+    const inventory = LIFE_ACTIVITIES.map(a => ({activityId: a.id, earnedOn: "2026-01-01"}));
+    await db.query(`UPDATE characters SET sharing = jsonb_set(sharing, '{life,inventory}', $1::jsonb) WHERE user_id = (SELECT id FROM users WHERE email = $2)`, [JSON.stringify(inventory), `life-${test.info().project.name}@e2e.test`]);
+  } finally { await db.end(); }
+  await page.reload();
   await expect(page.getByLabel("生活收藏進度")).toHaveText("7/7");
   await checkState(page, "G07-life-cabinet");
   for (const a of LIFE_ACTIVITIES) {
@@ -402,7 +423,8 @@ test("B4 重新整理常用頁面保留角色與生活資料", async ({ page }) 
   test.setTimeout(120_000);
   await json(page.request.post("/api/auth/dev-login", { data: { email: `reload-${test.info().project.name}@e2e.test` } }));
   await growToStageTwo(page, "小圓");
-  await json(page.request.post("/api/me/life/activities", { data: { activityId: "shop" } }));
+  const openNow = (await json(page.request.get("/api/me/life"))).activities.find((a: {open: boolean}) => a.open);
+  await json(page.request.post("/api/me/life/activities", { data: { activityId: openNow.id } }));
   const before = await json(page.request.get("/api/me"));
   const lifeBefore = await json(page.request.get("/api/me/life"));
   for (const [path, text] of [

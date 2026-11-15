@@ -37,13 +37,16 @@ export function LifePage({ cabinet = false }: { cabinet?: boolean }) {
     } finally { gate.current = false; setBusy(false); }
   }
   function choose() {
-    const available = data?.activities.filter(a => !a.done) ?? [];
+    const available = data?.activities.filter(a => a.open && !a.done) ?? [];
     setSelected(available.find(a => a.id === data?.recommendedId)?.id ?? available[0]?.id ?? "music");
     setChoosing(true);
   }
   if (!me?.character) return <section className="panel stack"><h1>小龍還在蛋裡</h1><p>先把牠帶回家，再一起玩。</p><Link to="/" className="btn primary">回小龍身邊</Link></section>;
   if (!data) return <section className="panel stack"><h1>小龍的今天</h1><p role={life.error ? "alert" : "status"}>{life.error ? "剛剛沒連上，小龍還在等你。" : "翻開今天的小本子…"}</p>{life.error && <button className="btn primary" onClick={() => void life.reload()}>再看一次</button>}<Link className="btn ghost" to="/">回小龍身邊</Link></section>;
-  const allDone = data.activities.every(a => a.done);
+  const openToday = data.activities.filter(a => a.open);
+  const allDone = openToday.every(a => a.done);
+  const keepsakeStory = (id: LifeActivityId, earnedOn: string) =>
+    data.history.flatMap(d => d.day === earnedOn ? d.entries : []).find(e => e.activityId === id)?.story ?? lifeActivityStory(id, new Date(`${earnedOn}T04:00:00Z`));
   return <div className="stack life-page">
     <div className="row between"><h1>{cabinet ? "生活收藏" : "小龍的今天"}</h1><Link className={`btn ${cabinet ? "primary" : "ghost"}`} to="/">回小龍身邊</Link></div>
     {error && <p className="error" role="alert">{error}</p>}
@@ -68,7 +71,7 @@ export function LifePage({ cabinet = false }: { cabinet?: boolean }) {
           <p className="life-scene">{data.scene}</p>
           <div className="life-wish"><strong>想要什麼？</strong><p>{data.wish}</p><strong>可以幫點什麼？</strong><p>{data.help}</p></div>
           {allDone ? <Link to="/life/cabinet" className="btn primary">看看今天帶回來的</Link> : <button type="button" className="btn primary" onClick={choose}>陪牠去玩</button>}
-          <p className="muted">{allDone ? "今天玩得滿滿的。一起躺一下。" : `今天還有 ${data.activities.filter(a => !a.done).length} 種小冒險。想玩再玩。`}</p>
+          <p className="muted">{allDone ? "今天想去的地方都去了。明天牠會想去別的地方。" : `小龍今天只想去 ${openToday.map(a => a.place).join("、")}。其他地方明天再說。`}</p>
         </section>
         <section className="panel stack life-diary" aria-label="小龍日記">
           <h2>今天的小本子</h2>
@@ -84,7 +87,7 @@ export function LifePage({ cabinet = false }: { cabinet?: boolean }) {
     {choosing && <Dialog title="陪小龍去玩" busy={busy} onClose={() => setChoosing(false)}>
       <h2>這次去哪裡？</h2>
       <div className="life-choices" role="radiogroup" aria-label="挑一個小冒險">
-        {data.activities.map(a => <button type="button" role="radio" aria-checked={selected === a.id} key={a.id} className={`btn ghost ${selected === a.id ? "is-chosen" : ""}`} disabled={busy || a.done} onClick={() => setSelected(a.id)}>{a.emoji} {a.name}{a.done ? " · 今天玩過了" : ""}</button>)}
+        {data.activities.map(a => <button type="button" role="radio" aria-checked={selected === a.id} key={a.id} className={`btn ghost ${selected === a.id ? "is-chosen" : ""}`} disabled={busy || a.done || !a.open} onClick={() => setSelected(a.id)}>{a.emoji} {a.name}{a.done ? " · 今天玩過了" : !a.open ? " · 今天沒開" : ""}</button>)}
       </div>
       <p>{activity?.story}</p>
       <p className="muted">帶回：{activity?.reward}</p>
@@ -99,7 +102,7 @@ export function LifePage({ cabinet = false }: { cabinet?: boolean }) {
     {item && <Dialog title={item.reward} busy={busy} onClose={() => setDetail(null)}>
       <p className="life-object" aria-hidden>{item.emoji}</p><h2>{item.reward}</h2><p>{item.category}</p>
       {data.inventory.find(i => i.activityId === item.id) ? <>
-        <p>{data.inventory.find(i => i.activityId === item.id)!.earnedOn} · {item.place}</p><p>{lifeActivityStory(item.id, new Date(`${data.inventory.find(i => i.activityId === item.id)!.earnedOn}T04:00:00Z`))}</p>
+        <p>{data.inventory.find(i => i.activityId === item.id)!.earnedOn} · {item.place}</p><p>{keepsakeStory(item.id, data.inventory.find(i => i.activityId === item.id)!.earnedOn)}</p>
         {item.id === "shop" || item.id === "festival" ? <button type="button" className="btn primary" disabled={busy} aria-busy={busy} onClick={() => void change(item.id === "shop" ? {outfit: data.outfit ? null : "shop"} : {decoration: data.decoration ? null : "festival"})}>{busy ? "放好囉…" : item.id === "shop" ? (data.outfit ? "收回圍巾" : "穿上圍巾") : (data.decoration ? "收起小燈" : "擺在家裡")}</button> : <button type="button" className="btn primary" onClick={() => setDetail(null)}>收好</button>}
       </> : <><p>陪小龍{item.name}，就能帶回來。</p><Link to="/life" className="btn primary" onClick={() => setDetail(null)}>找小龍一起玩</Link></>}
       {error && <p className="error" role="alert">{error}</p>}
