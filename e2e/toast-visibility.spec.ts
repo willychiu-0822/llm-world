@@ -29,7 +29,9 @@ test("A6 連接頁複製提示可見、不遮擋按鈕", async ({page, context})
   await growToStageTwo(page);
   await page.goto("/connect");
   await page.getByRole("button", {name:"開始連接"}).click();
-  for (const [name, message] of [["複製", "網址已複製"], ["複製這兩行", "指令已複製"]]) {
+  await page.getByRole("button", {name:"Claude", exact:true}).click();
+  for (const [name, message] of [["複製網址", "網址已複製"], ["複製這兩行", "指令已複製"]]) {
+    if (name === "複製這兩行") await page.getByText("進階", {exact:true}).click();
     await page.getByRole("button", {name, exact:true}).click();
     const notice = page.locator(".toast");
     await expect(notice).toContainText(message);
@@ -49,7 +51,7 @@ test("A6 連接頁複製提示可見、不遮擋按鈕", async ({page, context})
           rect.left < noticeRect.right && rect.right > noticeRect.left && rect.top < noticeRect.bottom && rect.bottom > noticeRect.top;
       }).map(target => target.textContent?.trim() || target.tagName);
     })).toEqual([]);
-    await page.screenshot({path:`docs/uat/evidence/${test.info().project.name}-A6-${name === "複製" ? "copy-url" : "copy-codex"}.png`});
+    await page.screenshot({path:`docs/uat/evidence/${test.info().project.name}-A6-${name === "複製網址" ? "copy-url" : "copy-codex"}.png`});
     await notice.getByRole("button", {name:"關閉提示"}).click();
     await expect(notice).toHaveCount(0);
   }

@@ -30,7 +30,7 @@ test("Codex instructions are on the connect page, and disconnect cuts the AI off
   page.once("dialog", (d) => d.accept());
   await page.getByRole("button", { name: "中斷連接" }).click();
   await expect(page.getByRole("status")).toContainText("已中斷連接");
-  await expect(page.getByText("還沒有連接中的 AI")).toBeVisible();
+  await expect(page.getByText("還沒有連上的朋友")).toBeVisible();
   await expect(tool(ai, "character_get")).rejects.toThrow();
   await ai.close();
 });
