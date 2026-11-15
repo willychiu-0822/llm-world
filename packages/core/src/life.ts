@@ -26,7 +26,116 @@ const FESTIVAL_STORIES = {
 export function lifeActivityStory(id: LifeActivityId, now: Date): string {
   return id === "festival" ? FESTIVAL_STORIES[lifeClock(now).season] : LIFE_ACTIVITIES.find(a => a.id === id)!.story;
 }
-const entry = z.object({ activityId: lifeActivityId, at: z.string() });
+type LifeStory = { id: string; text: string; season?: "春" | "夏" | "秋" | "冬" };
+/** Each place keeps several stories. `.0` is the original one, so old diaries still read the same. */
+const MORE_STORIES: Record<Exclude<LifeActivityId, "festival">, string[]> = {
+  shop: [
+    "萬事屋老闆拿出一頂小帽子。小龍戴上去，帽子把牠整個蓋住，只剩尾巴在外面搖。",
+    "小龍在店裡數了三遍零錢，最後買了一顆糖。老闆笑著多送牠一顆。",
+    "老闆教小龍把包裝紙折成小船。小龍折成了一團，還是很寶貝地帶走。",
+  ],
+  exercise: [
+    "小龍跟著阿湧沿河慢跑，跑到一半停下來看魚。阿湧也停了，兩個蹲了好久。",
+    "河邊的草長得比小龍還高。牠在裡面滾了一圈，頭上頂著一根草走出來。",
+    "阿湧教小龍丟石頭打水漂。小龍的石頭撲通一聲沉了，水花倒是很大。",
+  ],
+  music: [
+    "阿芽讓小龍試敲小鼓。小龍敲得很用力，連隔壁的狗都跟著搖尾巴。",
+    "音樂坊裡有一把舊口琴。小龍吹了一口氣，發出像打嗝的聲音，三個人都笑了。",
+    "阿芽哼了一小段新曲子。小龍聽完，用腳尖輕輕打了一整首拍子。",
+  ],
+  visit: [
+    "小栗家的窗台種了一盆小薄荷。小龍聞了又聞，小栗乾脆剪一小撮讓牠帶回去。",
+    "小栗翻出一本舊相簿。小龍指著一張糊掉的照片說，這張最好看。",
+    "兩個一起看雲。小栗說那朵像包子，小龍說那朵像小栗。",
+  ],
+  town: [
+    "霧丘鎮的熱湯店在冒煙。小龍捧著碗，把鼻子泡進熱氣裡。",
+    "車掌讓小龍幫忙剪票。小龍剪了一個小小的缺角，車掌說這樣最特別。",
+    "霧丘鎮的早上起了霧，小龍一路摸著牆走。牆那頭有隻貓，也在摸著牆走。",
+  ],
+  abroad: [
+    "星砂島的孩子教小龍用貝殼聽海。小龍聽到的是自己肚子咕嚕咕嚕的聲音。",
+    "向導帶小龍走過一段潮濕的沙灘。小龍留下一排腳印，海浪輕輕收走了一半。",
+    "小龍在島上學會了一句道謝。牠回程唸了一路，怕在路上弄丟。",
+  ],
+};
+const FESTIVAL_EXTRA = [
+  "小龍幫忙數了廣場上的小燈，數到一半被鎮民叫去吃湯圓，回來又得重數。",
+  "廣場擺了一排小攤子。小龍每一攤都問一句好，最後抱著三顆糖果回家。",
+];
+const STORIES: Record<LifeActivityId, LifeStory[]> = (() => {
+  const base = Object.fromEntries(LIFE_ACTIVITIES.map(a => [a.id, [{ id: `${a.id}.0`, text: a.story }] as LifeStory[]])) as Record<LifeActivityId, LifeStory[]>;
+  for (const [id, lines] of Object.entries(MORE_STORIES)) lines.forEach((text, i) => base[id as LifeActivityId]!.push({ id: `${id}.${i + 1}`, text }));
+  base.festival = [
+    ...(Object.entries(FESTIVAL_STORIES) as Array<[LifeStory["season"] & string, string]>).map(([season, text]) => ({ id: `festival.${season}`, text, season })),
+    ...FESTIVAL_EXTRA.map((text, i) => ({ id: `festival.${i + 1}`, text })),
+  ];
+  return base;
+})();
+/** Older entries have no story id. They read as the first story, or the season's festival line. */
+export function lifeLegacyStoryId(id: LifeActivityId, at: Date) {
+  return id === "festival" ? `festival.${lifeClock(at).season}` : `${id}.0`;
+}
+export type LifePlan = {
+  open: LifeActivityId[];
+  /** The story each open place will tell today. */
+  stories: Partial<Record<LifeActivityId, { storyId: string; text: string }>>;
+};
+/**
+ * Which places are open today, and which story each tells. Pure: it only reads days before today and
+ * keepsakes earned before today, so a preview and the saved entry always agree.
+ * Fewer than four keepsakes: two places. After that: one. Unowned places come first, so gaps never
+ * cost anything. Once everything is owned, the place with the fewest seen stories opens.
+ */
+export function lifePlan(characterId: string, now: Date, life: LifeState): LifePlan {
+  const { day, season } = lifeClock(now);
+  const owned = new Set(life.inventory.filter(i => i.earnedOn !== day).map(i => i.activityId));
+  const seen = new Map<string, number>();
+  const lastSeen = new Map<string, string>();
+  for (const d of life.days) {
+    if (d.day === day) continue;
+    for (const e of d.entries) {
+      const sid = e.storyId ?? lifeLegacyStoryId(e.activityId, new Date(e.at));
+      seen.set(sid, (seen.get(sid) ?? 0) + 1);
+      if ((lastSeen.get(sid) ?? "") < d.day) lastSeen.set(sid, d.day);
+    }
+  }
+  const seenCount = (id: LifeActivityId) => STORIES[id].reduce((n, s) => n + (seen.has(s.id) ? 1 : 0), 0);
+  const order = [...LIFE_ACTIVITIES].map(a => a.id).sort((a, b) => lifePick(`${characterId}:order:${a}`, 1e9) - lifePick(`${characterId}:order:${b}`, 1e9));
+  const count = owned.size < 4 ? 2 : 1;
+  const missing = order.filter(id => !owned.has(id));
+  const open = missing.length ? missing.slice(0, count)
+    : [...order].sort((a, b) => seenCount(a) - seenCount(b) || lifePick(`${characterId}:${day}:${a}`, 1e9) - lifePick(`${characterId}:${day}:${b}`, 1e9)).slice(0, count);
+  const stories: LifePlan["stories"] = {};
+  for (const id of open) {
+    const pool = STORIES[id].filter(s => !s.season || s.season === season);
+    const fresh = pool.filter(s => !seen.has(s.id));
+    const pickFrom = fresh.length ? fresh : [...pool].sort((a, b) => (lastSeen.get(a.id) ?? "").localeCompare(lastSeen.get(b.id) ?? ""));
+    const s = fresh.length ? pickFrom[lifePick(`${characterId}:${day}:${id}:story`, pickFrom.length)]! : pickFrom[0]!;
+    stories[id] = { storyId: s.id, text: s.text };
+  }
+  return { open, stories };
+}
+/**
+ * Records one visit in today's diary (the day must already exist in `life.days`), story text included,
+ * so rewording a story later never rewrites an old diary. Returns why nothing was written, if so.
+ */
+export function lifeApplyPlay(characterId: string, now: Date, life: LifeState, activityId: LifeActivityId): "played" | "done" | "closed" {
+  const { day } = lifeClock(now);
+  const today = life.days.find(d => d.day === day)!;
+  if (today.entries.some(e => e.activityId === activityId)) return "done";
+  const story = lifePlan(characterId, now, life).stories[activityId];
+  if (!story) return "closed";
+  today.entries.push({ activityId, at: now.toISOString(), storyId: story.storyId, story: story.text });
+  if (!life.inventory.some(i => i.activityId === activityId)) life.inventory.push({ activityId, earnedOn: day });
+  return "played";
+}
+/** The text of a stored entry. Old entries without a stored story fall back to the original wording. */
+export function lifeEntryStory(e: { activityId: LifeActivityId; at: string; story?: string }) {
+  return e.story ?? lifeActivityStory(e.activityId, new Date(e.at));
+}
+const entry = z.object({ activityId: lifeActivityId, at: z.string(), storyId: z.string().optional(), story: z.string().optional() });
 // New play is capped in the server. Reading must not discard a whole record
 // because one entry is unknown or an older save is longer than today's cap.
 export const lifeStateSchema = z.object({
@@ -59,6 +168,14 @@ function emptyLife(): LifeState {
 }
 function isKnownEntry(value: unknown): value is { activityId: LifeActivityId; at: string } {
   return isPlainObject(value) && typeof value.activityId === "string" && KNOWN_ACTIVITIES.has(value.activityId) && typeof value.at === "string" && value.at.length > 0;
+}
+/** Copies an entry, carrying the story fields only when the record has them. */
+function plainEntry(item: { activityId: LifeActivityId; at: string; storyId?: unknown; story?: unknown }) {
+  return {
+    activityId: item.activityId, at: item.at,
+    ...(typeof item.storyId === "string" ? { storyId: item.storyId } : {}),
+    ...(typeof item.story === "string" ? { story: item.story } : {}),
+  };
 }
 function isKnownInventory(value: unknown): value is { activityId: LifeActivityId; earnedOn: string } {
   return isPlainObject(value) && typeof value.activityId === "string" && KNOWN_ACTIVITIES.has(value.activityId) && typeof value.earnedOn === "string";
@@ -110,7 +227,7 @@ function salvageDays(value: unknown, issues: LifeIssue[]) {
         issues.push({ path: `life.days[${index}].entries[${entryIndex}]`, reason: "unrecognized entry left in place" });
         return;
       }
-      entries.push({ activityId: entry.activityId, at: entry.at });
+      entries.push(plainEntry(entry));
     });
     if (typeof item.autonomous !== "string") issues.push({ path: `life.days[${index}].autonomous`, reason: "unreadable note left in place" });
     known.push({ day: item.day, autonomous: typeof item.autonomous === "string" ? item.autonomous : "", entries });
@@ -171,7 +288,7 @@ function mergeDays(rawDays: unknown, stateDays: LifeState["days"]): unknown[] {
     if (index < 0) return { day: day.day, autonomous: day.autonomous, entries: day.entries };
     used.add(index);
     const rawDay = rawList[index] as Record<string, unknown> & { entries: unknown[] };
-    const pending = day.entries.map(item => ({ activityId: item.activityId, at: item.at }));
+    const pending = day.entries.map(plainEntry);
     const entries: unknown[] = [];
     for (const entry of rawDay.entries) {
       if (!isKnownEntry(entry)) {
@@ -245,7 +362,7 @@ export interface LifeView {
   help: string;
   scene: string;
   recommendedId: LifeActivityId;
-  activities: Array<Omit<typeof LIFE_ACTIVITIES[number], "story"> & { story: string; done: boolean }>;
+  activities: Array<Omit<typeof LIFE_ACTIVITIES[number], "story"> & { story: string; done: boolean; open: boolean }>;
   encounter?: { name: string; appearance: unknown } | null;
   inspiration?: { placeId: string; title: string; who: string } | null;
 }
