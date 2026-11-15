@@ -21,38 +21,54 @@ describe("a dragon's own life", () => {
     expect((await owner.get("/api/me/life")).body.today.day).toBe("2026-11-11");
     expect((await owner.get("/api/me")).body.pet.stars).toBe(0);
   });
-  it("keeps each season's festival preview in the completed diary", async () => {
+  const openIds = async (owner: { get: (u: string) => Promise<{ body: any }> }): Promise<string[]> =>
+    (await owner.get("/api/me/life")).body.activities.filter((a: { open: boolean }) => a.open).map((a: { id: string }) => a.id);
+  it("writes the story into the day's entry, so later rewording or other seasons never change it", async () => {
     env.ctx.now = () => new Date();
     const owner = await userWithCharacter(env.app, "seasonal@example.com");
     env.ctx.now = () => new Date("2026-03-10T04:00:00Z");
     const spring = (await owner.get("/api/me/life")).body;
-    const springStory = spring.activities.find((a: {id: string}) => a.id === "festival").story;
-    const played = (await owner.post("/api/me/life/activities").send({activityId: "festival"})).body;
-    expect(played.today.entries[0].story).toBe(springStory);
+    const first = spring.activities.find((a: {open: boolean}) => a.open);
+    expect(first.story).toBeTruthy();
+    const played = (await owner.post("/api/me/life/activities").send({activityId: first.id})).body;
+    expect(played.today.entries[0].story).toBe(first.story);
+    const [saved] = await env.ctx.db.select().from(characters);
+    const stored = (saved.sharing as { life: { days: Array<{ entries: Array<{ story?: string; storyId?: string }> }> } }).life.days[0]!.entries[0]!;
+    expect(stored.story).toBe(first.story);
+    expect(stored.storyId).toBeTruthy();
     env.ctx.now = () => new Date("2026-06-10T04:00:00Z");
     const summer = (await owner.get("/api/me/life")).body;
-    expect(summer.activities.find((a: {id: string}) => a.id === "festival").story).not.toBe(springStory);
-    expect(summer.history.find((d: {day: string}) => d.day === "2026-03-10").entries[0].story).toBe(springStory);
+    expect(summer.history.find((d: {day: string}) => d.day === "2026-03-10").entries[0].story).toBe(first.story);
   });
-  it("serializes repeats, persists all activity types and keeps pet settings on concurrent writes", async () => {
+  it("opens one or two places a day, turns closed ones away kindly, and takes at least five days to collect all seven", async () => {
     env.ctx.now = () => new Date();
     const owner = await userWithCharacter(env.app, "play@example.com");
-    const results = await Promise.all(Array.from({length: 4}, () => owner.post("/api/me/life/activities").send({activityId: "music"})));
+    env.ctx.now = () => new Date("2026-04-01T04:00:00Z");
+    const open = await openIds(owner);
+    expect(open.length).toBeGreaterThanOrEqual(1);
+    expect(open.length).toBeLessThanOrEqual(2);
+    const closed = ["shop", "exercise", "music", "visit", "festival", "town", "abroad"].find(id => !open.includes(id))!;
+    const refused = await owner.post("/api/me/life/activities").send({activityId: closed});
+    expect(refused.status).toBe(409);
+    expect(refused.body.error.message).toContain("沒開");
+    const results = await Promise.all(Array.from({length: 4}, () => owner.post("/api/me/life/activities").send({activityId: open[0]})));
     expect(results.every(r => r.status === 200)).toBe(true);
     const today = (await owner.get("/api/me/life")).body;
     expect(today.today.entries).toHaveLength(1);
     expect(today.inventory).toHaveLength(1);
     await Promise.all([
-      owner.post("/api/me/life/activities").send({activityId: "shop"}),
+      owner.post("/api/me/life/activities").send({activityId: open[1] ?? open[0]}),
       owner.patch("/api/me/pet").send({notify: false}),
     ]);
-    for (const activityId of ["exercise", "visit", "festival", "town", "abroad"]) {
-      expect((await owner.post("/api/me/life/activities").send({activityId})).status).toBe(200);
+    let days = 1;
+    while ((await owner.get("/api/me/life")).body.inventory.length < 7 && days < 12) {
+      env.ctx.now = () => new Date(Date.UTC(2026, 3, 1 + days * 2, 4));
+      days++;
+      for (const activityId of await openIds(owner)) expect((await owner.post("/api/me/life/activities").send({activityId})).status).toBe(200);
     }
+    expect(days).toBe(5);
     const life = (await owner.get("/api/me/life")).body;
-    expect(life.today.entries).toHaveLength(7);
     expect(life.inventory).toHaveLength(7);
-    expect(life.activities.every((a: {done:boolean}) => a.done)).toBe(true);
     const me = (await owner.get("/api/me")).body;
     expect(me.pet.notify).toBe(false);
     expect(me.pet.stars).toBe(0);
@@ -67,15 +83,18 @@ describe("a dragon's own life", () => {
     expect((await owner.post("/api/me/life/activities").send({activityId: "unknown"})).status).toBe(400);
     for (let i=0; i<65; i++) {
       env.ctx.now = () => new Date(Date.UTC(2026, 0, i+1, 4));
-      await owner.post("/api/me/life/activities").send({activityId: "shop"});
+      const [activityId] = await openIds(owner);
+      await owner.post("/api/me/life/activities").send({activityId});
     }
+    const owned = (await owner.get("/api/me/life")).body.inventory.length;
+    expect(owned).toBe(7);
     const equipped = await owner.patch("/api/me/life").send({outfit: "shop"});
     expect(equipped.body.outfit).toBe("shop");
     expect(equipped.body.history.length).toBeLessThanOrEqual(60);
     env.ctx.now = () => new Date("2027-11-10T00:00:00Z");
     await owner.post("/api/auth/dev-login").send({ email: "wardrobe@example.com" });
     const later = (await owner.get("/api/me/life")).body;
-    expect(later.inventory).toHaveLength(1);
+    expect(later.inventory).toHaveLength(owned);
     expect(later.outfit).toBe("shop");
     expect(later.mood).toBe("悠閒");
     expect((await owner.patch("/api/me/life").send({outfit: null})).body.outfit).toBeNull();
@@ -121,7 +140,8 @@ describe("a dragon's own life", () => {
       expect(viewed.status).toBe(200);
       expect(viewed.body.inventory).toHaveLength(8);
       expect(viewed.body.history.find((item: { day: string }) => item.day === "2024-03-01").entries).toHaveLength(8);
-      const played = await owner.post("/api/me/life/activities").send({ activityId: "music" });
+      const playedId = (await openIds(owner))[0];
+      const played = await owner.post("/api/me/life/activities").send({ activityId: playedId });
       expect(played.status).toBe(200);
       const [saved] = await env.ctx.db.select().from(characters);
       const stored = (saved.sharing as { life: { margin: string; outfit: string; days: Array<Record<string, any>>; inventory: Array<Record<string, any>> } }).life;
@@ -141,7 +161,7 @@ describe("a dragon's own life", () => {
       expect(stored.inventory.filter(item => item.activityId === "forged")).toEqual([{ activityId: "forged", earnedOn: "2024-04-09", ribbon: "foreign" }]);
       expect(stored.inventory.filter(item => item.ribbon === "second")).toEqual([{ activityId: "shop", earnedOn: "2024-04-08", ribbon: "second" }]);
       expect(stored.inventory.filter(item => item.activityId !== "forged")).toHaveLength(8);
-      expect(stored.days.some(item => item.day === "2026-03-02" && item.entries.some((entry: { activityId: string }) => entry.activityId === "music"))).toBe(true);
+      expect(stored.days.some(item => item.day === "2026-03-02" && item.entries.some((entry: { activityId: string }) => entry.activityId === playedId))).toBe(true);
       expect(logs.some(args => String(args[0]).includes("life record:"))).toBe(true);
     } finally {
       spy.mockRestore();

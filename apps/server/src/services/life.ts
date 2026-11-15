@@ -1,4 +1,4 @@
-import { autonomousLife, commitLife, LIFE_ACTIVITIES, lifeActivityInput, lifeActivityStory, lifeClock, lifePatchInput, lifePick, lifeScene, migrateLife, type LifeRecord, type LifeState } from "@lj/core";
+import { autonomousLife, commitLife, LIFE_ACTIVITIES, lifeActivityInput, lifeApplyPlay, lifeClock, lifeEntryStory, lifePatchInput, lifePick, lifePlan, lifeScene, migrateLife, type LifeRecord, type LifeState } from "@lj/core";
 import { characters } from "@lj/db";
 import { eq, sql } from "drizzle-orm";
 import type { AppContext } from "../context";
@@ -11,14 +11,19 @@ function logLife(characterId: string, record: LifeRecord) {
 function present(life: LifeState, id: string, now: Date) {
   const clock = lifeClock(now);
   const today = life.days.find(d => d.day === clock.day) ?? { day: clock.day, autonomous: autonomousLife(id, clock.day), entries: [] };
-  const recommended = LIFE_ACTIVITIES[lifePick(`${id}:${clock.day}:wish`, LIFE_ACTIVITIES.length)]!;
-  const withStories = (d: typeof today) => ({ ...d, entries: d.entries.map(e => ({ ...e, story: lifeActivityStory(e.activityId, new Date(e.at)) })) });
+  const plan = lifePlan(id, now, life);
+  const openList = LIFE_ACTIVITIES.filter(a => plan.open.includes(a.id));
+  const recommended = openList[lifePick(`${id}:${clock.day}:wish`, openList.length)]!;
+  const withStories = (d: typeof today) => ({ ...d, entries: d.entries.map(e => ({ ...e, story: lifeEntryStory(e) })) });
   const history = [today, ...life.days.filter(d => d.day !== clock.day)].sort((a,b) => b.day.localeCompare(a.day)).slice(0, 60).map(withStories);
   return {
     ...clock, today: withStories(today), history, inventory: life.inventory, outfit: life.outfit, decoration: life.decoration,
     allowVisits: life.allowVisits, mood: today.entries.length ? "滿足" : "悠閒", wish: recommended.wish, help: recommended.help,
     scene: lifeScene(now), recommendedId: recommended.id,
-    activities: LIFE_ACTIVITIES.map(a => ({ ...a, story: lifeActivityStory(a.id, now), done: today.entries.some(e => e.activityId === a.id) })),
+    activities: LIFE_ACTIVITIES.map(a => {
+      const entry = today.entries.find(e => e.activityId === a.id);
+      return { ...a, story: entry ? lifeEntryStory(entry) : plan.stories[a.id]?.text ?? "", done: !!entry, open: plan.open.includes(a.id) };
+    }),
   };
 }
 export type LifeView = ReturnType<typeof present>;
@@ -60,9 +65,7 @@ export async function playLife(ctx: AppContext, userId: string, raw: unknown) {
       // A normal diary stays within 60 days. An older save that is already longer is not trimmed.
       life.days = alreadyStored > 60 ? next : next.slice(0, 60);
     }
-    if (today.entries.some(e => e.activityId === activityId)) return;
-    today.entries.push({activityId, at: now.toISOString()});
-    if (!life.inventory.some(i => i.activityId === activityId)) life.inventory.push({ activityId, earnedOn: day });
+    if (lifeApplyPlay(id, now, life, activityId) === "closed") throw new AppError("conflict", "今天這裡沒開，換個地方陪小龍去吧。");
   });
 }
 export async function patchLife(ctx: AppContext, userId: string, raw: unknown) {
