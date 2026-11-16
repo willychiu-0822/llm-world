@@ -15,7 +15,8 @@ const EMPTY: PetSummary = { stars: 0, stage: 0, nextAt: 3, accessories: [], canW
 const OUTING_MS = 2400;
 
 interface WalkResult {
-  keepsake: KeepsakeItem;
+  keepsake: KeepsakeItem | null;
+  sight: { emoji: string; line: string } | null;
   reward: "backpack" | null;
   pet: PetSummary;
 }
@@ -40,6 +41,7 @@ export function HomePage() {
   const steps = useFetch<Step[]>(me?.character ? "/api/first-steps?status=confirmed" : null);
   const [phase, setPhase] = useState<"home" | "walking" | "found">("home");
   const [found, setFound] = useState<KeepsakeItem | null>(null);
+  const [sight, setSight] = useState<{ emoji: string; line: string } | null>(null);
   const [backpackNote, setBackpackNote] = useState(false);
   const [shelved, setShelved] = useState(false);
   const [accepting, setAccepting] = useState(false);
@@ -86,6 +88,7 @@ export function HomePage() {
     try {
       const res = await api<WalkResult>("/api/me/walk", { method: "POST" });
       setFound(res.keepsake);
+      setSight(res.keepsake ? null : res.sight);
       setBackpackNote(res.reward === "backpack");
       await new Promise((r) => window.setTimeout(r, OUTING_MS));
       setDidWalk(true);
@@ -154,7 +157,22 @@ export function HomePage() {
           {walkLabel}
         </button>
       )}
-      {!card && walkedToday && (
+      {!card && sight && phase !== "walking" && (
+        <article className="panel keepsake-card stack" aria-live="polite">
+          {backpackNote && <p className="notice" role="status">小背包背好了。</p>}
+          <p className="keepsake-emoji" aria-hidden>{sight.emoji}</p>
+          <p>{sight.line}</p>
+          <p className="muted">鎮上還沒有新的信物。有人留下足跡，小龍就會帶回來。</p>
+          <Link to="/life" className="btn primary">小龍的今天</Link>
+        </article>
+      )}
+      {!card && walkedToday && !sight && pet.total === 0 && (
+        <>
+          <p>今天已經出門了。鎮上還沒有新的信物。</p>
+          <Link to="/life" className="btn primary">小龍的今天</Link>
+        </>
+      )}
+      {!card && walkedToday && !sight && pet.total > 0 && (
         <>
           <p>今天已經出門了。收藏櫃還有位子。</p>
           <Link to="/cabinet" className="btn primary">去收藏櫃看看</Link>
@@ -180,7 +198,7 @@ export function HomePage() {
           <button type="button" className="btn ghost" disabled={accepting} onClick={() => { setShelved(true); setPhase("home"); setFound(null); }}>收進櫃裡</button>
         </article>
       )}
-      <Link to="/life" className="btn ghost">小龍的今天</Link>
+      {!(sight && phase !== "walking") && !(walkedToday && pet.total === 0 && !card) && <Link to="/life" className="btn ghost">小龍的今天</Link>}
       </div>
 
       {letterOpen && (

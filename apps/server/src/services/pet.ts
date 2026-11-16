@@ -1,4 +1,4 @@
-import { growthStage, keepsakeFor, nextGrowthAt, petPatchInput, warmLine, type Sticker } from "@lj/core";
+import { growthStage, keepsakeFor, nextGrowthAt, petPatchInput, TOWN_SIGHTS, townSightFor, warmLine, type Sticker } from "@lj/core";
 import { characters, deeds, firstSteps, places } from "@lj/db";
 import { and, count, desc, eq, inArray, ne, sql } from "drizzle-orm";
 import type { AppContext } from "../context";
@@ -170,7 +170,19 @@ export async function walkOut(ctx: AppContext, userId: string) {
   if (pet.lastWalkOn === today) throw new AppError("conflict", "今天已經出門過了");
   const rows = await otherDeeds(ctx, userId);
   const fresh = rows.filter((row) => !pet.collectedDeedIds.includes(row.deed.id));
-  if (!fresh.length) throw new AppError("conflict", "小龍翻了翻草叢，今天沒有新信物");
+  if (!fresh.length) {
+    // An empty town is a normal day: the baby still goes out and brings back something of its own.
+    const first = !pet.earnedAccessories.includes("backpack");
+    pet.lastWalkOn = today;
+    pet.lastKeepsakeId = null;
+    if (first) pet.earnedAccessories = [...pet.earnedAccessories, "backpack"];
+    await ctx.db
+      .update(characters)
+      .set({ sharing: sql`${characters.sharing} || ${JSON.stringify(sharingWith({}, pet))}::jsonb`, lastActiveAt: ctx.now() })
+      .where(eq(characters.id, character.id));
+    const summary = await getPetSummary(ctx, userId, sharingWith(character.sharing, pet));
+    return { keepsake: null, sight: townSightFor(pickIndex(`${userId}:${today}`, TOWN_SIGHTS.length)), reward: first ? "backpack" : null, pet: summary };
+  }
   const row = fresh[pickIndex(`${userId}:${today}:${ctx.now().getTime()}`, fresh.length)]!;
   const first = !pet.earnedAccessories.includes("backpack");
   pet.collectedDeedIds = [...pet.collectedDeedIds, row.deed.id];
@@ -182,7 +194,7 @@ export async function walkOut(ctx: AppContext, userId: string) {
     .set({ sharing: sql`${characters.sharing} || ${JSON.stringify(sharingWith({}, pet))}::jsonb`, lastActivePlaceId: row.deed.placeId, lastActiveAt: ctx.now() })
     .where(eq(characters.id, character.id));
   const summary = await getPetSummary(ctx, userId, sharingWith(character.sharing, pet));
-  return { keepsake: present(row, true, null), reward: first ? "backpack" : null, pet: summary };
+  return { keepsake: present(row, true, null), sight: null, reward: first ? "backpack" : null, pet: summary };
 }
 
 export async function patchPet(ctx: AppContext, userId: string, raw: unknown) {

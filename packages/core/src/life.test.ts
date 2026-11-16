@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { autonomousLife, commitLife, lifeClock, lifeScene, migrateLife, readLife } from "./life";
+import { autonomousLife, commitLife, LIFE_ACTIVITIES, lifeApplyPlay, lifeClock, lifeEntryStory, lifePlan, lifeScene, migrateLife, readLife, type LifeActivityId, type LifeState } from "./life";
 
 describe("Taipei's little everyday world", () => {
   it("uses the Taipei midnight and all four seasons and periods", () => {
@@ -58,5 +58,72 @@ describe("Taipei's little everyday world", () => {
     expect(future.canWrite).toBe(false);
     expect(future.state.days).toHaveLength(1);
     expect(migrateLife({ allowAiQuotes: true }).canWrite).toBe(true);
+  });
+
+  describe("daily places and stories", () => {
+    const at = (n: number) => new Date(Date.UTC(2026, 3, 1 + n, 4));
+    const fresh = () => readLife({});
+    function visit(life: LifeState, id: string, now: Date, only?: LifeActivityId[]) {
+      const { day } = lifeClock(now);
+      if (!life.days.find(d => d.day === day)) life.days.push({ day, autonomous: "x", entries: [] });
+      const played: LifeActivityId[] = [];
+      for (const a of lifePlan(id, now, life).open) if ((!only || only.includes(a)) && lifeApplyPlay(id, now, life, a) === "played") played.push(a);
+      return played;
+    }
+    it("opens at most two places on the first day and keeps the others closed", () => {
+      const life = fresh();
+      const plan = lifePlan("dragon", at(0), life);
+      expect(plan.open.length).toBeLessThanOrEqual(2);
+      const closed = LIFE_ACTIVITIES.map(a => a.id).find(a => !plan.open.includes(a))!;
+      visit(life, "dragon", at(0));
+      expect(life.inventory.length).toBe(2);
+      expect(lifeApplyPlay("dragon", at(0), life, closed)).toBe("closed");
+      expect(life.inventory.length).toBe(2);
+    });
+    it("needs at least five different days to collect all seven, however they are spread", () => {
+      for (const gap of [1, 3, 40]) {
+        const life = fresh();
+        let days = 0;
+        while (life.inventory.length < 7 && days < 20) visit(life, "dragon", at(days++ * gap));
+        expect(days).toBe(5);
+      }
+    });
+    it("gives an unseen story every day for a week, and never blocks play after that", () => {
+      const life = fresh();
+      for (let d = 0; d < 7; d++) {
+        const before = new Set(life.days.flatMap(x => x.entries.map(e => e.storyId)));
+        const now = at(d);
+        const plan = lifePlan("dragon", now, life);
+        expect(plan.open.length).toBeGreaterThan(0);
+        expect(plan.open.some(id => !before.has(plan.stories[id]!.storyId))).toBe(true);
+        visit(life, "dragon", now);
+      }
+      for (let d = 7; d < 60; d++) expect(visit(life, "dragon", at(d)).length).toBeGreaterThan(0);
+    });
+    it("keeps the story text it wrote, and old entries without one read as before", () => {
+      const life = fresh();
+      visit(life, "dragon", at(0));
+      const e = life.days[0]!.entries[0]!;
+      expect(e.story).toBeTruthy();
+      expect(lifeEntryStory(e)).toBe(e.story);
+      expect(lifeEntryStory({ activityId: "shop", at: at(0).toISOString() })).toContain("雲朵圍巾");
+    });
+    it("writes story fields back to the stored record, also for a second visit on the same day", () => {
+      const now = at(0);
+      const first = readLife({}), id = "dragon";
+      const { day } = lifeClock(now);
+      first.days.push({ day, autonomous: "x", entries: [] });
+      const [a, b] = lifePlan(id, now, first).open;
+      lifeApplyPlay(id, now, first, a!);
+      const rec1 = migrateLife({ life: commitLife(migrateLife({}), readLife({}), first) });
+      const second = structuredClone(rec1.state);
+      const before = structuredClone(second);
+      lifeApplyPlay(id, now, second, b!);
+      const stored = commitLife(rec1, before, second);
+      const back = migrateLife({ life: stored }).state.days[0]!.entries;
+      expect(back).toHaveLength(2);
+      for (const x of back) { expect(x.storyId).toBeTruthy(); expect(x.story).toBeTruthy(); }
+      expect((stored.days as Array<{ entries: Array<{ story?: string }> }>)[0]!.entries.every(x => typeof x.story === "string")).toBe(true);
+    });
   });
 });

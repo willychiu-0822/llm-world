@@ -41,10 +41,21 @@ describe("novice keepsakes", () => {
     expect(renamed.body.pet.accessories).toEqual(["backpack"]);
   });
 
+  it("treats an empty town as a normal day: a sight, the backpack, no error", async () => {
+    const baby = await userWithCharacter(env.app, "empty@example.com");
+    await deed(baby, "自己的事");
+    const empty = await baby.post("/api/me/walk");
+    expect(empty.status).toBe(200);
+    expect(empty.body.keepsake).toBeNull();
+    expect(empty.body.sight.line).toBeTruthy();
+    expect(empty.body.reward).toBe("backpack");
+    expect(empty.body.pet).toMatchObject({ canWalk: false, collected: 0, pending: null });
+    expect((await baby.post("/api/me/walk")).status).toBe(409);
+  });
+
   it("does not hand the baby their own deed, and stars grow when a challenge is done", async () => {
     const baby = await userWithCharacter(env.app, "solo@example.com");
     await deed(baby, "自己的事");
-    expect((await baby.post("/api/me/walk")).status).toBe(409);
 
     const pal = await userWithCharacter(env.app, "pal@example.com", { ...nova, name: "阿遊" });
     const theirs = await deed(pal, "摸了一把吉他");
