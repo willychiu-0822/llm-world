@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { boolean, index, integer, jsonb, pgTable, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import { bigserial, boolean, index, integer, jsonb, pgTable, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
 
 const createdAt = () => timestamp("created_at", { withTimezone: true }).notNull().defaultNow();
 const ts = (name: string) => timestamp(name, { withTimezone: true });
@@ -21,18 +21,53 @@ export const sessions = pgTable("sessions", {
   createdAt: createdAt(),
 });
 
-export const characters = pgTable("characters", {
-  id: text("id").primaryKey(),
-  userId: text("user_id").notNull().unique().references(() => users.id, { onDelete: "cascade" }),
-  name: text("name").notNull(),
-  appearance: jsonb("appearance").notNull(),
-  personality: text("personality").notNull().default(""),
-  sharing: jsonb("sharing").notNull().default({ allowAiQuotes: true }),
-  lastActivePlaceId: text("last_active_place_id"),
-  lastActiveAt: ts("last_active_at"),
-  isDemo: boolean("is_demo").notNull().default(false),
-  createdAt: createdAt(),
-});
+export const characters = pgTable(
+  "characters",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull().unique().references(() => users.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    appearance: jsonb("appearance").notNull(),
+    personality: text("personality").notNull().default(""),
+    sharing: jsonb("sharing").notNull().default({ allowAiQuotes: true }),
+    lastActivePlaceId: text("last_active_place_id"),
+    lastActiveAt: ts("last_active_at"),
+    isDemo: boolean("is_demo").notNull().default(false),
+    createdAt: createdAt(),
+    // 小日子（LW-15）：首頁只需要這三個值，日記與收藏在 life_days / life_items。
+    allowVisits: boolean("allow_visits").notNull().default(false),
+    lifeOutfit: text("life_outfit"),
+    lifeDecoration: text("life_decoration"),
+    /** 搬家前 `sharing.life` 的原樣備份（陣列，一次搬移一份）。只留底，不回給前端。 */
+    lifeLegacy: jsonb("life_legacy"),
+  },
+  (t) => [index("characters_allow_visits_idx").on(t.id).where(sql`${t.allowVisits}`)],
+);
+
+/** 小龍一天的日記：一天一列，當天去過的地方放在 entries。舊存檔可能有重複日期，所以不設唯一。 */
+export const lifeDays = pgTable(
+  "life_days",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    characterId: text("character_id").notNull().references(() => characters.id, { onDelete: "cascade" }),
+    day: text("day").notNull(),
+    autonomous: text("autonomous").notNull().default(""),
+    entries: jsonb("entries").notNull().default([]),
+  },
+  (t) => [index("life_days_character_day_idx").on(t.characterId, t.day)],
+);
+
+/** 小龍帶回家的收藏：一件一列。舊存檔可能同一件有兩筆，所以不設唯一。 */
+export const lifeItems = pgTable(
+  "life_items",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    characterId: text("character_id").notNull().references(() => characters.id, { onDelete: "cascade" }),
+    activityId: text("activity_id").notNull(),
+    earnedOn: text("earned_on").notNull(),
+  },
+  (t) => [index("life_items_character_idx").on(t.characterId)],
+);
 
 export const wants = pgTable(
   "wants",

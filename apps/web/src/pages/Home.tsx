@@ -1,4 +1,3 @@
-import { readLife } from "@lj/core";
 import { BABY_LINES, joinWords, stageLabel } from "@lj/core";
 import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -67,7 +66,7 @@ export function HomePage() {
 
   const pet = me.pet ?? EMPTY;
   const baby = me.character;
-  const life = readLife(baby.sharing);
+  const life = baby.life ?? { outfit: null, decoration: null };
   const backpack = pet.accessories.includes("backpack") || backpackNote;
   const goal = pet.nextAt ?? pet.stars;
   const openTries = (steps.data ?? []).length;
