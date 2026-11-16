@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 import type { Db } from "./client";
 import { ensureBasePlaces } from "./base";
+import { moveAllLegacyLife } from "./life-move";
 
 export function migrationsFolder(): string {
   if (process.env.MIGRATIONS_DIR) return process.env.MIGRATIONS_DIR;
@@ -13,6 +14,7 @@ export function migrationsFolder(): string {
 export async function runMigrations(db: Db): Promise<void> {
   await migrate(db, { migrationsFolder: migrationsFolder() });
   await ensureBasePlaces(db);
+  await moveAllLegacyLife(db);
 }
 
 /**
@@ -30,6 +32,7 @@ export async function migrateWithLock(url: string): Promise<void> {
     const db = drizzle(client, { schema });
     await migrate(db, { migrationsFolder: migrationsFolder() });
     await ensureBasePlaces(db as unknown as Db);
+    await moveAllLegacyLife(db as unknown as Db);
   } finally {
     await client.query("SELECT pg_advisory_unlock(727272)").catch(() => {});
     await client.end();

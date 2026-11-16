@@ -14,10 +14,12 @@ async function onlyVisitOpen(email: string) {
   await db.connect();
   try {
     const inventory = LIFE_ACTIVITIES.filter(a => a.id !== "visit").map(a => ({ activityId: a.id, earnedOn: "2020-01-01" }));
+    const who = `(SELECT c.id FROM characters c JOIN users u ON u.id = c.user_id WHERE u.email = $1)`;
+    await db.query(`DELETE FROM life_items WHERE character_id = ${who}`, [email]);
     const r = await db.query(
-      `UPDATE characters SET sharing = jsonb_set(sharing, '{life}', COALESCE(sharing->'life', '{"version":1,"days":[]}'::jsonb) || jsonb_build_object('inventory', $1::jsonb)) WHERE user_id = (SELECT id FROM users WHERE email = $2)`,
-      [JSON.stringify(inventory), email]);
-    expect(r.rowCount).toBe(1);
+      `INSERT INTO life_items (character_id, activity_id, earned_on) SELECT ${who}, x->>'activityId', x->>'earnedOn' FROM jsonb_array_elements($2::jsonb) x WHERE ${who} IS NOT NULL`,
+      [email, JSON.stringify(inventory)]);
+    expect(r.rowCount).toBe(inventory.length);
   } finally { await db.end(); }
 }
 

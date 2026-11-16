@@ -5,6 +5,7 @@ import type { z } from "zod";
 import type { AppContext } from "../context";
 import { notFound } from "../http/errors";
 import { moderate } from "./moderation";
+import { lifeLook } from "./life";
 import { getPetSummary } from "./pet";
 
 export type CharacterRow = typeof characters.$inferSelect;
@@ -76,7 +77,7 @@ export async function getMe(ctx: AppContext, user: { id: string; email: string; 
   const [d] = await ctx.db.select({ c: count() }).from(discoveries).where(and(eq(discoveries.userId, user.id), isNull(discoveries.readAt)));
   return {
     user: { id: user.id, email: user.email, displayName: user.displayName, roles: user.roles },
-    character: character ? { id: character.id, name: character.name, appearance: character.appearance, personality: character.personality, sharing: character.sharing } : null,
+    character: character ? { id: character.id, name: character.name, appearance: character.appearance, personality: character.personality, sharing: { allowAiQuotes: (character.sharing as { allowAiQuotes?: boolean }).allowAiQuotes ?? true }, life: lifeLook(character) } : null,
     wants: await listWants(ctx, user.id),
     provider: provider ?? null,
     unread: { notifications: n.c, discoveries: d.c },

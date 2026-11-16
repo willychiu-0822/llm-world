@@ -15,6 +15,13 @@
       "when": 1794271203729,
       "tag": "0001_oauth_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794820476505,
+      "tag": "0002_life_tables",
+      "breakpoints": true
     }
   ]
 }

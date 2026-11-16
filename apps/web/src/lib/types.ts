@@ -22,7 +22,7 @@ export interface PetSummary {
 
 export interface Me {
   user: { id: string; email: string; displayName: string; roles: string[] };
-  character: { id: string; name: string; appearance: Appearance; personality: string; sharing: { allowAiQuotes: boolean } } | null;
+  character: { id: string; name: string; appearance: Appearance; personality: string; sharing: { allowAiQuotes: boolean }; life?: { outfit: "shop" | null; decoration: "festival" | null } } | null;
   wants: Want[];
   provider: { id: string; name: string; status: string } | null;
   unread: { notifications: number; discoveries: number };

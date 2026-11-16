@@ -362,7 +362,11 @@ test("檢核 G1–G8：小龍有自己的今天、七種生活與四類收藏", 
   await db.connect();
   try {
     const inventory = LIFE_ACTIVITIES.map(a => ({activityId: a.id, earnedOn: "2026-01-01"}));
-    await db.query(`UPDATE characters SET sharing = jsonb_set(sharing, '{life,inventory}', $1::jsonb) WHERE user_id = (SELECT id FROM users WHERE email = $2)`, [JSON.stringify(inventory), `life-${test.info().project.name}@e2e.test`]);
+    const who = `(SELECT c.id FROM characters c JOIN users u ON u.id = c.user_id WHERE u.email = $1)`;
+    const email = `life-${test.info().project.name}@e2e.test`;
+    await db.query(`DELETE FROM life_items WHERE character_id = ${who}`, [email]);
+    const seeded = await db.query(`INSERT INTO life_items (character_id, activity_id, earned_on) SELECT ${who}, x->>'activityId', x->>'earnedOn' FROM jsonb_array_elements($2::jsonb) x WHERE ${who} IS NOT NULL`, [email, JSON.stringify(inventory)]);
+    expect(seeded.rowCount).toBe(inventory.length);
   } finally { await db.end(); }
   await page.reload();
   await expect(page.getByLabel("生活收藏進度")).toHaveText("7/7");

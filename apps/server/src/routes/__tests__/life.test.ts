@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { characters, deeds } from "@lj/db";
+import { characters, deeds, lifeDays, lifeItems } from "@lj/db";
 import { eq } from "drizzle-orm";
 import { nova, userWithCharacter, useTestApp, login } from "../../test/helpers";
 
@@ -32,8 +32,8 @@ describe("a dragon's own life", () => {
     expect(first.story).toBeTruthy();
     const played = (await owner.post("/api/me/life/activities").send({activityId: first.id})).body;
     expect(played.today.entries[0].story).toBe(first.story);
-    const [saved] = await env.ctx.db.select().from(characters);
-    const stored = (saved.sharing as { life: { days: Array<{ entries: Array<{ story?: string; storyId?: string }> }> } }).life.days[0]!.entries[0]!;
+    const [savedDay] = await env.ctx.db.select().from(lifeDays);
+    const stored = (savedDay!.entries as Array<{ story?: string; storyId?: string }>)[0]!;
     expect(stored.story).toBe(first.story);
     expect(stored.storyId).toBeTruthy();
     env.ctx.now = () => new Date("2026-06-10T04:00:00Z");
@@ -143,29 +143,69 @@ describe("a dragon's own life", () => {
       const playedId = (await openIds(owner))[0];
       const played = await owner.post("/api/me/life/activities").send({ activityId: playedId });
       expect(played.status).toBe(200);
+      // LW-15: the save now lives in its own tables. Nothing readable is lost, duplicates included,
+      // and the original JSON is archived untouched so the parts this version cannot read are still there.
       const [saved] = await env.ctx.db.select().from(characters);
-      const stored = (saved.sharing as { life: { margin: string; outfit: string; days: Array<Record<string, any>>; inventory: Array<Record<string, any>> } }).life;
-      expect(stored.margin).toBe("手寫");
-      expect(stored.outfit).toBe("handmade-cape");
-      expect(stored.days.find(item => item.autonomous === "沒有日期")).toEqual(undated);
+      expect(saved.sharing).toEqual({ allowAiQuotes: true });
+      expect(saved.lifeLegacy).toEqual([life]);
+      expect(saved.lifeOutfit).toBeNull();
+      const dayRows = await env.ctx.db.select().from(lifeDays);
       for (const original of datedDays) {
-        const kept = stored.days.find(item => item.day === original.day);
-        expect(kept?.kept).toBe(true);
-        expect(kept?.entries.filter((entry: { activityId: string; note?: string }) => entry.activityId === "shop" && entry.note === "scarf")).toHaveLength(1);
-        expect(kept?.entries.filter((entry: { activityId: string; note?: string }) => entry.activityId === "shop" && entry.note === "second-scarf")).toHaveLength(1);
-        expect(kept?.entries.filter((entry: { activityId: string }) => entry.activityId === "future-game")).toHaveLength(1);
+        const kept = dayRows.filter(row => row.day === original.day);
+        expect(kept).toHaveLength(1);
+        const entries = kept[0]!.entries as Array<{ activityId: string }>;
+        expect(entries.filter(entry => entry.activityId === "shop")).toHaveLength(2);
+        expect(entries.filter(entry => entry.activityId === "future-game")).toHaveLength(0);
         for (const activityId of ["music", "exercise", "visit", "festival", "town", "abroad"]) {
-          expect(kept?.entries.filter((entry: { activityId: string }) => entry.activityId === activityId)).toHaveLength(1);
+          expect(entries.filter(entry => entry.activityId === activityId)).toHaveLength(1);
         }
       }
-      expect(stored.inventory.filter(item => item.activityId === "forged")).toEqual([{ activityId: "forged", earnedOn: "2024-04-09", ribbon: "foreign" }]);
-      expect(stored.inventory.filter(item => item.ribbon === "second")).toEqual([{ activityId: "shop", earnedOn: "2024-04-08", ribbon: "second" }]);
-      expect(stored.inventory.filter(item => item.activityId !== "forged")).toHaveLength(8);
-      expect(stored.days.some(item => item.day === "2026-03-02" && item.entries.some((entry: { activityId: string }) => entry.activityId === playedId))).toBe(true);
+      const itemRows = await env.ctx.db.select().from(lifeItems);
+      expect(itemRows.filter(item => item.activityId === "forged")).toHaveLength(0);
+      expect(itemRows.filter(item => item.activityId === "shop").map(item => item.earnedOn).sort()).toEqual(["2024-04-01", "2024-04-08"]);
+      expect(itemRows).toHaveLength(8);
+      expect(dayRows.some(row => row.day === "2026-03-02" && (row.entries as Array<{ activityId: string }>).some(entry => entry.activityId === playedId))).toBe(true);
+      expect(dayRows).toHaveLength(datedDays.length + 1);
       expect(logs.some(args => String(args[0]).includes("life record:"))).toBe(true);
     } finally {
       spy.mockRestore();
     }
+  });
+  it("LW-15: the session carries only what home needs, never the diary", async () => {
+    env.ctx.now = () => new Date("2026-03-02T04:00:00Z");
+    const owner = await userWithCharacter(env.app, "session@example.com");
+    const [created] = await env.ctx.db.select().from(characters);
+    const life = {
+      version: 1, outfit: "shop", decoration: null, allowVisits: true,
+      days: [{ day: "2026-03-01", autonomous: "只寫在日記裡的悄悄話", entries: [{ activityId: "shop", at: "2026-03-01T03:00:00.000Z", story: "只寫在日記裡的故事" }] }],
+      inventory: [{ activityId: "shop", earnedOn: "2026-03-01" }],
+    };
+    await env.ctx.db.update(characters).set({ sharing: { allowAiQuotes: false, life } }).where(eq(characters.id, created!.id));
+    // 還沒搬的舊存檔：session 也只給穿戴與佈置
+    const old = await owner.get("/api/session");
+    expect(old.body.me.character.life).toEqual({ outfit: "shop", decoration: null });
+    expect(old.body.me.character.sharing).toEqual({ allowAiQuotes: false });
+    expect(JSON.stringify(old.body)).not.toContain("悄悄話");
+    expect(JSON.stringify(old.body)).not.toContain("日記裡的故事");
+    // 打開生活頁時搬家，一筆不少
+    const view = (await owner.get("/api/me/life")).body;
+    expect(view.history.find((d: { day: string }) => d.day === "2026-03-01").entries[0].story).toBe("只寫在日記裡的故事");
+    expect(view).toMatchObject({ outfit: "shop", decoration: null, allowVisits: true });
+    expect(view.inventory).toEqual([{ activityId: "shop", earnedOn: "2026-03-01" }]);
+    const [moved] = await env.ctx.db.select().from(characters);
+    expect(moved).toMatchObject({ sharing: { allowAiQuotes: false }, allowVisits: true, lifeOutfit: "shop", lifeDecoration: null, lifeLegacy: [life] });
+    const session = await owner.get("/api/session");
+    expect(session.body.me.character).toEqual({ id: created!.id, name: "Nova", appearance: created!.appearance, personality: created!.personality, sharing: { allowAiQuotes: false }, life: { outfit: "shop", decoration: null } });
+    expect(JSON.stringify(session.body)).not.toContain("悄悄話");
+    // 換下圍巾後 session 跟著變，日記還在
+    expect((await owner.patch("/api/me/life").send({ outfit: null })).body.outfit).toBeNull();
+    expect((await owner.get("/api/session")).body.me.character.life).toEqual({ outfit: null, decoration: null });
+    expect(await env.ctx.db.select().from(lifeDays)).toHaveLength(1);
+    // 改角色設定不會把生活資料帶回 sharing
+    await owner.put("/api/me/character").send({ ...nova, sharing: { allowAiQuotes: true } });
+    const [after] = await env.ctx.db.select().from(characters);
+    expect(after!.sharing).toEqual({ allowAiQuotes: true });
+    expect(after!.allowVisits).toBe(true);
   });
   it("refuses to overwrite a life record it cannot migrate", async () => {
     const logs: unknown[][] = [];
@@ -186,6 +226,9 @@ describe("a dragon's own life", () => {
       expect(blocked.status).toBe(409);
       const [again] = await env.ctx.db.select().from(characters);
       expect((again.sharing as { life: unknown }).life).toEqual(future);
+      expect(again.lifeLegacy).toBeNull();
+      expect(await env.ctx.db.select().from(lifeDays)).toHaveLength(0);
+      expect(await env.ctx.db.select().from(lifeItems)).toHaveLength(0);
       expect(logs.some(args => String(args[0]).includes("life record: refusing to overwrite"))).toBe(true);
     } finally {
       spy.mockRestore();
@@ -224,7 +267,10 @@ describe("a dragon's own life", () => {
     const played = (await me.post("/api/me/life/activities").send({ activityId: todayId })).body;
     expect(played.encounter.name).toBe("阿綠");
     const stored = (await env.ctx.db.select().from(characters).where(eq(characters.name, "我家小龍")))[0]!;
-    expect(JSON.stringify(stored.sharing)).not.toContain("阿綠");
+    expect(JSON.stringify(stored)).not.toContain("阿綠");
+    const diary = await env.ctx.db.select().from(lifeDays).where(eq(lifeDays.characterId, stored.id));
+    expect(diary).toHaveLength(1);
+    expect(JSON.stringify(diary)).not.toContain("阿綠");
     // 撤回後未來不再出現
     expect((await friend.patch("/api/me/life").send({ allowVisits: false })).body.allowVisits).toBe(false);
     expect((await me.get("/api/me/life")).body.encounter).toEqual({ kind: "town", name: "小栗" });
