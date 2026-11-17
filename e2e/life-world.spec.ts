@@ -139,3 +139,35 @@ test("G11：life_get 只讀小龍自己的小日子，不寫入、不含別人�
   expect(await json(me.request.get("/api/me/life"))).toEqual(before);
   expect((await json(me.request.get("/api/me"))).pet.stars).toBe(starsBefore);
 });
+
+test("LW-13：手機第一屏看得到小龍、今天的一句話和唯一的主按鈕", async ({ browser }) => {
+  const page = await loginPage(browser, "lw13@e2e.test", "LW13");
+  await json(page.request.put("/api/me/character", { data: { name: "阿圓", appearance: look(), personality: "", sharing: { allowAiQuotes: false } } }));
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/life");
+  const life = await json(page.request.get("/api/me/life"));
+  const first = page.getByLabel("小龍現在");
+  const inFirstScreen = async (l: import("@playwright/test").Locator) => {
+    const box = (await l.boundingBox())!;
+    expect(box.y).toBeGreaterThanOrEqual(0);
+    expect(box.y + box.height).toBeLessThanOrEqual(844);
+  };
+  const scene = first.getByRole("img", { name: /的龍角鎮，阿圓在家門口/ });
+  await expect(scene).toHaveAttribute("data-season", life.season);
+  await expect(scene).toHaveAttribute("data-period", life.period);
+  await inFirstScreen(scene);
+  await inFirstScreen(scene.locator("svg[data-body]"));
+  await inFirstScreen(first.getByText(life.today.autonomous));
+  await inFirstScreen(first.getByRole("button", { name: "陪牠去玩", exact: true }));
+  await expect(page.locator("main .btn.primary")).toHaveCount(1);
+  // 第一屏（不算固定的導覽列）可以按的地方不超過 2 個
+  const tappable = await page.locator("main").locator("a, button").evaluateAll(els => els.filter(el => {
+    const r = el.getBoundingClientRect();
+    return r.height > 0 && r.top < window.innerHeight && r.bottom > 0;
+  }).length);
+  expect(tappable).toBeLessThanOrEqual(2);
+  // 其他東西還在，只是往下收
+  await expect(page.getByLabel("小龍日記")).toBeVisible();
+  await expect(page.getByLabel("串門子")).toBeVisible();
+  await page.context().close();
+});

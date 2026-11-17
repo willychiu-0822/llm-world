@@ -2,7 +2,7 @@ import { expect } from "@playwright/test";
 import { test } from "./helpers";
 import { apiAs, evidence, json, look } from "./helpers";
 
-const BANNED = ["AI", "MCP", "token", "agent", "provider", "連接器", "用戶端", "伺服器", "事蹟", "主題區", "鏡子", "隨筆", "本人執行", "定義", "映照", "許可證", "可能的自己", "明信片", "越小越好", "不計分", "勇氣", "踏出", "第一步", "你應該", "試著", "記得", "反思"];
+const BANNED = ["AI", "MCP", "token", "agent", "provider", "連接器", "用戶端", "伺服器", "事蹟", "主題區", "鏡子", "隨筆", "本人執行", "定義", "映照", "許可證", "可能的自己", "明信片", "合照", "相簿", "照片", "相片", "拍照", "越小越好", "不計分", "勇氣", "踏出", "第一步", "你應該", "試著", "記得", "反思"];
 
 async function expectClean(page: import("@playwright/test").Page) {
   const text = await page.evaluate(() => document.body.innerText);

@@ -28,7 +28,7 @@ const life = vi.hoisted(() => {
       row("shop", "逛逛小店", "雲朵圍巾", "衣服", true),
       row("exercise", "河邊動一動", "葉子哨", "旅行紀念品", false),
       row("music", "聽一首小曲", "小鈴鐺", "旅行紀念品", true),
-      row("visit", "去朋友家喝茶", "茶會合照", "朋友相簿", false),
+      row("visit", "去朋友家喝茶", "小栗的茶杯墊", "朋友送的", false),
       row("festival", "廣場湊熱鬧", "四季小燈", "房間佈置", false),
       row("town", "去霧丘鎮旅行", "霧丘車票夾", "旅行紀念品", false),
       row("abroad", "去星砂島出國玩", "星砂瓶", "旅行紀念品", false),
