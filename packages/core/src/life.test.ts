@@ -1,5 +1,22 @@
 import { describe, expect, it } from "vitest";
-import { autonomousLife, commitLife, LIFE_ACTIVITIES, lifeApplyPlay, lifeClock, lifeEntryStory, lifePlan, lifeScene, migrateLife, readLife, type LifeActivityId, type LifeState } from "./life";
+import { bannedHits } from "./keepsake";
+import { autonomousLife, commitLife, LIFE_ACTIVITIES, lifeAllCopy, lifeApplyPlay, lifeClock, lifeEntryStory, lifePlan, lifeScene, migrateLife, readLife, type LifeActivityId, type LifeState } from "./life";
+
+describe("龍角鎮的回禮", () => {
+  it("回禮都是拿得到的東西，而且說得出是誰做的小事", () => {
+    for (const a of LIFE_ACTIVITIES) {
+      expect(a.giver.length, a.id).toBeGreaterThan(0);
+      expect(a.origin.length, a.id).toBeGreaterThan(5);
+    }
+    expect(LIFE_ACTIVITIES.find(a => a.id === "visit")).toMatchObject({ reward: "小栗的茶杯墊", category: "朋友送的", giver: "小栗" });
+  });
+  it("生活頁文案沒有影像類的回禮", () => {
+    expect(bannedHits("茶會合照 朋友相簿 照片 相片 拍照 明信片")).toEqual(expect.arrayContaining(["合照", "相簿", "照片", "相片", "拍照", "明信片"]));
+    const copy = lifeAllCopy();
+    expect(copy.length).toBeGreaterThan(30);
+    for (const line of copy) for (const word of ["合照", "相簿", "照片", "相片", "拍照", "明信片"]) expect(line, line).not.toContain(word);
+  });
+});
 
 describe("Taipei's little everyday world", () => {
   it("uses the Taipei midnight and all four seasons and periods", () => {

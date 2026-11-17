@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Avatar } from "../components/Avatar";
 import { Dialog } from "../components/Dialog";
+import { LifeScene } from "../components/LifeScene";
 import { api } from "../lib/api";
 import { useSession } from "../lib/session";
 import { useFetch } from "../lib/useFetch";
@@ -57,29 +58,38 @@ export function LifePage({ cabinet = false }: { cabinet?: boolean }) {
   const keepsakeStory = (id: LifeActivityId, earnedOn: string) =>
     data.history.flatMap(d => d.day === earnedOn ? d.entries : []).find(e => e.activityId === id)?.story ?? lifeActivityStory(id, new Date(`${earnedOn}T04:00:00Z`));
   return <div className="stack life-page">
-    <div className="row between"><h1>{cabinet ? "生活收藏" : "小龍的今天"}</h1><Link className={`btn ${cabinet ? "primary" : "ghost"}`} to="/">回小龍身邊</Link></div>
+    <div className="row between"><h1>{cabinet ? "生活收藏" : "小龍的今天"}</h1><Link className={`btn ${cabinet ? "primary" : "ghost small"}`} to="/">回小龍身邊</Link></div>
     {error && <p className="error" role="alert">{error}</p>}
     {cabinet ? <>
-      <p>口袋裡有故事，也有小東西。</p>
+      <p>每一件都是鎮上有人親手留給小龍的。</p>
       <p className="life-progress" aria-label="生活收藏進度">{data.inventory.length}/{LIFE_ACTIVITIES.length}</p>
       <div className="life-shelf">
         {LIFE_ACTIVITIES.map(a => {
           const owned = data.inventory.some(i => i.activityId === a.id);
           return <button key={a.id} type="button" className={`life-item ${owned ? "" : "is-missing"}`} onClick={() => setDetail(a.id)} aria-label={`${a.reward}${owned ? "，已收集" : "，還沒帶回家"}`}>
-            <span className="life-object" aria-hidden>{a.emoji}</span><strong>{a.reward}</strong><small>{a.category}</small><span>{owned ? "已收集" : "還沒帶回家"}</span>
+            <span className="life-object" aria-hidden>{a.emoji}</span><strong>{a.reward}</strong><small>{a.category}</small><span>{owned ? `${a.giver}留的` : "還沒帶回家"}</span>
           </button>;
         })}
       </div>
       <Link className="btn ghost" to="/life">去看看小龍今天</Link>
     </> : <>
-      <div className="life-columns">
-        <section className="panel stack life-today">
-          <p className="muted">{data.day} · {data.season}天 · {data.period}</p>
+      <section className="panel life-today life-first" aria-label="小龍現在">
+        <LifeScene season={data.season} period={data.period} lantern={!!data.decoration} label={`${data.season}天${data.period}的龍角鎮，${me.character.name}在家門口`}>
+          <Avatar appearance={me.character.appearance as never} name={me.character.name} size={104} />
+          {data.outfit && <span className="life-scene-outfit" aria-hidden>🧣</span>}
+        </LifeScene>
+        <div className="stack life-first-words">
+          <p className="muted">{data.season}天 · {data.period}</p>
           <h2>{me.character.name}，今天{data.mood}</h2>
           <p>{data.today.autonomous}</p>
+          {allDone ? <Link to="/life/cabinet" className="btn primary">看看今天帶回來的</Link> : <button type="button" className="btn primary" onClick={choose}>陪牠去玩</button>}
+        </div>
+      </section>
+      <div className="life-columns">
+        <section className="panel stack life-mind" aria-label="小龍在想什麼">
+          <h2>牠在想什麼</h2>
           <p className="life-scene">{data.scene}</p>
           <div className="life-wish"><strong>想要什麼？</strong><p>{data.wish}</p><strong>可以幫點什麼？</strong><p>{data.help}</p></div>
-          {allDone ? <Link to="/life/cabinet" className="btn primary">看看今天帶回來的</Link> : <button type="button" className="btn primary" onClick={choose}>陪牠去玩</button>}
           <p className="muted">{allDone ? "今天想去的地方都去了。明天牠會想去別的地方。" : `小龍今天只想去 ${openToday.map(a => a.place).join("、")}。其他地方明天再說。`}</p>
         </section>
         <section className="panel stack life-diary" aria-label="小龍日記">
@@ -119,15 +129,15 @@ export function LifePage({ cabinet = false }: { cabinet?: boolean }) {
       <button type="button" className="btn ghost" disabled={busy} onClick={() => setChoosing(false)}>先待在家</button>
     </Dialog>}
     {reward && <Dialog title="帶回小驚喜" onClose={() => setResult(null)}>
-      <p className="life-object" aria-hidden>{reward.emoji}</p><h2>{reward.reward}，帶回來了！</h2><p>{reward.story}</p>{result === "visit" && <Meeting data={data} />}<p>小龍說：「下次還想跟你一起。」</p>
+      <p className="life-object" aria-hidden>{reward.emoji}</p><h2>{reward.reward}，帶回來了！</h2><p>{reward.story}</p><p className="life-origin"><strong>{reward.giver}留給小龍的</strong>{reward.origin}</p>{result === "visit" && <Meeting data={data} />}<p>小龍說：「下次還想跟你一起。」</p>
       <button type="button" className="btn primary" onClick={() => setResult(null)}>收好紀念品</button>
     </Dialog>}
     {item && <Dialog title={item.reward} busy={busy} onClose={() => setDetail(null)}>
       <p className="life-object" aria-hidden>{item.emoji}</p><h2>{item.reward}</h2><p>{item.category}</p>
       {data.inventory.find(i => i.activityId === item.id) ? <>
-        <p>{data.inventory.find(i => i.activityId === item.id)!.earnedOn} · {item.place}</p><p>{keepsakeStory(item.id, data.inventory.find(i => i.activityId === item.id)!.earnedOn)}</p>
+        <p>{data.inventory.find(i => i.activityId === item.id)!.earnedOn} · {item.place}</p><p className="life-origin"><strong>{item.giver}留給小龍的</strong>{item.origin}</p><p>{keepsakeStory(item.id, data.inventory.find(i => i.activityId === item.id)!.earnedOn)}</p>
         {item.id === "shop" || item.id === "festival" ? <button type="button" className="btn primary" disabled={busy} aria-busy={busy} onClick={() => void change(item.id === "shop" ? {outfit: data.outfit ? null : "shop"} : {decoration: data.decoration ? null : "festival"})}>{busy ? "放好囉…" : item.id === "shop" ? (data.outfit ? "收回圍巾" : "穿上圍巾") : (data.decoration ? "收起小燈" : "擺在家裡")}</button> : <button type="button" className="btn primary" onClick={() => setDetail(null)}>收好</button>}
-      </> : <><p>陪小龍{item.name}，就能帶回來。</p><Link to="/life" className="btn primary" onClick={() => setDetail(null)}>找小龍一起玩</Link></>}
+      </> : <><p className="life-origin is-waiting"><strong>這一格在等{item.giver}</strong>還不知道會留下什麼。</p><p>陪小龍{item.name}，就能帶回來。</p><Link to="/life" className="btn primary" onClick={() => setDetail(null)}>找小龍一起玩</Link></>}
       {error && <p className="error" role="alert">{error}</p>}
     </Dialog>}
   </div>;

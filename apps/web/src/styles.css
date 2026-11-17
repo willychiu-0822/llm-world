@@ -369,6 +369,16 @@ body:has(.veil) main .btn.primary { visibility: hidden; }
 .life-page { width: 100%; max-width: 1040px; margin: 0 auto; }
 .life-columns { display: grid; gap: 24px; grid-template-columns: minmax(0,1fr); }
 .life-today { background: var(--butter-soft); }
+.life-first { display: grid; gap: 20px; grid-template-columns: minmax(0,1fr); align-content: start; }
+.life-first-words h2, .life-first-words p { margin: 0; }
+.life-scene-art { position: relative; height: clamp(180px, 34svh, 300px); border: 2px solid var(--line); border-radius: 20px; overflow: hidden; }
+.life-scene-art > svg { display: block; width: 100%; height: 100%; }
+.life-scene-dragon { position: absolute; left: 50%; bottom: 4%; transform: translateX(-50%); line-height: 0; }
+.life-scene-outfit { position: absolute; left: 4px; bottom: 18px; font-size: 1.3rem; line-height: 1; filter: drop-shadow(0 2px 0 var(--line)); }
+@media (max-width: 720px) {
+  /* 手機第一屏只留小龍、今天的一句話和一顆主按鈕；其他往下滑才看得到。 */
+  .life-first { min-height: calc(100svh - 150px); }
+}
 .life-wish { display: grid; gap: 8px; border-top: 2px dashed var(--line); padding-top: 16px; }
 .life-wish p { margin: 0 0 8px; }
 .life-scene { color: var(--muted); }
@@ -378,6 +388,9 @@ body:has(.veil) main .btn.primary { visibility: hidden; }
 .life-item.is-missing { background: var(--paper-2); }
 .life-item.is-missing .life-object { filter: grayscale(1); opacity: .4; }
 .life-object { font-size: 40px; line-height: 1.2; margin: 0; }
+.life-origin { display: flex; flex-direction: column; gap: 4px; margin: 8px 0; padding: 12px 14px; border-left: 4px solid var(--line); border-radius: 12px; background: var(--paper-2); text-align: left; }
+.life-origin strong { font-size: .9em; }
+.life-origin.is-waiting { border-left-style: dashed; }
 .life-progress { font-size: 24px; font-weight: 700; }
 .life-choices { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
 .life-choices .btn { font-size: 14px; padding: 8px; }
@@ -386,6 +399,8 @@ body:has(.veil) main .btn.primary { visibility: hidden; }
 .celebrate { max-height: calc(100dvh - 32px); overflow-y: auto; }
 @media (min-width:900px) {
   .life-columns { grid-template-columns: minmax(0,1fr) minmax(0,1fr); align-items: start; }
+  .life-first { grid-template-columns: minmax(0,1.1fr) minmax(0,1fr); align-items: center; }
+  .life-first .life-scene-art { height: 300px; }
   .life-shelf { grid-template-columns: repeat(4,minmax(0,1fr)); }
 }
 
