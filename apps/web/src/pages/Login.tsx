@@ -1,5 +1,5 @@
 import { useRef, useState, type FormEvent } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { api } from "../lib/api";
 import { useSession } from "../lib/session";
 
@@ -31,12 +31,21 @@ export function LoginPage() {
     }
   };
 
+  const closed = Boolean(config && !config.googleLogin && !config.devLogin);
+  const googleDown = params.get("error") === "google_unavailable";
+
   return (
     <div className="stack" style={{ maxWidth: 440, margin: "24px auto" }}>
       <section className="panel stack">
         <h1>登入後就能把寶寶帶回家</h1>
         {next.startsWith("/oauth/") && <p className="notice">你的 AI 用戶端想連接龍角鎮，登入後會請你確認。</p>}
-        {params.get("error") === "google_unavailable" && <p role="status" className="notice">Google 登入尚未開放，請使用下方的開發用登入。</p>}
+        {closed && (
+          <div className="stack">
+            <p role="status">小鎮還在整理門口，晚點再來。</p>
+            <Link to="/" className="btn primary">回首頁</Link>
+          </div>
+        )}
+        {googleDown && !closed && <p role="status" className="notice">Google 登入尚未開放。{config?.devLogin ? "先用下面的方式進來就好。" : "晚點再來，或先回首頁看看。"}</p>}
         {!config && !configError && <p role="status">正在確認可以使用的登入方式……</p>}
         {configError && <div className="stack"><p role="alert">暫時無法取得登入方式，請再試一次。</p><button className="btn primary" onClick={() => void reloadConfig()}>重新載入登入方式</button></div>}
         {config?.googleLogin && (
@@ -44,7 +53,7 @@ export function LoginPage() {
             使用 Google 帳號登入
           </a>
         )}
-        <p className="muted">登入即表示你同意下面兩份說明。</p>
+        {!closed && <p className="muted">登入即表示你同意下面兩份說明。</p>}
         <div className="row wrap">
           <a className="btn ghost" href="/terms">服務條款</a>
           <a className="btn ghost" href="/privacy">隱私權政策</a>
