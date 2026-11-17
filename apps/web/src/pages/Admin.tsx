@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Empty, ErrorBox, Loading } from "../components/Bits";
+import { Dialog } from "../components/Dialog";
 import { api } from "../lib/api";
 import { formatDateTime } from "../lib/format";
 import { useSession } from "../lib/session";
@@ -24,6 +25,7 @@ export function AdminPage() {
   const metrics = useFetch<Metrics>(isAdmin ? "/api/admin/metrics" : null);
   const [deedId, setDeedId] = useState("");
   const [error, setError] = useState<Error | null>(null);
+  const [confirmPurge, setConfirmPurge] = useState(false);
   if (!isAdmin) return <Empty><p>需要管理者權限。</p><Link className="btn primary" to="/">回地圖</Link></Empty>;
   const act = async (fn: () => Promise<unknown>, msg: string) => {
     try {
@@ -89,8 +91,14 @@ export function AdminPage() {
       <section className="panel stack">
         <h2>示範內容</h2>
         <p className="muted">示範內容都標示「示範」，排在真人內容之後，也不會觸發回謝。等鎮上有足夠的真人事蹟，就可以清除。</p>
-        <button className="btn danger" onClick={() => window.confirm("確定要清除所有示範內容嗎？") && act(() => api("/api/admin/demo/purge", { method: "POST" }), "已清除示範內容")}>清除所有示範內容</button>
+        <button type="button" className="btn danger" onClick={() => setConfirmPurge(true)}>清除所有示範內容</button>
       </section>
+      {confirmPurge && <Dialog title="清除示範內容" onClose={() => setConfirmPurge(false)}>
+        <h2>要清除所有示範內容嗎？</h2>
+        <p>清除之後就不能從這裡復原。</p>
+        <button type="button" className="btn primary" onClick={() => setConfirmPurge(false)}>先留著</button>
+        <button type="button" className="btn danger" onClick={() => { setConfirmPurge(false); void act(() => api("/api/admin/demo/purge", { method: "POST" }), "已清除示範內容"); }}>清除所有示範內容</button>
+      </Dialog>}
     </div>
   );
 }

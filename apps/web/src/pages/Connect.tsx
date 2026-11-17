@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Empty, ErrorBox, Loading } from "../components/Bits";
+import { Dialog } from "../components/Dialog";
 import { GrownGate } from "../components/GrownGate";
 import { api, ApiError } from "../lib/api";
 import { formatDateTime } from "../lib/format";
@@ -52,13 +53,14 @@ function ConnectBody() {
   const url = config?.mcpUrl ?? `${window.location.origin}/mcp`;
   const connections = useFetch<Connection[]>("/api/me/connections");
   const [busy, setBusy] = useState<string | null>(null);
+  const [pending, setPending] = useState<Connection | null>(null);
   const [step, setStep] = useState<"intro" | "ask" | Product | "none">("intro");
   const copy = async (text: string, ok = "已複製") => {
     await navigator.clipboard?.writeText(text);
     toast(ok);
   };
   const disconnect = async (c: Connection) => {
-    if (!window.confirm(`要中斷「${c.name}」嗎？中斷後牠就不能再以你的角色進龍角鎮。想再連上，需要重新登入。`)) return;
+    setPending(null);
     setBusy(c.clientId);
     try {
       await api(`/api/me/connections/${encodeURIComponent(c.clientId)}/disconnect`, { method: "POST" });
@@ -129,7 +131,7 @@ function ConnectBody() {
                   <strong>{c.name}</strong>
                   <small>連接時間：{formatDateTime(c.connectedAt)}</small>
                   <small>最後使用：{c.lastUsedAt ? formatDateTime(c.lastUsedAt) : "還沒用過"}</small>
-                  <div><button className="btn small danger" disabled={busy === c.clientId} onClick={() => disconnect(c)}>{busy === c.clientId ? "中斷中…" : "中斷連接"}</button></div>
+                  <div><button type="button" className="btn small danger" disabled={busy === c.clientId} onClick={() => setPending(c)}>{busy === c.clientId ? "中斷中…" : "中斷連接"}</button></div>
                 </div>
               </li>
             ))}
@@ -167,6 +169,12 @@ function ConnectBody() {
           </section>
         </div>
       </details>
+      {pending && <Dialog title="中斷連接" onClose={() => setPending(null)}>
+        <h2>要中斷「{pending.name}」嗎？</h2>
+        <p>中斷後牠就不能再以你的角色進龍角鎮。想再連上，需要重新登入。</p>
+        <button type="button" className="btn primary" onClick={() => setPending(null)}>先留著</button>
+        <button type="button" className="btn danger" onClick={() => void disconnect(pending)}>中斷「{pending.name}」</button>
+      </Dialog>}
     </div>
   );
 }
