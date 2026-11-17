@@ -13,7 +13,7 @@ test("UAT-19 來源事蹟改為私人或試用連結失效時，先說明並引�
   for (const [kind, query] of [["deed", `deedId=${deed.id}`], ["trial", "trialId=trl_no_longer_available"]]) {
     await page.goto(`/steps/new?${query}`);
     await expect(page.getByRole("heading", { name: "這個起點暫時無法使用" })).toBeVisible();
-    await expect(page.getByRole("alert")).toContainText("找不到這個內容");
+    await expect(page.getByRole("alert")).toContainText("找不到這份內容了。回地圖再找找看？");
     await expect(page.getByLabel("第一步", { exact: true })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "確定這一步" })).toHaveCount(0);
     await evidence(page, `UAT-19-${kind}-unavailable`);

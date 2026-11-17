@@ -2,6 +2,7 @@ import { BABY_LINES, isTownSightMark, joinWords, keepsakeFor, stageLabel, type T
 import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Avatar } from "../components/Avatar";
+import { Loading } from "../components/Bits";
 import { Dialog } from "../components/Dialog";
 import { TownMark } from "../components/TownMark";
 import { MapBoard } from "../components/MapBoard";
@@ -53,7 +54,7 @@ export function HomePage() {
   const [didWalk, setDidWalk] = useState(false);
   const gate = useRef(false);
 
-  if (loading && !me) return <p className="empty">載入中……</p>;
+  if (loading && !me) return <Loading />;
   if (!me) return <GuestHome />;
   if (!me.character) {
     return (

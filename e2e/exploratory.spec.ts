@@ -64,7 +64,7 @@ test("UAT-17 長Email與長英文內容在個人頁、步驟、事蹟與鏡子�
     await page.goto(route);
     if (route === "/steps") await page.getByRole("tab", { name: /完成了/ }).click();
     await expect(page.locator("main h1")).toBeVisible();
-    await expect(page.getByText("載入中……", { exact: true })).toHaveCount(0);
+    await expect(page.getByText("等小龍一下…", { exact: true })).toHaveCount(0);
     await evidence(page, `UAT-17-long-content-${i}`);
     expect(await page.evaluate(() => document.documentElement.scrollWidth), `${route} should fit the viewport`).toBeLessThanOrEqual(test.info().project.use.viewport!.width);
   }

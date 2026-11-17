@@ -9,6 +9,7 @@ import { CabinetView } from "../components/CabinetView";
 import { Celebrate } from "../components/Celebrate";
 import { HomePage } from "./Home";
 import { MePage } from "./Me";
+import { ApiError, NAME_MODERATION_HINT } from "../lib/api";
 import type { Me } from "../lib/types";
 
 const look = { ...DEFAULT_APPEARANCE, description: "" };
@@ -103,6 +104,18 @@ describe("novice loop", () => {
     await userEvent.click(screen.getByRole("button", { name: "帶牠回家" }));
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ name: "小龍" }));
     expect(bannedHits(document.body.textContent ?? "")).toEqual([]);
+  });
+
+  it("shows a soft name hint when the name is blocked, with a next step and no jargon", async () => {
+    const onSave = vi.fn().mockRejectedValue(new ApiError(422, "moderation_blocked", "這段話小龍唸不出來，換一個寫法試試？"));
+    render(<AdoptWizard initial={{ name: "", appearance: look }} onSave={onSave} />);
+    await userEvent.click(screen.getByRole("button", { name: "下一步" }));
+    await userEvent.click(screen.getByRole("button", { name: "下一步" }));
+    await userEvent.type(screen.getByLabelText("角色名字"), "禁字");
+    await userEvent.click(screen.getByRole("button", { name: "帶牠回家" }));
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent(NAME_MODERATION_HINT);
+    expect(bannedHits(alert.textContent ?? "")).toEqual([]);
   });
 
   it("celebrates with one button that keeps the star", async () => {

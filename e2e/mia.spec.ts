@@ -89,6 +89,6 @@ test("Mia shares her first step and is thanked when Kai follows it", async ({ br
   await mia.getByRole("button", { name: "改成私人" }).click();
   await expect(mia.getByText("目前：私人")).toBeVisible();
   await kai.goto(deedUrl);
-  await expect(kai.getByRole("alert")).toHaveText("找不到這個內容");
+  await expect(kai.getByRole("alert")).toHaveText("找不到這份內容了。回地圖再找找看？");
   expect(await json(kai.request.get("/api/me"))).toBeTruthy();
 });
