@@ -5,18 +5,21 @@ import { Dialog } from "../components/Dialog";
 import { api } from "../lib/api";
 import { useSession } from "../lib/session";
 
+type SaveKind = "name" | "personality" | "share";
+
 export function MePage() {
   const { me, reload } = useSession();
   const [name, setName] = useState(me?.character?.name ?? "");
   const [personality, setPersonality] = useState(me?.character?.personality ?? "");
   const [allow, setAllow] = useState(me?.character?.sharing.allowAiQuotes ?? true);
   const [notify, setNotify] = useState(me?.pet?.notify !== false);
-  const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<{ kind: SaveKind; message: string } | null>(null);
+  const [busy, setBusy] = useState<SaveKind | null>(null);
+  const [saved, setSaved] = useState<SaveKind | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const gate = useRef(false);
   if (!me) return null;
+
   const logout = async () => {
     await api("/api/auth/logout", { method: "POST" });
     window.location.assign("/");
@@ -25,24 +28,30 @@ export function MePage() {
     await api("/api/me", { method: "DELETE" });
     window.location.assign("/");
   };
-  const saveName = async () => {
+  const save = async (kind: SaveKind, patch: { name?: string; personality?: string; allow?: boolean }) => {
     if (!me.character || gate.current) return;
     gate.current = true;
-    setBusy(true);
-    setSaved(false);
-    setError("");
+    setBusy(kind);
+    setSaved(null);
+    setError(null);
     try {
       await api("/api/me/character", {
         method: "PUT",
-        body: { name, appearance: me.character.appearance, personality, sharing: { allowAiQuotes: allow } },
+        body: {
+          name: patch.name ?? me.character.name,
+          appearance: me.character.appearance,
+          personality: patch.personality ?? me.character.personality,
+          sharing: { allowAiQuotes: patch.allow ?? me.character.sharing.allowAiQuotes },
+        },
       });
       await reload();
-      setSaved(true);
+      setSaved(kind);
     } catch (err) {
-      setError((err as Error).message);
+      if (kind === "share" && patch.allow !== undefined) setAllow(!patch.allow);
+      setError({ kind, message: (err as Error).message });
     } finally {
       gate.current = false;
-      setBusy(false);
+      setBusy(null);
     }
   };
   const toggleNotify = async (value: boolean) => {
@@ -50,6 +59,9 @@ export function MePage() {
     await api("/api/me/pet", { method: "PATCH", body: { notify: value } });
     await reload();
   };
+  const savedNote = (kind: SaveKind) => saved === kind ? <p role="status">存好了。</p> : null;
+  const errorNote = (kind: SaveKind) => error?.kind === kind ? <p role="alert" className="error">{error.message}</p> : null;
+
   return (
     <div className="stack settings" style={{ maxWidth: 640, margin: "0 auto" }}>
       <h1>設定</h1>
@@ -70,9 +82,9 @@ export function MePage() {
             <input type="checkbox" checked={notify} onChange={(e) => void toggleNotify(e.target.checked)} />
             新消息提醒
           </label>
-          {error && <p role="alert" className="error">{error}</p>}
-          {saved && <p role="status">存好了。</p>}
-          <button type="button" className="btn primary" disabled={busy} aria-busy={busy} onClick={() => void saveName()}>{busy ? "儲存中…" : "儲存名字"}</button>
+          {errorNote("name")}
+          {savedNote("name")}
+          <button type="button" className="btn primary" disabled={busy === "name"} aria-busy={busy === "name"} onClick={() => void save("name", { name })}>{busy === "name" ? "儲存中…" : "存起來"}</button>
         </section>
       ) : (
         <section className="panel stack">
@@ -92,10 +104,15 @@ export function MePage() {
                 <span>脾氣</span>
                 <textarea aria-label="脾氣" value={personality} maxLength={200} rows={2} onChange={(e) => setPersonality(e.target.value)} />
               </label>
+              {errorNote("personality")}
+              {savedNote("personality")}
+              <button type="button" className="btn" disabled={busy === "personality"} aria-busy={busy === "personality"} onClick={() => void save("personality", { personality })}>{busy === "personality" ? "儲存中…" : "把脾氣存起來"}</button>
               <label className="check">
-                <input type="checkbox" checked={allow} onChange={(e) => setAllow(e.target.checked)} />
+                <input type="checkbox" aria-busy={busy === "share"} disabled={busy === "share"} checked={allow} onChange={(e) => { setAllow(e.target.checked); void save("share", { allow: e.target.checked }); }} />
                 做過的事可以說給鎮上的朋友聽
               </label>
+              {errorNote("share")}
+              {savedNote("share")}
             </>
           )}
           <Link to="/provider">開一間小店</Link>
