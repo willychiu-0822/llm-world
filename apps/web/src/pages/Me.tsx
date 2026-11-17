@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Avatar } from "../components/Avatar";
+import { Dialog } from "../components/Dialog";
 import { api } from "../lib/api";
 import { useSession } from "../lib/session";
 
@@ -13,6 +14,7 @@ export function MePage() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const gate = useRef(false);
   if (!me) return null;
   const logout = async () => {
@@ -20,7 +22,6 @@ export function MePage() {
     window.location.assign("/");
   };
   const remove = async () => {
-    if (!window.confirm("小龍和做過的事都會不見。真的要刪嗎？")) return;
     await api("/api/me", { method: "DELETE" });
     window.location.assign("/");
   };
@@ -101,9 +102,15 @@ export function MePage() {
           <Link to="/terms">服務條款</Link>
           <Link to="/privacy">隱私權政策</Link>
           {me.user.roles.includes("admin") && <Link to="/admin">管理</Link>}
-          <button type="button" className="btn danger" onClick={() => void remove()}>刪除帳號</button>
+          <button type="button" className="btn danger" onClick={() => setConfirmDelete(true)}>刪除帳號</button>
         </div>
       </details>
+      {confirmDelete && <Dialog title="刪除帳號" onClose={() => setConfirmDelete(false)}>
+        <h2>要刪掉這個帳號嗎？</h2>
+        <p>小龍和做過的事都會不見。</p>
+        <button type="button" className="btn primary" onClick={() => setConfirmDelete(false)}>先留著</button>
+        <button type="button" className="btn danger" onClick={() => void remove()}>刪掉小龍和所有紀錄</button>
+      </Dialog>}
     </div>
   );
 }
