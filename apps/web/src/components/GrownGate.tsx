@@ -11,7 +11,7 @@ export function GrownGate({ children }: { children: ReactNode }) {
     return (
       <section className="panel stack" style={{ maxWidth: 520, margin: "0 auto" }}>
         <h1>小龍還沒長大</h1>
-        <p>圍巾尺寸之後，再來看這些。先回家陪牠。</p>
+        <p>等小龍再長大一點，這裡就會開門。先回家陪牠。</p>
         <Link to="/" className="btn primary">回家陪小龍</Link>
       </section>
     );

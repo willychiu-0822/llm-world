@@ -7,6 +7,7 @@ import { TownMark } from "../components/TownMark";
 import { LifeScene } from "../components/LifeScene";
 import { api } from "../lib/api";
 import { useSession } from "../lib/session";
+import { formatLifeDay } from "../lib/format";
 import { useFetch } from "../lib/useFetch";
 
 function Meeting({ data }: { data: LifeView }) {
@@ -80,7 +81,7 @@ export function LifePage({ cabinet = false }: { cabinet?: boolean }) {
           {data.outfit && <span className="life-scene-outfit" aria-hidden>🧣</span>}
         </LifeScene>
         <div className="stack life-first-words">
-          <p className="muted">{data.season}天 · {data.period}</p>
+          <p className="muted">{formatLifeDay(data.today.day, { season: data.season, period: data.period })}</p>
           <h2>{me.character.name}，今天{data.mood}</h2>
           <p>{data.today.autonomous}</p>
           {allDone ? <Link to="/life/cabinet" className="btn primary">看看今天帶回來的</Link> : <button type="button" className="btn primary" onClick={choose}>陪牠去玩</button>}
@@ -115,7 +116,7 @@ export function LifePage({ cabinet = false }: { cabinet?: boolean }) {
           <button type="button" className="btn ghost" aria-busy={busy} disabled={busy} onClick={() => void change({ allowVisits: !data.allowVisits })}>{data.allowVisits ? "先不串門" : "讓小龍去串門"}</button>
         </section>
       </div>
-      {data.history.length > 1 && <section className="panel stack"><h2>前幾天也很好玩</h2>{data.history.slice(1).map(day => <article key={day.day}><h3>{day.day}</h3><p>{day.autonomous}</p><p>{day.entries.map(e => LIFE_ACTIVITIES.find(a => a.id === e.activityId)!.name).join("、")}</p></article>)}</section>}
+      {data.history.length > 1 && <section className="panel stack"><h2>前幾天也很好玩</h2>{data.history.slice(1).map(day => <article key={day.day}><h3>{formatLifeDay(day.day)}</h3><p>{day.autonomous}</p><p>{day.entries.map(e => LIFE_ACTIVITIES.find(a => a.id === e.activityId)!.name).join("、")}</p></article>)}</section>}
     </>}
     {choosing && <Dialog title="陪小龍去玩" busy={busy} onClose={() => setChoosing(false)}>
       <h2>這次去哪裡？</h2>
@@ -136,7 +137,7 @@ export function LifePage({ cabinet = false }: { cabinet?: boolean }) {
     {item && <Dialog title={item.reward} busy={busy} onClose={() => setDetail(null)}>
       <p className="life-object" aria-hidden><TownMark name={item.id} size={56} /></p><h2>{item.reward}</h2><p>{item.category}</p>
       {data.inventory.find(i => i.activityId === item.id) ? <>
-        <p>{data.inventory.find(i => i.activityId === item.id)!.earnedOn} · {item.place}</p><p className="life-origin"><strong>{item.giver}留給小龍的</strong>{item.origin}</p><p>{keepsakeStory(item.id, data.inventory.find(i => i.activityId === item.id)!.earnedOn)}</p>
+        <p>{formatLifeDay(data.inventory.find(i => i.activityId === item.id)!.earnedOn)} · {item.place}</p><p className="life-origin"><strong>{item.giver}留給小龍的</strong>{item.origin}</p><p>{keepsakeStory(item.id, data.inventory.find(i => i.activityId === item.id)!.earnedOn)}</p>
         {item.id === "shop" || item.id === "festival" ? <button type="button" className="btn primary" disabled={busy} aria-busy={busy} onClick={() => void change(item.id === "shop" ? {outfit: data.outfit ? null : "shop"} : {decoration: data.decoration ? null : "festival"})}>{busy ? "放好囉…" : item.id === "shop" ? (data.outfit ? "收回圍巾" : "穿上圍巾") : (data.decoration ? "收起小燈" : "擺在家裡")}</button> : <button type="button" className="btn primary" onClick={() => setDetail(null)}>收好</button>}
       </> : <><p className="life-origin is-waiting"><strong>這一格在等{item.giver}</strong>還不知道會留下什麼。</p><p>陪小龍{item.name}，就能帶回來。</p><Link to="/life" className="btn primary" onClick={() => setDetail(null)}>找小龍一起玩</Link></>}
       {error && <p className="error" role="alert">{error}</p>}
