@@ -2,6 +2,7 @@ import { dedupeKeepsakes, joinWords, keepsakeFor, townFolk, warmLine } from "@lj
 import { useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Dialog } from "../components/Dialog";
+import { TownMark } from "../components/TownMark";
 import { ErrorBox, Loading } from "../components/Bits";
 import { timeAgo } from "../lib/format";
 import { acceptKeepsake } from "../lib/keepsake";
@@ -96,7 +97,7 @@ export function PlacePage() {
                 const line = warmLine({ name: deed.character?.name ?? "一位鎮民", title: deed.title, districtKey: deed.districtKey });
                 return (
                   <button key={deed.id} type="button" className="panel row card-link" onClick={() => setOpen(deed)}>
-                    <span className="keepsake-emoji" aria-hidden>{keepsakeFor(deed.districtKey).emoji}</span>
+                    <TownMark name={keepsakeFor(deed.districtKey).key} size={40} />
                     <span className="grow" style={{ textAlign: "left" }}>
                       <strong>{line}</strong>
                       <small style={{ display: "block" }}>{timeAgo(deed.createdAt)}</small>
@@ -115,7 +116,7 @@ export function PlacePage() {
       </section>
       {open && (
         <Dialog title={keepsakeFor(open.districtKey).name} busy={busy} onClose={() => { if (!busy) setOpen(null); }}>
-          <p className="keepsake-emoji" aria-hidden>{keepsakeFor(open.districtKey).emoji}</p>
+          <TownMark name={keepsakeFor(open.districtKey).key} size={56} />
           <p>{warmLine({ name: open.character?.name ?? "一位鎮民", title: open.title, districtKey: open.districtKey })}</p>
           {acceptError && <p role="alert" className="error">{acceptError}</p>}
           <button type="button" className="btn primary" disabled={busy} aria-busy={busy} onClick={() => void accept(open)}>{busy ? "記下來…" : "我也去摸摸看"}</button>

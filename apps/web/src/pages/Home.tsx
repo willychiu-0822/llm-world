@@ -1,8 +1,9 @@
-import { BABY_LINES, joinWords, stageLabel } from "@lj/core";
+import { BABY_LINES, isTownSightMark, joinWords, keepsakeFor, stageLabel, type TownSight } from "@lj/core";
 import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Avatar } from "../components/Avatar";
 import { Dialog } from "../components/Dialog";
+import { TownMark } from "../components/TownMark";
 import { MapBoard } from "../components/MapBoard";
 import { api } from "../lib/api";
 import { acceptKeepsake } from "../lib/keepsake";
@@ -15,7 +16,7 @@ const OUTING_MS = 2400;
 
 interface WalkResult {
   keepsake: KeepsakeItem | null;
-  sight: { emoji: string; line: string } | null;
+  sight: TownSight | null;
   reward: "backpack" | null;
   pet: PetSummary;
 }
@@ -40,7 +41,7 @@ export function HomePage() {
   const steps = useFetch<Step[]>(me?.character ? "/api/first-steps?status=confirmed" : null);
   const [phase, setPhase] = useState<"home" | "walking" | "found">("home");
   const [found, setFound] = useState<KeepsakeItem | null>(null);
-  const [sight, setSight] = useState<{ emoji: string; line: string } | null>(null);
+  const [sight, setSight] = useState<TownSight | null>(null);
   const [backpackNote, setBackpackNote] = useState(false);
   const [shelved, setShelved] = useState(false);
   const [accepting, setAccepting] = useState(false);
@@ -87,7 +88,7 @@ export function HomePage() {
     try {
       const res = await api<WalkResult>("/api/me/walk", { method: "POST" });
       setFound(res.keepsake);
-      setSight(res.keepsake ? null : res.sight);
+      setSight(res.keepsake || !res.sight || !isTownSightMark(res.sight.mark) ? null : res.sight);
       setBackpackNote(res.reward === "backpack");
       await new Promise((r) => window.setTimeout(r, OUTING_MS));
       setDidWalk(true);
@@ -120,6 +121,8 @@ export function HomePage() {
 
   const walkedToday = (!pet.canWalk || didWalk) && phase !== "walking";
   const walkLabel = phase === "walking" ? "小龍還在外面晃…" : "出門逛逛";
+  const scarf = life.outfit ? "cloud" : pet.stage >= 2 && baby.appearance.accessory !== "scarf" ? "fit" : null;
+  const wornNote = [backpack ? "背著小背包" : "", life.outfit ? "圍著雲朵圍巾" : ""].filter(Boolean).join("，");
 
   return (
     <div className="stack baby-home">
@@ -127,26 +130,23 @@ export function HomePage() {
         <p className="star-line">★ {pet.stars}/{goal || 0}　{stageLabel(pet.stage)}</p>
         <div className="row">
           <button type="button" className="icon-btn" aria-label="郵筒" onClick={() => (pet.letter ? setLetterOpen(true) : setMailOpen(true))}>
-            ✉️
+            <TownMark name="mail" size={22} />
             {!pet.letter && pet.notify && me.unread.notifications > 0 && <span className="badge">{me.unread.notifications}</span>}
           </button>
-          <Link to="/me" className="icon-btn" aria-label="設定">⚙️</Link>
+          <Link to="/me" className="icon-btn" aria-label="設定"><TownMark name="gear" size={22} /></Link>
         </div>
       </div>
 
       <div className="baby-stage">
         {bubble && <p className="bubble baby-bubble" role="status">{bubble}</p>}
-        {life.decoration && <span className="life-decoration" aria-hidden>🏮</span>}
+        {life.decoration && <TownMark name="festival" className="life-decoration" />}
         <div className={`baby-wrap stage-${pet.stage}`}>
-          <button type="button" className={jump ? "baby-hit jump" : "baby-hit"} onClick={poke} aria-label={baby.name}>
-            <Avatar appearance={baby.appearance} name={baby.name} size={156} />
-            {backpack && <span className="backpack" aria-label="小背包">🎒</span>}
-            {pet.stage >= 2 && !life.outfit && baby.appearance.accessory !== "scarf" && <span className="scarf-extra" aria-hidden>🧣</span>}
-            {life.outfit && <span className="life-outfit" aria-hidden>🧣</span>}
+          <button type="button" className={jump ? "baby-hit jump" : "baby-hit"} onClick={poke} aria-label={wornNote ? `${baby.name}，${wornNote}` : baby.name}>
+            <Avatar appearance={baby.appearance} name={baby.name} size={156} worn={{ backpack, scarf }} />
           </button>
           <strong>{baby.name}</strong>
-          {life.outfit && <span className="life-home-item" aria-label="穿著雲朵圍巾">🧣 雲朵圍巾</span>}
-          {life.decoration && <span className="life-home-item" aria-label="房間的四季小燈">🏮 四季小燈</span>}
+          {life.outfit && <span className="life-home-item" aria-label="穿著雲朵圍巾"><TownMark name="shop" size={16} /> 雲朵圍巾</span>}
+          {life.decoration && <span className="life-home-item" aria-label="房間的四季小燈"><TownMark name="festival" size={16} /> 四季小燈</span>}
         </div>
       </div>
       <div className="baby-actions stack">
@@ -159,7 +159,7 @@ export function HomePage() {
       {!card && sight && phase !== "walking" && (
         <article className="panel keepsake-card stack" aria-live="polite">
           {backpackNote && <p className="notice" role="status">小背包背好了。</p>}
-          <p className="keepsake-emoji" aria-hidden>{sight.emoji}</p>
+          <TownMark name={sight.mark} size={56} />
           <p>{sight.line}</p>
           <p className="muted">鎮上還沒有新的信物。有人留下足跡，小龍就會帶回來。</p>
           <Link to="/life" className="btn primary">小龍的今天</Link>
@@ -181,14 +181,14 @@ export function HomePage() {
       {phase === "walking" && (
         <div className="outing" aria-live="polite">
           <p>小龍出門了，大概{joinWords("在", found?.placeName || "草叢")}附近亂聞。</p>
-          <div className="outing-track" aria-hidden><span className="outing-dot">🐾</span></div>
+          <div className="outing-track" aria-hidden><span className="outing-dot"><TownMark name="paw" size={28} /></span></div>
         </div>
       )}
       {error && <p role="alert" className="error">{/[㐀-鿿]/.test(error) ? error : "咦，小龍迷路了。再試一次？"}</p>}
       {card && (
         <article className="panel keepsake-card stack">
           {backpackNote && <p className="notice" role="status">小背包背好了。</p>}
-          <p className="keepsake-emoji" aria-hidden>{card.emoji}</p>
+          <TownMark name={keepsakeFor(card.districtKey).key} size={56} />
           <p>{joinWords("從", card.placeName || "鎮上")}撿到的{card.object}</p>
           <p>{card.warmLine}</p>
           <button type="button" className="btn primary" disabled={accepting} aria-busy={accepting} onClick={() => void accept(card)}>
@@ -202,7 +202,7 @@ export function HomePage() {
 
       {letterOpen && (
         <Dialog title="小龍的信" onClose={() => setLetterOpen(false)}>
-          <p>📮</p>
+          <TownMark name="post" size={56} />
           <p>小龍寫了一封歪歪扭扭的信：「我想交一個會說話的朋友，幫我去打聽消息。你有認識的嗎？」</p>
           <Link to="/connect" className="btn primary">會說話的朋友</Link>
           <button type="button" className="btn ghost" onClick={() => setLetterOpen(false)}>先收起來</button>
@@ -210,7 +210,7 @@ export function HomePage() {
       )}
       {mailOpen && (
         <Dialog title="郵筒" onClose={() => setMailOpen(false)}>
-          <p>📮</p>
+          <TownMark name="post" size={56} />
           <p>還沒有信。小龍說有信會塞進來。</p>
           <button type="button" className="btn primary" onClick={() => setMailOpen(false)}>關上郵筒</button>
         </Dialog>

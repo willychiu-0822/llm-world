@@ -7,23 +7,26 @@ export const GROWTH_AT = [3, 7, 15] as const;
 export const STICKERS = ["😆", "🙂", "😮‍💨"] as const;
 export type Sticker = (typeof STICKERS)[number];
 
+/** Stable picture ids. The web draws these; nothing here is a system emoji. */
+export const KEEPSAKE_MARKS = ["pick", "ribbon", "clay", "spoon", "bookmark", "flower", "cup", "pouch", "pebble"] as const;
+export type KeepsakeMark = (typeof KEEPSAKE_MARKS)[number];
+
 export interface KeepsakeKind {
-  key: string;
+  key: KeepsakeMark;
   name: string;
-  emoji: string;
 }
 
 /** A small object that stands in for one real thing a townsperson did. */
 export const KEEPSAKES: Record<DistrictKey, KeepsakeKind> = {
-  music: { key: "pick", name: "吉他撥片", emoji: "🎸" },
-  sports: { key: "ribbon", name: "完賽緞帶", emoji: "🎀" },
-  crafts: { key: "clay", name: "小陶土", emoji: "🏺" },
-  food: { key: "spoon", name: "木湯匙", emoji: "🥄" },
-  learning: { key: "bookmark", name: "書籤", emoji: "🔖" },
-  outdoors: { key: "flower", name: "壓花", emoji: "🌼" },
-  social: { key: "cup", name: "小茶杯", emoji: "🍵" },
-  volunteer: { key: "pouch", name: "小布包", emoji: "👝" },
-  misc: { key: "pebble", name: "圓石子", emoji: "🪨" },
+  music: { key: "pick", name: "吉他撥片" },
+  sports: { key: "ribbon", name: "完賽緞帶" },
+  crafts: { key: "clay", name: "小陶土" },
+  food: { key: "spoon", name: "木湯匙" },
+  learning: { key: "bookmark", name: "書籤" },
+  outdoors: { key: "flower", name: "壓花" },
+  social: { key: "cup", name: "小茶杯" },
+  volunteer: { key: "pouch", name: "小布包" },
+  misc: { key: "pebble", name: "圓石子" },
 };
 
 export function keepsakeFor(districtKey: string): KeepsakeKind {
@@ -90,19 +93,26 @@ export function warmLine(input: { name: string; title: string; districtKey: stri
   return `${joinWords(who, `的${kind.name}`)}。${did}。`;
 }
 
+export const TOWN_SIGHT_MARKS = ["leaf", "bird", "sun", "pebble", "bread", "flower"] as const;
+export type TownSightMark = (typeof TOWN_SIGHT_MARKS)[number];
+
 export interface TownSight {
-  emoji: string;
+  mark: TownSightMark;
   line: string;
+}
+
+export function isTownSightMark(value: unknown): value is TownSightMark {
+  return typeof value === "string" && (TOWN_SIGHT_MARKS as readonly string[]).includes(value);
 }
 
 /** What the baby brings back when the town has no new keepsake. Needs nobody else's content. */
 export const TOWN_SIGHTS: readonly TownSight[] = [
-  { emoji: "🍃", line: "小龍在路邊撿到一片會打轉的葉子。" },
-  { emoji: "🐦", line: "小龍聽見屋簷上的小鳥在練歌，練了三次才成功。" },
-  { emoji: "🌤️", line: "小龍曬了一下午的太陽，回來的時候暖呼呼的。" },
-  { emoji: "🪨", line: "小龍滾了一顆圓圓的石頭回來，說牠很重要。" },
-  { emoji: "🥖", line: "麵包店飄出香味，小龍站在門口聞了很久。" },
-  { emoji: "🌼", line: "小龍在牆角找到一朵偷偷開的小花。" },
+  { mark: "leaf", line: "小龍在路邊撿到一片會打轉的葉子。" },
+  { mark: "bird", line: "小龍聽見屋簷上的小鳥在練歌，練了三次才成功。" },
+  { mark: "sun", line: "小龍曬了一下午的太陽，回來的時候暖呼呼的。" },
+  { mark: "pebble", line: "小龍滾了一顆圓圓的石頭回來，說牠很重要。" },
+  { mark: "bread", line: "麵包店飄出香味，小龍站在門口聞了很久。" },
+  { mark: "flower", line: "小龍在牆角找到一朵偷偷開的小花。" },
 ];
 
 export function townSightFor(seed: number): TownSight {

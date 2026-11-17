@@ -381,7 +381,7 @@ test("檢核 G1–G8：小龍有自己的今天、七種生活與四類收藏", 
   await page.getByRole("link", {name: "回小龍身邊", exact:true}).click();
   await expect(page.getByLabel("穿著雲朵圍巾")).toBeVisible();
   await expect(page.getByLabel("房間的四季小燈")).toBeVisible();
-  await expect(page.locator(".baby-hit .life-outfit")).toBeVisible();
+  await expect(page.locator(".baby-hit [data-part='cloud-scarf']")).toBeVisible();
   await expect(page.locator(".baby-stage > .life-decoration")).toBeVisible();
   await checkState(page, "G09-decorated-home");
   await page.reload();

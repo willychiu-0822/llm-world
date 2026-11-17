@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
+import { LIFE_ACTIVITIES } from "./life";
 import {
   BABY_LINES,
   GROWTH_AT,
+  KEEPSAKES,
   TOWN_FOLK,
+  TOWN_SIGHTS,
   bannedHits,
   dedupeKeepsakes,
   growthLine,
@@ -58,7 +61,14 @@ describe("keepsakes", () => {
     expect(nextGrowthAt(15)).toBeNull();
   });
 
-  it("names a real object and says who did what, without a postcard", () => {
+  it("names a real object and says who did what, without a postcard or a system emoji", () => {
+    const pictograph = /\p{Extended_Pictographic}/u;
+    expect(JSON.stringify(KEEPSAKES)).not.toMatch(pictograph);
+    expect(JSON.stringify(LIFE_ACTIVITIES)).not.toMatch(pictograph);
+    expect(JSON.stringify(TOWN_SIGHTS)).not.toMatch(pictograph);
+    expect(Object.values(KEEPSAKES)).toHaveLength(9);
+    expect(LIFE_ACTIVITIES).toHaveLength(7);
+    expect(new Set(TOWN_SIGHTS.map((sight) => sight.mark)).size).toBe(TOWN_SIGHTS.length);
     expect(keepsakeFor("music").name).toBe("吉他撥片");
     expect(keepsakeFor("outdoors").name).toBe("壓花");
     const line = warmLine({ name: "小雀 Mia", title: "去上一次聲樂課", districtKey: "music" });

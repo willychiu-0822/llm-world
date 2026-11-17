@@ -2,6 +2,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useSession } from "../lib/session";
 import { Avatar } from "./Avatar";
+import { TownMark } from "./TownMark";
 
 export function Layout({ children }: { children: ReactNode }) {
   const { me, loading, message, dismissMessage } = useSession();
@@ -27,9 +28,9 @@ export function Layout({ children }: { children: ReactNode }) {
       {message && <div ref={noticeRef} className="toast" role="status"><span>{message}</span><button type="button" onClick={dismissMessage}>關閉提示</button></div>}
       <main className="page">{children}</main>
       <nav className="tabbar" aria-label="快速導覽">
-        <NavLink to="/" end><span className="icon" aria-hidden>🏠</span>家</NavLink>
-        <NavLink to="/map"><span className="icon" aria-hidden>🗺️</span>地圖</NavLink>
-        <NavLink to="/cabinet"><span className="icon" aria-hidden>🧺</span>收藏櫃</NavLink>
+        <NavLink to="/" end><TownMark name="home" size={22} className="icon" />家</NavLink>
+        <NavLink to="/map"><TownMark name="map" size={22} className="icon" />地圖</NavLink>
+        <NavLink to="/cabinet"><TownMark name="basket" size={22} className="icon" />收藏櫃</NavLink>
       </nav>
     </div>
   );

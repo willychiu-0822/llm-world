@@ -35,7 +35,6 @@ export interface KeepsakeItem {
   placeId: string;
   placeName: string;
   object: string;
-  emoji: string;
   collected: boolean;
   createdAt: string;
   who?: string;

@@ -261,30 +261,26 @@ td, th { text-align: left; padding: 6px 8px; border-bottom: 1px dashed var(--lin
 .icon-btn:active, .pick button:active, .sticker:active, .swatch:active, .keepsake-cell:active, .tabs button:active { transform: translateY(1px); }
 .icon-btn .badge { position: absolute; top: -4px; right: -4px; }
 .baby-stage { position: relative; }
-.life-decoration { position: absolute; right: -42px; top: 8px; font-size: 2rem; }
-.life-outfit { position: absolute; left: 6px; bottom: 28px; font-size: 1.6rem; filter: drop-shadow(0 2px 0 var(--line)); }
+.life-decoration { position: absolute; right: -42px; top: 8px; width: 2rem; height: 2rem; }
+.town-mark { display: inline-block; vertical-align: middle; flex: none; }
 .baby-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .baby-wrap.stage-1 .baby-hit { transform: scale(1.06); }
 .baby-wrap.stage-2 .baby-hit { transform: scale(1.14); }
 .baby-wrap.stage-3 .baby-hit { transform: scale(1.22); }
 .baby-hit { position: relative; border: 0; background: transparent; padding: 0; cursor: pointer; }
 .baby-hit.jump { animation: hop 0.45s ease; }
-.backpack, .scarf-extra { position: absolute; font-size: 1.6rem; filter: drop-shadow(0 2px 0 var(--line)); }
-.backpack { right: 8px; bottom: 18px; }
-.scarf-extra { left: 6px; bottom: 28px; }
 .baby-bubble { max-width: 280px; }
 .walk-btn { width: min(100%, 420px); font-size: 1.15rem; padding: 14px 18px; }
 .outing { width: 100%; }
 .outing-track { position: relative; height: 64px; border-radius: 999px; background: var(--leaf-soft); overflow: hidden; border: 2px dashed var(--leaf); }
 .outing-dot { position: absolute; top: 14px; font-size: 28px; animation: stroll 2.4s linear forwards; }
 .keepsake-card { width: min(100%, 420px); text-align: center; }
-.keepsake-emoji { font-size: 2.4rem; line-height: 1; margin: 0; }
+.keepsake-card > .town-mark, .celebrate > .town-mark { margin-inline: auto; }
 .keepsake-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; justify-content: center; }
 .keepsake-cell.is-new { border-color: var(--leaf); box-shadow: 0 0 0 3px var(--butter); }
 .keepsake-cell { position: relative; font: inherit; color: var(--ink); background: var(--card); border: 2px solid var(--line); border-radius: 18px; padding: 10px 6px; display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 92px; cursor: pointer; }
 .keepsake-count { position: absolute; top: 6px; right: 6px; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px; background: var(--leaf); color: #1c2416; font-size: 12px; font-weight: 700; display: grid; place-items: center; }
 .keepsake-cell.is-missing { filter: grayscale(1); opacity: 0.55; cursor: default; background: var(--paper-2); }
-.keepsake-cell .keepsake-emoji { font-size: 1.8rem; }
 .cabinet { text-align: center; }
 .cabinet h2 { font-size: 1rem; }
 .veil { position: fixed; inset: 0; z-index: 40; background: color-mix(in srgb, #2a2118 45%, transparent); display: grid; place-items: center; padding: 24px; }
@@ -349,7 +345,7 @@ body:has(.veil) main .btn.primary { visibility: hidden; }
   }
   .baby-home .home-chrome { grid-column: 1 / -1; }
   .baby-home .baby-stage { justify-self: center; align-self: start; margin-top: 64px; }
-  .baby-home .life-decoration { right: -105px; top: -12px; font-size: 2.8rem; }
+  .baby-home .life-decoration { right: -105px; top: -12px; width: 2.8rem; height: 2.8rem; }
   .baby-home .baby-wrap { transform: scale(1.67); transform-origin: center center; }
   .baby-home .baby-actions { align-items: flex-start; width: 100%; }
   .baby-home .baby-actions > .btn,
@@ -387,15 +383,16 @@ body:has(.veil) main .btn.primary { visibility: hidden; }
 .life-item { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 8px; border: 2px solid var(--line); border-radius: 20px; background: var(--card); color: var(--ink); font: inherit; cursor: pointer; }
 .life-item.is-missing { background: var(--paper-2); }
 .life-item.is-missing .life-object { filter: grayscale(1); opacity: .4; }
-.life-object { font-size: 40px; line-height: 1.2; margin: 0; }
+.life-object { display: grid; place-items: center; line-height: 1.2; margin: 0; }
+.life-entry strong { display: inline-flex; align-items: center; gap: 6px; }
 .life-origin { display: flex; flex-direction: column; gap: 4px; margin: 8px 0; padding: 12px 14px; border-left: 4px solid var(--line); border-radius: 12px; background: var(--paper-2); text-align: left; }
 .life-origin strong { font-size: .9em; }
 .life-origin.is-waiting { border-left-style: dashed; }
 .life-progress { font-size: 24px; font-weight: 700; }
 .life-choices { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
-.life-choices .btn { font-size: 14px; padding: 8px; }
+.life-choices .btn { font-size: 14px; padding: 8px; justify-content: flex-start; text-align: left; }
 .life-choices .is-chosen { background: var(--butter); border-color: var(--ink); }
-.life-home-item { display: block; font-size: 12px; line-height: 1.5; }
+.life-home-item { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; line-height: 1.5; }
 .celebrate { max-height: calc(100dvh - 32px); overflow-y: auto; }
 @media (min-width:900px) {
   .life-columns { grid-template-columns: minmax(0,1fr) minmax(0,1fr); align-items: start; }

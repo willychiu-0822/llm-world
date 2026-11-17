@@ -20,6 +20,7 @@ describe("novice keepsakes", () => {
     expect(walked.body.reward).toBe("backpack");
     expect([a.id, b.id]).toContain(walked.body.keepsake.deedId);
     expect(walked.body.keepsake.warmLine).toContain("小雀的");
+    expect(walked.body.keepsake).not.toHaveProperty("emoji");
     expect(walked.body.keepsake.warmLine).not.toContain("明信片");
     expect(walked.body.pet).toMatchObject({ collected: 1, total: 2, accessories: ["backpack"], canWalk: false, stars: 0, stage: 0 });
     expect(walked.body.pet.pending.deedId).toBe(walked.body.keepsake.deedId);
@@ -48,6 +49,8 @@ describe("novice keepsakes", () => {
     expect(empty.status).toBe(200);
     expect(empty.body.keepsake).toBeNull();
     expect(empty.body.sight.line).toBeTruthy();
+    expect(["leaf", "bird", "sun", "pebble", "bread", "flower"]).toContain(empty.body.sight.mark);
+    expect(empty.body.sight).not.toHaveProperty("emoji");
     expect(empty.body.reward).toBe("backpack");
     expect(empty.body.pet).toMatchObject({ canWalk: false, collected: 0, pending: null });
     expect((await baby.post("/api/me/walk")).status).toBe(409);
