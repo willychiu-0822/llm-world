@@ -6,6 +6,7 @@ import { api } from "../lib/api";
 import { useSession } from "../lib/session";
 
 type SaveKind = "name" | "personality" | "share";
+type ActionKind = SaveKind | "notify" | "logout" | "delete";
 
 export function MePage() {
   const { me, reload } = useSession();
@@ -13,20 +14,36 @@ export function MePage() {
   const [personality, setPersonality] = useState(me?.character?.personality ?? "");
   const [allow, setAllow] = useState(me?.character?.sharing.allowAiQuotes ?? true);
   const [notify, setNotify] = useState(me?.pet?.notify !== false);
-  const [error, setError] = useState<{ kind: SaveKind; message: string } | null>(null);
-  const [busy, setBusy] = useState<SaveKind | null>(null);
+  const [error, setError] = useState<{ kind: ActionKind; message: string } | null>(null);
+  const [busy, setBusy] = useState<ActionKind | null>(null);
   const [saved, setSaved] = useState<SaveKind | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const gate = useRef(false);
   if (!me) return null;
 
   const logout = async () => {
-    await api("/api/auth/logout", { method: "POST" });
-    window.location.assign("/");
+    if (busy) return;
+    setBusy("logout");
+    setError(null);
+    try {
+      await api("/api/auth/logout", { method: "POST" });
+      window.location.assign("/");
+    } catch {
+      setError({ kind: "logout", message: "剛剛沒有登出成功。再按一次登出就好。" });
+      setBusy(null);
+    }
   };
   const remove = async () => {
-    await api("/api/me", { method: "DELETE" });
-    window.location.assign("/");
+    if (busy) return;
+    setBusy("delete");
+    setError(null);
+    try {
+      await api("/api/me", { method: "DELETE" });
+      window.location.assign("/");
+    } catch {
+      setError({ kind: "delete", message: "帳號還沒刪掉。再按一次試試看。" });
+      setBusy(null);
+    }
   };
   const save = async (kind: SaveKind, patch: { name?: string; personality?: string; allow?: boolean }) => {
     if (!me.character || gate.current) return;
@@ -56,11 +73,20 @@ export function MePage() {
   };
   const toggleNotify = async (value: boolean) => {
     setNotify(value);
-    await api("/api/me/pet", { method: "PATCH", body: { notify: value } });
-    await reload();
+    setBusy("notify");
+    setError(null);
+    try {
+      await api("/api/me/pet", { method: "PATCH", body: { notify: value } });
+      await reload();
+    } catch {
+      setNotify(!value);
+      setError({ kind: "notify", message: "提醒沒有改成。再按一次就好。" });
+    } finally {
+      setBusy(null);
+    }
   };
   const savedNote = (kind: SaveKind) => saved === kind ? <p role="status">存好了。</p> : null;
-  const errorNote = (kind: SaveKind) => error?.kind === kind ? <p role="alert" className="error">{error.message}</p> : null;
+  const errorNote = (kind: ActionKind) => error?.kind === kind ? <p role="alert" className="error">{error.message}</p> : null;
 
   return (
     <div className="stack settings" style={{ maxWidth: 640, margin: "0 auto" }}>
@@ -79,9 +105,10 @@ export function MePage() {
             <input aria-label="寶寶名字" value={name} maxLength={20} onChange={(e) => setName(e.target.value)} />
           </label>
           <label className="check">
-            <input type="checkbox" checked={notify} onChange={(e) => void toggleNotify(e.target.checked)} />
+            <input type="checkbox" aria-label="新消息提醒" checked={notify} disabled={busy === "notify"} aria-busy={busy === "notify"} onChange={(e) => void toggleNotify(e.target.checked)} />
             新消息提醒
           </label>
+          {errorNote("notify")}
           {errorNote("name")}
           {savedNote("name")}
           <button type="button" className="btn primary" disabled={busy === "name"} aria-busy={busy === "name"} onClick={() => void save("name", { name })}>{busy === "name" ? "儲存中…" : "存起來"}</button>
@@ -92,7 +119,8 @@ export function MePage() {
           <Link to="/me/character" className="btn primary">把牠撿回家</Link>
         </section>
       )}
-      <button type="button" className="btn ghost" onClick={() => void logout()}>登出</button>
+      {errorNote("logout")}
+      <button type="button" className="btn ghost" disabled={busy === "logout"} aria-busy={busy === "logout"} onClick={() => void logout()}>{busy === "logout" ? "登出中…" : "登出"}</button>
       <details className="panel advanced">
         <summary>進階</summary>
         <div className="stack">
@@ -122,11 +150,12 @@ export function MePage() {
           <button type="button" className="btn danger" onClick={() => setConfirmDelete(true)}>刪除帳號</button>
         </div>
       </details>
-      {confirmDelete && <Dialog title="刪除帳號" onClose={() => setConfirmDelete(false)}>
+      {confirmDelete && <Dialog title="刪除帳號" busy={busy === "delete"} onClose={() => setConfirmDelete(false)}>
         <h2>要刪掉這個帳號嗎？</h2>
         <p>小龍和做過的事都會不見。</p>
-        <button type="button" className="btn primary" onClick={() => setConfirmDelete(false)}>先留著</button>
-        <button type="button" className="btn danger" onClick={() => void remove()}>刪掉小龍和所有紀錄</button>
+        {errorNote("delete")}
+        <button type="button" className="btn primary" disabled={busy === "delete"} onClick={() => setConfirmDelete(false)}>先留著</button>
+        <button type="button" className="btn danger" disabled={busy === "delete"} aria-busy={busy === "delete"} onClick={() => void remove()}>{busy === "delete" ? "刪掉中…" : "刪掉小龍和所有紀錄"}</button>
       </Dialog>}
     </div>
   );
