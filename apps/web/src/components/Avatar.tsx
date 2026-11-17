@@ -35,7 +35,7 @@ function CloudScarf({ neckY }: { neckY: number }) {
 
 function Backpack({ x, y }: { x: number; y: number }) {
   return (
-    <g data-part="backpack" data-x={x} data-y={y} {...stroke}>
+    <g data-part="backpack" className="backpack" aria-label="小背包" data-x={x} data-y={y} {...stroke}>
       <path d={`M${x + 4} ${y + 3} C${x - 2} ${y - 10} ${x + 1} ${y - 16} ${x + 8} ${y - 4}`} fill="none" />
       <rect x={x} y={y} width="14" height="16" rx="4" fill="#C5D7B4" />
       <path d={`M${x + 2.5} ${y + 6} H${x + 11.5}`} fill="none" />
