@@ -1,5 +1,6 @@
 import { ACCESSORIES, ACCESSORY_LABELS, BODY_LABELS, BODY_SHAPES, PALETTE, type Appearance } from "@lj/core";
 import { useEffect, useState } from "react";
+import { ApiError, NAME_MODERATION_HINT } from "../lib/api";
 import { Avatar } from "./Avatar";
 
 function readDraft(key?: string): { step: number; name: string; appearance: Appearance } | null {
@@ -38,7 +39,7 @@ export function AdoptWizard({ initial, draftKey, finishLabel = "帶牠回家", o
     try {
       await onSave({ name: name.trim(), appearance });
     } catch (err) {
-      setError((err as Error).message);
+      setError(err instanceof ApiError && err.code === "moderation_blocked" ? NAME_MODERATION_HINT : (err as Error).message);
       setBusy(false);
     }
   };

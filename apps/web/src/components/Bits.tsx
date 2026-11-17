@@ -20,7 +20,7 @@ export function DistrictTag({ k }: { k: string }) {
 }
 
 export function Loading() {
-  return <p className="empty">載入中……</p>;
+  return <p className="empty">等小龍一下…</p>;
 }
 
 export function ErrorBox({ error }: { error: Error | null }) {
