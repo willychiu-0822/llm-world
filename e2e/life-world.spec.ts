@@ -52,7 +52,7 @@ test("G9：串門要玩家自己同意，開關之後別人遇到的對象會跟
   // 我這邊現在會遇到「阿綠」，而且只看得到名字和長相
   await openVisit();
   await expect(me.getByText("碰到「阿綠」的小龍")).toBeVisible();
-  const seen = await json(me.request.get("/api/me/life"));
+  const seen = await json(me.request.get("/api/me/life?visit=1"));
   expect(Object.keys(seen.encounter).sort()).toEqual(["appearance", "kind", "name"]);
   expect(JSON.stringify(seen)).not.toContain("g9-friend@e2e.test");
   // 朋友自己不會遇到自己

@@ -1,6 +1,6 @@
 import { autonomousLife, LIFE_ACTIVITIES, lifeActivityInput, lifeApplyPlay, lifeClock, lifeEntryStory, lifePatchInput, lifePick, lifePlan, lifeScene, migrateLife, type LifeActivityId, type LifeRecord, type LifeState, type LifeView } from "@lj/core";
 import { characters, deeds, hasLegacyLife, lifeDays, lifeItems, moveLifeRecord, places, providers, type DbOrTx } from "@lj/db";
-import { and, asc, desc, eq, inArray, ne } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, ne } from "drizzle-orm";
 import type { AppContext } from "../context";
 import { AppError } from "../http/errors";
 import { visibleDeed } from "./deeds";
@@ -76,14 +76,19 @@ function presentBase(life: LifeState, id: string, now: Date) {
 
 const TOWN_HOST = { kind: "town" as const, name: "小栗" };
 
-/** 同意串門的其他玩家小龍（不含示範角色）；只回名字與外觀，每天固定同一位。 */
+/** 同意串門的其他玩家小龍（不含示範角色）；只回名字與外觀，每天固定同一位。走 allow_visits 索引，只取第 N 筆。 */
 async function findEncounter(ctx: AppContext, self: { id: string }, day: string): Promise<LifeView["encounter"]> {
-  const rows = await ctx.db
+  const where = and(ne(characters.id, self.id), eq(characters.isDemo, false), eq(characters.allowVisits, true));
+  const [{ n }] = await ctx.db.select({ n: count() }).from(characters).where(where);
+  const total = Number(n);
+  if (!total) return TOWN_HOST;
+  const [pick] = await ctx.db
     .select({ name: characters.name, appearance: characters.appearance })
     .from(characters)
-    .where(and(ne(characters.id, self.id), eq(characters.isDemo, false), eq(characters.allowVisits, true)))
-    .orderBy(asc(characters.id));
-  const pick = rows[lifePick(`${self.id}:${day}:visit`, rows.length)];
+    .where(where)
+    .orderBy(asc(characters.id))
+    .limit(1)
+    .offset(lifePick(`${self.id}:${day}:visit`, total));
   return pick ? { kind: "player", name: pick.name, appearance: pick.appearance } : TOWN_HOST;
 }
 
@@ -104,9 +109,14 @@ async function findInspiration(ctx: AppContext, self: { id: string; userId: stri
   return pick ? { placeId: pick.placeId, placeName: pick.placeName, title: pick.title, who: pick.who ?? "鎮民", isDemo: pick.isDemo } : null;
 }
 
-async function present(ctx: AppContext, c: Pick<CharacterRow, "id" | "userId">, life: LifeState): Promise<LifeView> {
+async function present(ctx: AppContext, c: Pick<CharacterRow, "id" | "userId">, life: LifeState, visit = false): Promise<LifeView> {
   const base = presentBase(life, c.id, ctx.now());
-  return { ...base, encounter: await findEncounter(ctx, c, base.day), inspiration: await findInspiration(ctx, c, base.day) };
+  const visiting = visit || base.today.entries.some(e => e.activityId === "visit");
+  return {
+    ...base,
+    encounter: visiting ? await findEncounter(ctx, c, base.day) : TOWN_HOST,
+    inspiration: await findInspiration(ctx, c, base.day),
+  };
 }
 
 /** The owner's character with its life loaded. An old save is moved to the tables on the way. */
@@ -121,9 +131,9 @@ async function own(ctx: AppContext, userId: string) {
   }
   return { c, life: (await load(ctx.db, c)).state };
 }
-export async function getLife(ctx: AppContext, userId: string) {
+export async function getLife(ctx: AppContext, userId: string, opts: { visit?: boolean } = {}) {
   const { c, life } = await own(ctx, userId);
-  return present(ctx, c, life);
+  return present(ctx, c, life, opts.visit);
 }
 async function mutate(ctx: AppContext, userId: string, change: (life: LifeState, id: string, now: Date) => void) {
   await ctx.db.transaction(async tx => {

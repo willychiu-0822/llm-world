@@ -255,17 +255,20 @@ describe("a dragon's own life", () => {
     expect((await me.get("/api/me/life")).body.encounter.kind).toBe("town");
     // 朋友同意後才會遇到
     expect((await friend.patch("/api/me/life").send({ allowVisits: true })).body.allowVisits).toBe(true);
-    const met = (await me.get("/api/me/life")).body;
+    // 沒有要去串門時，生活頁不查同意串門的名單
+    expect((await me.get("/api/me/life")).body.encounter).toEqual({ kind: "town", name: "小栗" });
+    const met = (await me.get("/api/me/life?visit=1")).body;
     expect(met.encounter).toMatchObject({ kind: "player", name: "阿綠", appearance: { body: "round" } });
     expect(JSON.stringify(met)).not.toContain("friend@example.com");
     expect(Object.keys(met.encounter).sort()).toEqual(["appearance", "kind", "name"]);
-    expect((await me.get("/api/me/life")).body.encounter).toEqual(met.encounter); // 同一天穩定
+    expect((await me.get("/api/me/life?visit=1")).body.encounter).toEqual(met.encounter); // 同一天穩定
     // 不會遇到自己
-    expect((await friend.get("/api/me/life")).body.encounter.kind).toBe("town");
+    expect((await friend.get("/api/me/life?visit=1")).body.encounter.kind).toBe("town");
     // 結果日記沒有複製對方資料
     const todayId = (await openIds(me))[0];
     const played = (await me.post("/api/me/life/activities").send({ activityId: todayId })).body;
-    expect(played.encounter.name).toBe("阿綠");
+    expect((await me.get("/api/me/life?visit=1")).body.encounter.name).toBe("阿綠");
+    expect(played.today).toBeTruthy();
     const stored = (await env.ctx.db.select().from(characters).where(eq(characters.name, "我家小龍")))[0]!;
     expect(JSON.stringify(stored)).not.toContain("阿綠");
     const diary = await env.ctx.db.select().from(lifeDays).where(eq(lifeDays.characterId, stored.id));
@@ -273,7 +276,7 @@ describe("a dragon's own life", () => {
     expect(JSON.stringify(diary)).not.toContain("阿綠");
     // 撤回後未來不再出現
     expect((await friend.patch("/api/me/life").send({ allowVisits: false })).body.allowVisits).toBe(false);
-    expect((await me.get("/api/me/life")).body.encounter).toEqual({ kind: "town", name: "小栗" });
+    expect((await me.get("/api/me/life?visit=1")).body.encounter).toEqual({ kind: "town", name: "小栗" });
     expect((await friend.patch("/api/me/life").send({ allowVisits: "yes" })).status).toBe(400);
   });
 
