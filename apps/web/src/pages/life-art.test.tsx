@@ -68,4 +68,26 @@ describe("life pictures", () => {
     expect(document.querySelectorAll(".life-choices [data-mark]")).toHaveLength(7);
     expect(document.body.textContent ?? "").not.toMatch(pictured);
   });
+
+  it("日子寫成「11 月 14 日，秋天的早晨」，畫面上沒有 YYYY-MM-DD", async () => {
+    const originalHistory = life.history;
+    life.history = [
+      originalHistory[0]!,
+      { day: "2026-11-13", autonomous: "昨天去散步。", entries: [] },
+    ];
+    try {
+      const { unmount } = render(<MemoryRouter><LifePage /></MemoryRouter>);
+      expect(screen.getByText("11 月 14 日，秋天的早晨")).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: "11 月 13 日，秋天" })).toBeInTheDocument();
+      expect(document.body.textContent ?? "").not.toMatch(/\d{4}-\d{2}-\d{2}/);
+      unmount();
+
+      render(<MemoryRouter><LifePage cabinet /></MemoryRouter>);
+      await userEvent.click(screen.getByRole("button", { name: "雲朵圍巾，已收集" }));
+      expect(screen.getByText(/11 月 14 日，秋天/)).toBeInTheDocument();
+      expect(document.body.textContent ?? "").not.toMatch(/\d{4}-\d{2}-\d{2}/);
+    } finally {
+      life.history = originalHistory;
+    }
+  });
 });
