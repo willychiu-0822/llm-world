@@ -11,10 +11,10 @@ test("設定頁改脾氣與分享不必捲回上方就能存，重整後還在",
   await page.getByText("進階", { exact: true }).click();
   await page.getByLabel("脾氣").fill("喜歡曬太陽");
   await page.getByRole("button", { name: "把脾氣存起來" }).click();
-  await expect(page.getByRole("status")).toHaveTextContent("存好了。");
+  await expect(page.getByRole("status")).toHaveText("存好了。");
 
   await page.getByLabel("做過的事可以說給鎮上的朋友聽").uncheck();
-  await expect(page.getByRole("status")).toHaveTextContent("存好了。");
+  await expect(page.getByRole("status")).toHaveText("存好了。");
 
   await page.reload();
   await page.getByText("進階", { exact: true }).click();
