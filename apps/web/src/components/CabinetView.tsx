@@ -1,7 +1,8 @@
-import { DISTRICT_KEYS, KEEPSAKES, type DistrictKey } from "@lj/core";
+import { DISTRICT_KEYS, KEEPSAKES, keepsakeFor, type DistrictKey } from "@lj/core";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Dialog } from "./Dialog";
+import { TownMark } from "./TownMark";
 import { formatDate } from "../lib/format";
 import type { KeepsakeItem } from "../lib/types";
 
@@ -58,7 +59,7 @@ export function CabinetView({ total, items, pendingId, onAccept }: { collected: 
               aria-label={got ? `${slot.kind.name}${slot.got.length > 1 ? ` ${slot.got.length} 顆` : ""}` : `還沒撿到的${slot.kind.name}`}
               onClick={() => got && show(slot.got)}
             >
-              <span className="keepsake-emoji" aria-hidden>{slot.kind.emoji}</span>
+              <TownMark name={slot.kind.key} size={36} />
               <small>{slot.kind.name}</small>
               {slot.got.length > 1 && <span className="keepsake-count">{slot.got.length}</span>}
             </button>
@@ -67,7 +68,7 @@ export function CabinetView({ total, items, pendingId, onAccept }: { collected: 
       </div>
       {open && pile && (
         <Dialog title={open.object} busy={busy} onClose={() => { if (!busy) setPile(null); }}>
-          <p className="keepsake-emoji">{open.emoji}</p>
+          <TownMark name={keepsakeFor(open.districtKey).key} size={56} />
           <p>{open.warmLine}</p>
           <small>{formatDate(open.createdAt)}</small>
           {open.mood ? <p>當時的表情是 {open.mood}</p> : <p className="muted">這顆還沒貼表情。</p>}

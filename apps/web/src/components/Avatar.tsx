@@ -2,14 +2,49 @@ import { ACCESSORIES, BODY_SHAPES, DEFAULT_APPEARANCE, type Accessory, type Appe
 
 const INK = "#5B4636";
 
-const BODIES: Record<BodyShape, { d: string; top: number; eyeY: number; neckY: number }> = {
-  round: { d: "M50 32 C72 32 82 48 82 62 C82 78 68 88 50 88 C32 88 18 78 18 62 C18 48 28 32 50 32 Z", top: 32, eyeY: 56, neckY: 72 },
-  pear: { d: "M50 30 C64 30 70 42 72 52 C80 60 84 70 82 78 C79 88 66 90 50 90 C34 90 21 88 18 78 C16 70 20 60 28 52 C30 42 36 30 50 30 Z", top: 30, eyeY: 52, neckY: 66 },
-  tall: { d: "M50 22 C66 22 72 34 72 48 L72 74 C72 84 62 90 50 90 C38 90 28 84 28 74 L28 48 C28 34 34 22 50 22 Z", top: 22, eyeY: 46, neckY: 64 },
+const BODIES: Record<BodyShape, { d: string; top: number; eyeY: number; neckY: number; packX: number; packY: number }> = {
+  round: { d: "M50 32 C72 32 82 48 82 62 C82 78 68 88 50 88 C32 88 18 78 18 62 C18 48 28 32 50 32 Z", top: 32, eyeY: 56, neckY: 72, packX: 74, packY: 64 },
+  pear: { d: "M50 30 C64 30 70 42 72 52 C80 60 84 70 82 78 C79 88 66 90 50 90 C34 90 21 88 18 78 C16 70 20 60 28 52 C30 42 36 30 50 30 Z", top: 30, eyeY: 52, neckY: 66, packX: 72, packY: 66 },
+  tall: { d: "M50 22 C66 22 72 34 72 48 L72 74 C72 84 62 90 50 90 C38 90 28 84 28 74 L28 48 C28 34 34 22 50 22 Z", top: 22, eyeY: 46, neckY: 64, packX: 64, packY: 56 },
 };
 
+const stroke = { stroke: INK, strokeWidth: 2.2, strokeLinejoin: "round" as const, strokeLinecap: "round" as const };
+
+/** A scarf wrapped at this body's neck, so round, pear and tall each get their own place. */
+function PlainScarf({ neckY, accent }: { neckY: number; accent: string }) {
+  return (
+    <g data-part="scarf" data-neck={neckY} fill={accent} {...stroke}>
+      <path d={`M27 ${neckY} C38 ${neckY + 6} 62 ${neckY + 6} 73 ${neckY} L74 ${neckY + 7} C62 ${neckY + 13} 38 ${neckY + 13} 26 ${neckY + 7} Z`} />
+      <path d={`M60 ${neckY + 8} L64 ${neckY + 22} L70 ${neckY + 19} L67 ${neckY + 7} Z`} />
+    </g>
+  );
+}
+
+/** The shop souvenir: a paler, puffier scarf on the same neck line. */
+function CloudScarf({ neckY }: { neckY: number }) {
+  return (
+    <g data-part="cloud-scarf" data-neck={neckY} {...stroke}>
+      <path d={`M26 ${neckY} C34 ${neckY + 5} 42 ${neckY + 1} 50 ${neckY + 5} C58 ${neckY + 1} 66 ${neckY + 5} 74 ${neckY} L75 ${neckY + 8} C64 ${neckY + 15} 36 ${neckY + 15} 25 ${neckY + 8} Z`} fill="#F7F4EE" />
+      <path d={`M58 ${neckY + 9} C60 ${neckY + 20} 68 ${neckY + 23} 72 ${neckY + 15} C66 ${neckY + 11} 60 ${neckY + 8} 58 ${neckY + 9} Z`} fill="#E4F0F8" />
+      <circle cx="36" cy={neckY + 6} r="2.1" fill="#E4F0F8" />
+      <circle cx="48" cy={neckY + 7} r="2.3" fill="#E4F0F8" />
+      <circle cx="60" cy={neckY + 6} r="2.1" fill="#E4F0F8" />
+    </g>
+  );
+}
+
+function Backpack({ x, y }: { x: number; y: number }) {
+  return (
+    <g data-part="backpack" data-x={x} data-y={y} {...stroke}>
+      <path d={`M${x + 4} ${y + 3} C${x - 2} ${y - 10} ${x + 1} ${y - 16} ${x + 8} ${y - 4}`} fill="none" />
+      <rect x={x} y={y} width="14" height="16" rx="4" fill="#C5D7B4" />
+      <path d={`M${x + 2.5} ${y + 6} H${x + 11.5}`} fill="none" />
+    </g>
+  );
+}
+
 function Accessory({ kind, top, eyeY, neckY, accent }: { kind: Accessory; top: number; eyeY: number; neckY: number; accent: string }) {
-  const s = { stroke: INK, strokeWidth: 2.2, strokeLinejoin: "round" as const, strokeLinecap: "round" as const };
+  const s = stroke;
   switch (kind) {
     case "dragon_horns":
       return (
@@ -33,12 +68,7 @@ function Accessory({ kind, top, eyeY, neckY, accent }: { kind: Accessory; top: n
         </g>
       );
     case "scarf":
-      return (
-        <g data-part="scarf" fill={accent} {...s}>
-          <path d={`M27 ${neckY} C38 ${neckY + 6} 62 ${neckY + 6} 73 ${neckY} L74 ${neckY + 7} C62 ${neckY + 13} 38 ${neckY + 13} 26 ${neckY + 7} Z`} />
-          <path d={`M60 ${neckY + 8} L64 ${neckY + 22} L70 ${neckY + 19} L67 ${neckY + 7} Z`} />
-        </g>
-      );
+      return <PlainScarf neckY={neckY} accent={accent} />;
     case "glasses":
       return (
         <g data-part="glasses" fill="none" {...s}>
@@ -69,13 +99,22 @@ function Accessory({ kind, top, eyeY, neckY, accent }: { kind: Accessory; top: n
   }
 }
 
-export function Avatar({ appearance, name, size = 48, className, x, y }: { appearance: Partial<Appearance> | null | undefined; name: string; size?: number; className?: string; x?: number; y?: number }) {
+export type Worn = {
+  backpack?: boolean;
+  /** cloud = the shop scarf. fit = the scarf that starts fitting at stage 2. */
+  scarf?: "cloud" | "fit" | null;
+};
+
+export function Avatar({ appearance, name, size = 48, className, x, y, worn }: { appearance: Partial<Appearance> | null | undefined; name: string; size?: number; className?: string; x?: number; y?: number; worn?: Worn }) {
   const a = appearance ?? {};
   const body: BodyShape = (BODY_SHAPES as readonly string[]).includes(a.body ?? "") ? (a.body as BodyShape) : DEFAULT_APPEARANCE.body;
   const accessory: Accessory = (ACCESSORIES as readonly string[]).includes(a.accessory ?? "") ? (a.accessory as Accessory) : "none";
   const main = a.main ?? DEFAULT_APPEARANCE.main;
   const accent = a.accent ?? DEFAULT_APPEARANCE.accent;
   const b = BODIES[body];
+  const cloud = worn?.scarf === "cloud";
+  const fit = worn?.scarf === "fit" && accessory !== "scarf" && !cloud;
+  const drawnAccessory: Accessory = cloud && accessory === "scarf" ? "none" : accessory;
   return (
     <svg
       role="img"
@@ -101,7 +140,10 @@ export function Avatar({ appearance, name, size = 48, className, x, y }: { appea
       <circle cx="41" cy={b.eyeY - 1.2} r="0.9" fill="#fff" />
       <circle cx="61" cy={b.eyeY - 1.2} r="0.9" fill="#fff" />
       <path d={`M45 ${b.eyeY + 8} Q50 ${b.eyeY + 12} 55 ${b.eyeY + 8}`} fill="none" stroke={INK} strokeWidth="2.2" strokeLinecap="round" />
-      <Accessory kind={accessory} top={b.top} eyeY={b.eyeY} neckY={b.neckY} accent={accent} />
+      {worn?.backpack && <Backpack x={b.packX} y={b.packY} />}
+      <Accessory kind={drawnAccessory} top={b.top} eyeY={b.eyeY} neckY={b.neckY} accent={accent} />
+      {cloud && <CloudScarf neckY={b.neckY} />}
+      {fit && <PlainScarf neckY={b.neckY} accent={accent} />}
     </svg>
   );
 }

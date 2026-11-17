@@ -59,6 +59,10 @@ describe("novice loop", () => {
   it("shows the baby and a single main action", async () => {
     state.me = baby();
     render(<MemoryRouter><Layout><HomePage /></Layout></MemoryRouter>);
+    expect(document.querySelector("[data-mark='home']")).not.toBeNull();
+    expect(document.querySelector("[data-mark='map']")).not.toBeNull();
+    expect(document.querySelector("[data-mark='basket']")).not.toBeNull();
+    expect(document.body.textContent ?? "").not.toMatch(/🏠|🗺|🧺/);
     expect(screen.getAllByRole("link", { name: "家" }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole("link", { name: "地圖" }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole("link", { name: "收藏櫃" }).length).toBeGreaterThan(0);
@@ -71,6 +75,21 @@ describe("novice loop", () => {
     const said = screen.getByRole("status").textContent ?? "";
     expect(said.length).toBeGreaterThan(0);
     expect(bannedHits(document.body.textContent ?? "")).toEqual([]);
+  });
+
+  it("wears the backpack and cloud scarf on the dragon for that body", () => {
+    const me = baby();
+    me.pet = { ...me.pet!, stage: 2, accessories: ["backpack"] };
+    me.character = { ...me.character!, appearance: { ...look, body: "pear" }, life: { outfit: "shop", decoration: "festival" } };
+    state.me = me;
+    render(<MemoryRouter><HomePage /></MemoryRouter>);
+    const dragon = screen.getByRole("img", { name: "小龍" });
+    expect(dragon.querySelector("[data-part='cloud-scarf']")).toHaveAttribute("data-neck", "66");
+    expect(dragon.querySelector("[data-part='backpack']")).toHaveAttribute("data-y", "66");
+    expect(document.querySelector(".life-decoration")).toHaveAttribute("data-mark", "festival");
+    expect(screen.getByLabelText("穿著雲朵圍巾")).toBeInTheDocument();
+    expect(screen.getByLabelText("房間的四季小燈")).toBeInTheDocument();
+    expect(document.body.textContent ?? "").not.toMatch(/🎒|🧣|🏮|✉|⚙|📮|🐾/);
   });
 
   it("adopts in three steps with one next button", async () => {
@@ -101,13 +120,15 @@ describe("novice loop", () => {
 
   it("greys out keepsakes that are still missing", () => {
     render(<MemoryRouter><CabinetView collected={1} total={2} items={[
-      { deedId: "a", districtKey: "music", placeId: "p", placeName: "音樂坊小廣場", object: "吉他撥片", emoji: "🎸", collected: true, createdAt: "2026-11-10T00:00:00.000Z", warmLine: "小雀的吉他撥片。去上了聲樂課。", mood: "😆" },
-      { deedId: "b", districtKey: "music", placeId: "p", placeName: "音樂坊小廣場", object: "吉他撥片", emoji: "🎸", collected: false, createdAt: "2026-11-10T00:00:00.000Z" },
+      { deedId: "a", districtKey: "music", placeId: "p", placeName: "音樂坊小廣場", object: "吉他撥片", collected: true, createdAt: "2026-11-10T00:00:00.000Z", warmLine: "小雀的吉他撥片。去上了聲樂課。", mood: "😆" },
+      { deedId: "b", districtKey: "music", placeId: "p", placeName: "音樂坊小廣場", object: "吉他撥片", collected: false, createdAt: "2026-11-10T00:00:00.000Z" },
     ]} /></MemoryRouter>);
     expect(screen.getByLabelText("收藏進度")).toHaveTextContent("1/9");
     expect(document.querySelectorAll(".keepsake-cell")).toHaveLength(9);
     expect(document.querySelectorAll(".is-missing")).toHaveLength(8);
     expect(screen.queryByText(/明信片/)).not.toBeInTheDocument();
+    expect(document.querySelector("[data-mark='pick']")).not.toBeNull();
+    expect(document.body.textContent ?? "").not.toMatch(/🎸|🎀|🏺|🥄|🔖|🌼|🍵|👝|🪨/);
     expect(bannedHits(document.body.textContent ?? "")).toEqual([]);
   });
 

@@ -138,7 +138,6 @@ function present(row: KeepsakeRow, collected: boolean, mood: string | null) {
     placeId: row.deed.placeId,
     placeName: row.placeName ?? "",
     object: kind.name,
-    emoji: kind.emoji,
     collected,
     createdAt: row.deed.createdAt,
   };

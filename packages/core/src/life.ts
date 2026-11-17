@@ -1,13 +1,13 @@
 import { z } from "zod";
 
 export const LIFE_ACTIVITIES = [
-  { id: "shop", name: "逛逛小店", emoji: "🧣", place: "萬事屋", wish: "想換個新樣子。", help: "幫我挑一條軟軟的圍巾？", story: "萬事屋老闆翻出一條雲朵圍巾。小龍試戴了三次，還是把頭鑽錯洞。", reward: "雲朵圍巾", category: "衣服" },
-  { id: "exercise", name: "河邊動一動", emoji: "🍃", place: "河邊草地", wish: "腳趾想伸懶腰。", help: "陪我去河邊跑一小圈？", story: "鎮民阿湧教小龍吹葉子哨。小龍吹出噗的一聲，兩個一起笑倒。", reward: "葉子哨", category: "旅行紀念品" },
-  { id: "music", name: "聽一首小曲", emoji: "🔔", place: "音樂坊", wish: "耳朵想聽點新聲音。", help: "幫我打三下拍子？", story: "鎮民阿芽敲了三下鈴。小龍慢了一拍，卻剛好接住最後一個音。", reward: "小鈴鐺", category: "旅行紀念品" },
-  { id: "visit", name: "去朋友家喝茶", emoji: "🍵", place: "小栗的家", wish: "想找個伴坐一下。", help: "陪我帶點小餅乾？", story: "鎮民小栗端出兩杯茶。小龍把餅乾疊成塔，小栗偷偷在旁邊加了一層。", reward: "茶會合照", category: "朋友相簿" },
-  { id: "festival", name: "廣場湊熱鬧", emoji: "🏮", place: "四季廣場", wish: "廣場好像有熱鬧。", help: "幫我扶住小燈的另一邊？", story: "鎮民們在廣場掛小燈。小龍負責扶梯子，最後自己也掛上了一顆。", reward: "四季小燈", category: "房間佈置" },
-  { id: "town", name: "去霧丘鎮旅行", emoji: "🚞", place: "霧丘鎮", wish: "想看看山後面。", help: "幫我把小包包扣好？", story: "霧丘鎮車掌替小龍指路。牠還是繞回原點，卻多認識了一家熱湯店。", reward: "霧丘車票夾", category: "旅行紀念品" },
-  { id: "abroad", name: "去星砂島出國玩", emoji: "🐚", place: "星砂島", wish: "想學海那邊的招呼。", help: "陪我練一次招手？", story: "星砂島向導帶小龍聽海。牠學會島上的招呼，把一小瓶星砂帶回家。", reward: "星砂瓶", category: "旅行紀念品" },
+  { id: "shop", name: "逛逛小店", place: "萬事屋", wish: "想換個新樣子。", help: "幫我挑一條軟軟的圍巾？", story: "萬事屋老闆翻出一條雲朵圍巾。小龍試戴了三次，還是把頭鑽錯洞。", reward: "雲朵圍巾", category: "衣服" },
+  { id: "exercise", name: "河邊動一動", place: "河邊草地", wish: "腳趾想伸懶腰。", help: "陪我去河邊跑一小圈？", story: "鎮民阿湧教小龍吹葉子哨。小龍吹出噗的一聲，兩個一起笑倒。", reward: "葉子哨", category: "旅行紀念品" },
+  { id: "music", name: "聽一首小曲", place: "音樂坊", wish: "耳朵想聽點新聲音。", help: "幫我打三下拍子？", story: "鎮民阿芽敲了三下鈴。小龍慢了一拍，卻剛好接住最後一個音。", reward: "小鈴鐺", category: "旅行紀念品" },
+  { id: "visit", name: "去朋友家喝茶", place: "小栗的家", wish: "想找個伴坐一下。", help: "陪我帶點小餅乾？", story: "鎮民小栗端出兩杯茶。小龍把餅乾疊成塔，小栗偷偷在旁邊加了一層。", reward: "茶會合照", category: "朋友相簿" },
+  { id: "festival", name: "廣場湊熱鬧", place: "四季廣場", wish: "廣場好像有熱鬧。", help: "幫我扶住小燈的另一邊？", story: "鎮民們在廣場掛小燈。小龍負責扶梯子，最後自己也掛上了一顆。", reward: "四季小燈", category: "房間佈置" },
+  { id: "town", name: "去霧丘鎮旅行", place: "霧丘鎮", wish: "想看看山後面。", help: "幫我把小包包扣好？", story: "霧丘鎮車掌替小龍指路。牠還是繞回原點，卻多認識了一家熱湯店。", reward: "霧丘車票夾", category: "旅行紀念品" },
+  { id: "abroad", name: "去星砂島出國玩", place: "星砂島", wish: "想學海那邊的招呼。", help: "陪我練一次招手？", story: "星砂島向導帶小龍聽海。牠學會島上的招呼，把一小瓶星砂帶回家。", reward: "星砂瓶", category: "旅行紀念品" },
 ] as const;
 export type LifeActivityId = typeof LIFE_ACTIVITIES[number]["id"];
 export const lifeActivityId = z.enum(["shop", "exercise", "music", "visit", "festival", "town", "abroad"]);
