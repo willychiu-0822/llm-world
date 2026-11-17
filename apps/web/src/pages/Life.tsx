@@ -48,10 +48,27 @@ export function LifePage({ cabinet = false }: { cabinet?: boolean }) {
       setError("剛剛沒連上。再按一次就好。");
     } finally { gate.current = false; setBusy(false); }
   }
+  async function loadVisit() {
+    setBusy(true);
+    setError("");
+    try {
+      life.setData(await api<LifeView>("/api/me/life?visit=1"));
+    } catch {
+      setError("剛剛沒連上。再按一次就好。");
+    } finally {
+      setBusy(false);
+    }
+  }
+  function pickPlace(id: LifeActivityId) {
+    setSelected(id);
+    if (id === "visit") void loadVisit();
+  }
   function choose() {
     const available = data?.activities.filter(a => a.open && !a.done) ?? [];
-    setSelected(available.find(a => a.id === data?.recommendedId)?.id ?? available[0]?.id ?? "music");
+    const next = available.find(a => a.id === data?.recommendedId)?.id ?? available[0]?.id ?? "music";
+    setSelected(next);
     setChoosing(true);
+    if (next === "visit") void loadVisit();
   }
   if (!me?.character) return <section className="panel stack"><h1>小龍還在蛋裡</h1><p>先把牠帶回家，再一起玩。</p><Link to="/" className="btn primary">回小龍身邊</Link></section>;
   if (!data) return <section className="panel stack"><h1>小龍的今天</h1><p role={life.error ? "alert" : "status"}>{life.error ? "剛剛沒連上，小龍還在等你。" : "翻開今天的小本子…"}</p>{life.error && <button className="btn primary" onClick={() => void life.reload()}>再看一次</button>}<Link className="btn ghost" to="/">回小龍身邊</Link></section>;
@@ -121,7 +138,7 @@ export function LifePage({ cabinet = false }: { cabinet?: boolean }) {
     {choosing && <Dialog title="陪小龍去玩" busy={busy} onClose={() => setChoosing(false)}>
       <h2>這次去哪裡？</h2>
       <div className="life-choices" role="radiogroup" aria-label="挑一個小冒險">
-        {data.activities.map(a => <button type="button" role="radio" aria-checked={selected === a.id} key={a.id} className={`btn ghost ${selected === a.id ? "is-chosen" : ""}`} disabled={busy || a.done || !a.open} onClick={() => setSelected(a.id)}><TownMark name={a.id} size={22} /> <span>{a.name}{a.done ? " · 今天玩過了" : !a.open ? " · 今天沒開" : ""}</span></button>)}
+        {data.activities.map(a => <button type="button" role="radio" aria-checked={selected === a.id} key={a.id} className={`btn ghost ${selected === a.id ? "is-chosen" : ""}`} disabled={busy || a.done || !a.open} onClick={() => pickPlace(a.id)}><TownMark name={a.id} size={22} /> <span>{a.name}{a.done ? " · 今天玩過了" : !a.open ? " · 今天沒開" : ""}</span></button>)}
       </div>
       <p>{activity?.story}</p>
       {selected === "visit" && <Meeting data={data} />}

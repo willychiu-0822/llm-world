@@ -35,7 +35,7 @@ export function meRoutes(ctx: AppContext) {
       res.json(await getMe(ctx, req.user!));
     }),
   );
-  r.get("/life", h(async (req, res) => res.json(await getLife(ctx, req.user!.id))));
+  r.get("/life", h(async (req, res) => res.json(await getLife(ctx, req.user!.id, { visit: req.query.visit === "1" || req.query.visit === "true" }))));
   r.post("/life/activities", h(async (req, res) => res.json(await playLife(ctx, req.user!.id, req.body))));
   r.patch("/life", h(async (req, res) => res.json(await patchLife(ctx, req.user!.id, req.body))));
   r.post("/walk", h(async (req, res) => res.json(await walkOut(ctx, req.user!.id))));
