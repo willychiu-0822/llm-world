@@ -1,4 +1,5 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { assertE2eDatabase } from "./assert-e2e-database.mjs";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { expect, request, test as base, type APIRequestContext, type Browser, type Page } from "@playwright/test";
 import pg from "pg";
@@ -10,7 +11,7 @@ export const BASE = `http://localhost:${process.env.E2E_PORT ?? 4131}`;
 export const test = base.extend<{ isolateUat: void }>({
   isolateUat: [async ({ browser, page: _page }, use) => {
     const url = process.env.E2E_DATABASE_URL ?? "postgres://postgres:postgres@127.0.0.1:5433/longjiao_laned_e2e";
-    if (new URL(url).pathname !== "/longjiao_laned_e2e") throw new Error("Only the session D E2E database may be reset");
+    assertE2eDatabase(url);
     const db = new pg.Client({ connectionString: url });
     await db.connect();
     try { await db.query("DELETE FROM users"); } finally { await db.end(); }
