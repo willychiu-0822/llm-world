@@ -35,6 +35,8 @@ export default defineConfig({
       SESSION_SECRET: "e2e-session-secret-e2e-session-secret",
       MODERATION_MODE: "filter",
       MCP_RATE_LIMIT_PER_MINUTE: "1000",
+      // One IP creates many accounts during the suite. The product default stays generous for a person.
+      REST_WRITE_RATE_LIMIT_PER_MINUTE: "1000",
     },
   },
 });

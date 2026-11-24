@@ -4,7 +4,9 @@ import { getMe } from "./services/characters";
 import { h } from "./http/errors";
 import { loadSession } from "./auth/session";
 import type { AppContext } from "./context";
+import { contentSecurityPolicyDirectives } from "./http/csp";
 import { errorHandler } from "./http/errors";
+import { restWriteLimiter } from "./http/write-limit";
 import { serveWeb } from "./web";
 import { APP_NAME } from "@lj/core";
 import { authRoutes } from "./routes/auth";
@@ -18,11 +20,15 @@ export function createApp(ctx: AppContext) {
   const app = express();
   app.set("trust proxy", 1);
   app.disable("x-powered-by");
-  app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
+  app.use(helmet({
+    contentSecurityPolicy: { useDefaults: false, directives: contentSecurityPolicyDirectives() },
+    crossOriginEmbedderPolicy: false,
+  }));
   app.get("/healthz", (_req, res) => res.json({ ok: true }));
   app.use(express.json({ limit: "100kb" }));
   app.use(express.urlencoded({ extended: false }));
   app.use(loadSession(ctx));
+  app.use(restWriteLimiter(ctx));
   app.get("/api/config", (_req, res) =>
     res.json({ appName: APP_NAME, devLogin: ctx.config.devLogin, googleLogin: Boolean(ctx.config.google.clientId), mcpUrl: `${ctx.config.baseUrl}/mcp` }),
   );

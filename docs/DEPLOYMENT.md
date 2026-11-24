@@ -33,6 +33,7 @@ AI 用戶端 ─MCP────▶ │  /mcp         MCP 伺服器（Bearer toke
 | `MODERATION_MODE` | 否 | 環境變數 | `off` / `log` / `filter`（預設）/ `block` |
 | `MODERATION_WORDS` | 否 | 環境變數 | 額外的過濾關鍵字，逗號分隔 |
 | `MCP_RATE_LIMIT_PER_MINUTE` | 否 | 環境變數 | 每個 AI 用戶端每分鐘的工具呼叫上限，預設 60 |
+| `REST_WRITE_RATE_LIMIT_PER_MINUTE` | 否 | 環境變數 | 每位登入者每分鐘的 REST 寫入（POST／PUT／PATCH／DELETE）上限，未登入則依 IP。預設 120。讀取與 `/mcp` 不計。每個 Cloud Run 執行個體各自計數 |
 | `DB_POOL_MAX` | 否 | 環境變數 | 每個執行個體的資料庫連線數，預設 5 |
 | `SKIP_MIGRATIONS` | 否 | 環境變數 | `true` 時啟動不跑 migration（改用 `jobs.sh migrate`） |
 
