@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { characters, deeds } from "@lj/db";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { nova, userWithCharacter, useTestApp, login } from "../../test/helpers";
 
 describe("a dragon's own life", () => {
@@ -145,4 +145,107 @@ describe("a dragon's own life", () => {
     // 讀取不寫入，也沒有生成任何真人事蹟或星星
     expect((await me.get("/api/me")).body.pet.stars).toBe(0);
   });
+
+  it("keeps recognised diary entries and collection items after reading and playing old data", async () => {
+    env.ctx.now = () => new Date("2026-11-10T04:00:00.000Z");
+    const owner = await userWithCharacter(env.app, "legacy-life@example.com");
+    const legacy = legacyLife();
+    await env.ctx.db.update(characters).set({
+      sharing: sql`jsonb_set(${characters.sharing}, '{life}', ${JSON.stringify(legacy)}::jsonb)`,
+    }).where(eq(characters.name, "Nova"));
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      expect((await owner.get("/api/me/life")).status).toBe(200);
+      const played = await owner.post("/api/me/life/activities").send({ activityId: "visit" });
+      expect(played.status).toBe(200);
+      const stored = (await env.ctx.db.select().from(characters).where(eq(characters.name, "Nova")))[0]!.sharing as { life: ReturnType<typeof legacyLife> };
+      const life = stored.life;
+      const knownEntries = (entries: Array<{ activityId: string; at: string }>) => entries.filter(e => e.activityId !== "old-market");
+      expect(life.days.map(d => ({ day: d.day, autonomous: d.autonomous, entries: knownEntries(d.entries) }))).toEqual([
+        { day: "2026-11-10", autonomous: legacy.days[0]!.autonomous, entries: [
+          { activityId: "shop", at: "2026-11-10T01:00:00.000Z" },
+          { activityId: "music", at: "2026-11-10T03:00:00.000Z" },
+          { activityId: "visit", at: "2026-11-10T04:00:00.000Z" },
+        ] },
+        { day: "2026-11-09", autonomous: legacy.days[1]!.autonomous, entries: legacy.days[1]!.entries },
+      ]);
+      expect(life.inventory.filter(i => i.activityId !== "old-market")).toEqual(legacy.inventory.filter(i => i.activityId !== "old-market"));
+      expect(life.outfit).toBe("shop");
+      expect(life.decoration).toBe("festival");
+      expect(life.allowVisits).toBe(true);
+      const logged = [...warn.mock.calls, ...error.mock.calls].flat().map(String).join("\n");
+      expect(logged).toContain("old-market");
+    } finally {
+      warn.mockRestore();
+      error.mockRestore();
+    }
+  });
+
+  it("logs a life parse failure and does not write over the stored diary", async () => {
+    env.ctx.now = () => new Date("2026-11-10T04:00:00.000Z");
+    const owner = await userWithCharacter(env.app, "future-life@example.com");
+    const legacy = { version: 2, days: legacyLife().days, inventory: legacyLife().inventory, outfit: "shop", decoration: "festival", allowVisits: true };
+    await env.ctx.db.update(characters).set({
+      sharing: sql`jsonb_set(${characters.sharing}, '{life}', ${JSON.stringify(legacy)}::jsonb)`,
+    }).where(eq(characters.name, "Nova"));
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      const played = await owner.post("/api/me/life/activities").send({ activityId: "music" });
+      expect(played.status).toBeGreaterThanOrEqual(400);
+      const stored = (await env.ctx.db.select().from(characters).where(eq(characters.name, "Nova")))[0]!.sharing as { life: typeof legacy };
+      expect(stored.life).toEqual(legacy);
+      const logged = [...warn.mock.calls, ...error.mock.calls].flat().map(String).join("\n");
+      expect(logged.length).toBeGreaterThan(0);
+    } finally {
+      warn.mockRestore();
+      error.mockRestore();
+    }
+  });
 });
+
+function legacyLife() {
+  return {
+    version: 1,
+    days: [
+      {
+        day: "2026-11-10",
+        autonomous: "早些時候，小龍在舊市集晃了一圈。",
+        entries: [
+          { activityId: "shop", at: "2026-11-10T01:00:00.000Z" },
+          { activityId: "old-market", at: "2026-11-10T02:00:00.000Z" },
+          { activityId: "music", at: "2026-11-10T03:00:00.000Z" },
+        ],
+      },
+      {
+        day: "2026-11-09",
+        autonomous: "早些時候，小龍把葉子吹到河對岸。",
+        entries: [
+          { activityId: "exercise", at: "2026-11-09T01:00:00.000Z" },
+          { activityId: "visit", at: "2026-11-09T02:00:00.000Z" },
+          { activityId: "festival", at: "2026-11-09T03:00:00.000Z" },
+          { activityId: "town", at: "2026-11-09T04:00:00.000Z" },
+          { activityId: "abroad", at: "2026-11-09T05:00:00.000Z" },
+          { activityId: "shop", at: "2026-11-09T06:00:00.000Z" },
+          { activityId: "music", at: "2026-11-09T07:00:00.000Z" },
+          { activityId: "exercise", at: "2026-11-09T08:00:00.000Z" },
+        ],
+      },
+    ],
+    inventory: [
+      { activityId: "shop", earnedOn: "2026-11-09" },
+      { activityId: "exercise", earnedOn: "2026-11-09" },
+      { activityId: "music", earnedOn: "2026-11-09" },
+      { activityId: "visit", earnedOn: "2026-11-09" },
+      { activityId: "festival", earnedOn: "2026-11-09" },
+      { activityId: "town", earnedOn: "2026-11-09" },
+      { activityId: "abroad", earnedOn: "2026-11-09" },
+      { activityId: "old-market", earnedOn: "2026-11-08" },
+      { activityId: "shop", earnedOn: "2026-11-01" },
+    ],
+    outfit: "shop" as const,
+    decoration: "festival" as const,
+    allowVisits: true,
+  };
+}
