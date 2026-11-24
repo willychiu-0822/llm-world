@@ -10,7 +10,10 @@ import { login, nova, useTestApp } from "../../test/helpers";
 
 const dist = mkdtempSync(path.join(tmpdir(), "lj-csp-"));
 mkdirSync(path.join(dist, "assets"));
-writeFileSync(path.join(dist, "index.html"), "<!doctype html><title>龍角鎮</title><div id=root></div>");
+writeFileSync(
+  path.join(dist, "index.html"),
+  "<!doctype html><title>龍角鎮</title><div id=root></div>",
+);
 
 describe("content security policy", () => {
   const env = useTestApp({ webDist: dist });
@@ -30,7 +33,9 @@ describe("content security policy", () => {
       expect(csp).toContain("frame-ancestors 'none'");
       expect(csp).toContain(`style-src 'self' ${CONSENT_STYLE_HASH}`);
       expect(csp).toContain("style-src-attr 'unsafe-inline'");
-      expect(csp.split(";").find((part) => part.trim().startsWith("style-src "))).not.toContain("unsafe-inline");
+      expect(csp.split(";").find((part) => part.trim().startsWith("style-src "))).not.toContain(
+        "unsafe-inline",
+      );
       expect(csp).not.toMatch(/script-src[^;]*unsafe-inline/);
       expect(csp).not.toContain("upgrade-insecure-requests");
       expect(csp).not.toContain("https:");
@@ -41,8 +46,13 @@ describe("content security policy", () => {
 describe("REST write limit config", () => {
   it("defaults to 120 per minute and rejects a non-positive value", () => {
     expect(loadConfig({ NODE_ENV: "test" }).restWriteRateLimitPerMinute).toBe(120);
-    expect(loadConfig({ NODE_ENV: "test", REST_WRITE_RATE_LIMIT_PER_MINUTE: "80" }).restWriteRateLimitPerMinute).toBe(80);
-    expect(() => loadConfig({ NODE_ENV: "test", REST_WRITE_RATE_LIMIT_PER_MINUTE: "0" })).toThrow(/REST_WRITE_RATE_LIMIT_PER_MINUTE/);
+    expect(
+      loadConfig({ NODE_ENV: "test", REST_WRITE_RATE_LIMIT_PER_MINUTE: "80" })
+        .restWriteRateLimitPerMinute,
+    ).toBe(80);
+    expect(() => loadConfig({ NODE_ENV: "test", REST_WRITE_RATE_LIMIT_PER_MINUTE: "0" })).toThrow(
+      /REST_WRITE_RATE_LIMIT_PER_MINUTE/,
+    );
   });
 });
 
@@ -57,7 +67,9 @@ describe("REST write rate limit", () => {
 
     const blocked = await a.put("/api/me/character").send(nova);
     expect(blocked.status).toBe(429);
-    expect(blocked.body).toEqual({ error: { code: "rate_limited", message: REST_WRITE_LIMIT_MESSAGE } });
+    expect(blocked.body).toEqual({
+      error: { code: "rate_limited", message: REST_WRITE_LIMIT_MESSAGE },
+    });
 
     for (let i = 0; i < 10; i++) expect((await a.get("/api/me")).status).toBe(200);
 
@@ -67,7 +79,10 @@ describe("REST write rate limit", () => {
 
   it("falls back to the client IP for anonymous writes", async () => {
     const send = (ip: string, n: number) =>
-      request(env.app).post("/api/auth/dev-login").set("X-Forwarded-For", ip).send({ email: `${ip}-${n}@example.com` });
+      request(env.app)
+        .post("/api/auth/dev-login")
+        .set("X-Forwarded-For", ip)
+        .send({ email: `${ip}-${n}@example.com` });
     expect((await send("203.0.113.10", 1)).status).toBe(200);
     expect((await send("203.0.113.10", 2)).status).toBe(200);
     expect((await send("203.0.113.10", 3)).status).toBe(200);
@@ -82,8 +97,12 @@ describe("MCP stays on its own limiter", () => {
   const env = useTestApp({ restWriteRateLimitPerMinute: 1 });
 
   it("does not count POST /mcp toward the REST write limit", async () => {
-    const first = await request(env.app).post("/mcp").send({ jsonrpc: "2.0", id: 1, method: "tools/list" });
-    const second = await request(env.app).post("/mcp").send({ jsonrpc: "2.0", id: 1, method: "tools/list" });
+    const first = await request(env.app)
+      .post("/mcp")
+      .send({ jsonrpc: "2.0", id: 1, method: "tools/list" });
+    const second = await request(env.app)
+      .post("/mcp")
+      .send({ jsonrpc: "2.0", id: 1, method: "tools/list" });
     expect(first.status).toBe(401);
     expect(second.status).toBe(401);
   });
@@ -95,7 +114,9 @@ describe("ordinary use under the default write limit", () => {
   it("lets a normal session write a few times and read freely", async () => {
     const agent = await login(env.app, "calm@example.com", "小安");
     expect((await agent.put("/api/me/character").send(nova)).status).toBe(200);
-    expect((await agent.post("/api/me/wants").send({ text: "想唱歌", districtKey: "music" })).status).toBe(201);
+    expect(
+      (await agent.post("/api/me/wants").send({ text: "想唱歌", districtKey: "music" })).status,
+    ).toBe(201);
     expect((await agent.get("/api/me")).status).toBe(200);
     for (let i = 0; i < 30; i++) expect((await agent.get("/api/town")).status).toBe(200);
   });

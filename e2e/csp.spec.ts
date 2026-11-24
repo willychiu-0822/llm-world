@@ -8,11 +8,14 @@ test("LW-17 頁面帶嚴格 CSP，首頁、設定、地圖與同意頁都沒有�
   });
   await page.addInitScript(() => {
     document.addEventListener("securitypolicyviolation", (event) => {
-      void (window as unknown as { cspReport: (text: string) => void }).cspReport(`${event.violatedDirective} ${event.blockedURI}`);
+      void (window as unknown as { cspReport: (text: string) => void }).cspReport(
+        `${event.violatedDirective} ${event.blockedURI}`,
+      );
     });
   });
   page.on("console", (message) => {
-    if (/content security policy|violates the following/i.test(message.text())) violations.push(message.text());
+    if (/content security policy|violates the following/i.test(message.text()))
+      violations.push(message.text());
   });
 
   const home = await page.goto("/");

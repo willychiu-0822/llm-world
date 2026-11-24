@@ -18,7 +18,8 @@ export function restWriteLimiter(ctx: AppContext) {
     standardHeaders: "draft-7",
     legacyHeaders: false,
     skip: (req) => !WRITE_METHODS.has(req.method) || isMcp(req.path),
-    keyGenerator: (req) => (req.user ? `user:${req.user.id}` : `ip:${ipKeyGenerator(req.ip ?? "")}`),
+    keyGenerator: (req) =>
+      req.user ? `user:${req.user.id}` : `ip:${ipKeyGenerator(req.ip ?? "")}`,
     handler: (_req, res) => {
       res.status(429).json({ error: { code: "rate_limited", message: REST_WRITE_LIMIT_MESSAGE } });
     },

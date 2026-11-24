@@ -20,22 +20,32 @@ export function createApp(ctx: AppContext) {
   const app = express();
   app.set("trust proxy", 1);
   app.disable("x-powered-by");
-  app.use(helmet({
-    contentSecurityPolicy: { useDefaults: false, directives: contentSecurityPolicyDirectives() },
-    crossOriginEmbedderPolicy: false,
-  }));
+  app.use(
+    helmet({
+      contentSecurityPolicy: { useDefaults: false, directives: contentSecurityPolicyDirectives() },
+      crossOriginEmbedderPolicy: false,
+    }),
+  );
   app.get("/healthz", (_req, res) => res.json({ ok: true }));
   app.use(express.json({ limit: "100kb" }));
   app.use(express.urlencoded({ extended: false }));
   app.use(loadSession(ctx));
   app.use(restWriteLimiter(ctx));
   app.get("/api/config", (_req, res) =>
-    res.json({ appName: APP_NAME, devLogin: ctx.config.devLogin, googleLogin: Boolean(ctx.config.google.clientId), mcpUrl: `${ctx.config.baseUrl}/mcp` }),
+    res.json({
+      appName: APP_NAME,
+      devLogin: ctx.config.devLogin,
+      googleLogin: Boolean(ctx.config.google.clientId),
+      mcpUrl: `${ctx.config.baseUrl}/mcp`,
+    }),
   );
-  app.get("/api/session", h(async (req, res) => {
-    res.set("Cache-Control", "no-store");
-    res.json({ me: req.user ? await getMe(ctx, req.user) : null });
-  }));
+  app.get(
+    "/api/session",
+    h(async (req, res) => {
+      res.set("Cache-Control", "no-store");
+      res.json({ me: req.user ? await getMe(ctx, req.user) : null });
+    }),
+  );
   app.use(authRoutes(ctx));
   const oauth = oauthRoutes(ctx);
   app.use(oauth.router);
@@ -48,7 +58,9 @@ export function createApp(ctx: AppContext) {
   app.use("/api", discoveryRoutes(ctx));
   app.use("/api/provider", providerRoutes(ctx));
   app.use("/api/admin", adminRoutes(ctx));
-  app.use("/api", (_req, res) => res.status(404).json({ error: { code: "not_found", message: "route not found" } }));
+  app.use("/api", (_req, res) =>
+    res.status(404).json({ error: { code: "not_found", message: "route not found" } }),
+  );
   serveWeb(app, ctx.config.webDist);
   app.use(errorHandler);
   return app;
