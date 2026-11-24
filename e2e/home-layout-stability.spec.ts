@@ -4,10 +4,18 @@ import { test, json, look, apiAs } from "./helpers";
 test("出門回來時操作區和小龍位置保持穩定", async ({ page }) => {
   const source = await apiAs(`layout-source-${test.info().project.name}@e2e.test`);
   await json(source.put("/api/me/character", { data: { name: "阿游", appearance: look() } }));
-  const step = await json(source.post("/api/first-steps", { data: { executor: "self", text: "聽了一首小曲" } }));
-  await json(source.post(`/api/first-steps/${step.id}/complete`, { data: { visibility: "public" } }));
+  const step = await json(
+    source.post("/api/first-steps", { data: { executor: "self", text: "聽了一首小曲" } }),
+  );
+  await json(
+    source.post(`/api/first-steps/${step.id}/complete`, { data: { visibility: "public" } }),
+  );
   await source.dispose();
-  await json(page.request.post("/api/auth/dev-login", { data: { email: `layout-${test.info().project.name}@e2e.test` } }));
+  await json(
+    page.request.post("/api/auth/dev-login", {
+      data: { email: `layout-${test.info().project.name}@e2e.test` },
+    }),
+  );
   await json(page.request.put("/api/me/character", { data: { name: "小豆", appearance: look() } }));
   await page.goto("/");
   await page.getByRole("button", { name: "出門逛逛" }).click();

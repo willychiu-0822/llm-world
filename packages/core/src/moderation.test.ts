@@ -23,7 +23,12 @@ describe("moderation pipeline", () => {
   it("log mode keeps text but reports the flag", async () => {
     const m = createModerator({ mode: "log", providers: [words] });
     const r = await m.check("這是壞字");
-    expect(r).toMatchObject({ action: "allow", flagged: true, text: "這是壞字", categories: ["profanity"] });
+    expect(r).toMatchObject({
+      action: "allow",
+      flagged: true,
+      text: "這是壞字",
+      categories: ["profanity"],
+    });
   });
 
   it("filter mode masks flagged spans, case-insensitively", async () => {
@@ -42,7 +47,17 @@ describe("moderation pipeline", () => {
   });
 
   it("merges results from several providers", async () => {
-    const custom = { name: "custom", check: async (t: string) => (t.includes("x") ? { flagged: true, categories: ["custom"], spans: [{ start: t.indexOf("x"), end: t.indexOf("x") + 1 }] } : { flagged: false, categories: [], spans: [] }) };
+    const custom = {
+      name: "custom",
+      check: async (t: string) =>
+        t.includes("x")
+          ? {
+              flagged: true,
+              categories: ["custom"],
+              spans: [{ start: t.indexOf("x"), end: t.indexOf("x") + 1 }],
+            }
+          : { flagged: false, categories: [], spans: [] },
+    };
     const m = createModerator({ mode: "filter", providers: [words, custom] });
     const r = await m.check("壞字x");
     expect(r.categories.sort()).toEqual(["custom", "profanity"]);

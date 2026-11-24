@@ -7,7 +7,11 @@ import type { TrialView } from "../lib/types";
 import { useFetch } from "../lib/useFetch";
 
 export function TrialPage() {
-  return <GrownGate><TrialBody /></GrownGate>;
+  return (
+    <GrownGate>
+      <TrialBody />
+    </GrownGate>
+  );
 }
 
 function TrialBody() {
@@ -27,13 +31,18 @@ function TrialBody() {
           {data.isDemo && <span className="tag tag-demo">示範</span>}
         </div>
         <h1>{data.title}</h1>
-        <p>由「{data.provider.name}」提供・<Link to={`/places/${data.place.id}`}>{data.place.name}</Link></p>
+        <p>
+          由「{data.provider.name}」提供・
+          <Link to={`/places/${data.place.id}`}>{data.place.name}</Link>
+        </p>
         <div className="chips">
           <span className="chip">⏱ {data.durationMin} 分鐘</span>
           <span className="chip">{data.exitAnytime ? "🚪 隨時可以離開" : "需要完整參加"}</span>
           {data.buddyOk && <span className="chip">👫 可以帶朋友</span>}
           {data.whenText && <span className="chip">🗓 {data.whenText}</span>}
-          <span className="chip">📍 {data.place.online ? "線上" : (data.place.realAddress ?? "地點洽提供者")}</span>
+          <span className="chip">
+            📍 {data.place.online ? "線上" : (data.place.realAddress ?? "地點洽提供者")}
+          </span>
         </div>
         {data.description && <p>{data.description}</p>}
         {data.processInfo && (
@@ -71,7 +80,9 @@ function TrialBody() {
           )}
         </section>
         <div className="row wrap">
-          <Link className="btn primary" to={me ? next : `/login?next=${encodeURIComponent(next)}`}>我也想試試</Link>
+          <Link className="btn primary" to={me ? next : `/login?next=${encodeURIComponent(next)}`}>
+            我也想試試
+          </Link>
           <small className="muted">可以交給 AI 先打聽，也可以直接報名</small>
         </div>
       </article>

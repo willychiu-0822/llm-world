@@ -32,7 +32,10 @@ function Mark({ children }: { children: ReactNode }) {
 const DRAWS: Record<MarkName, () => ReactNode> = {
   pick: () => (
     <Mark>
-      <path d="M32 8 C46 16 52 32 42 48 C36 58 32 60 32 60 C32 60 28 58 22 48 C12 32 18 16 32 8 Z" fill={SKIN} />
+      <path
+        d="M32 8 C46 16 52 32 42 48 C36 58 32 60 32 60 C32 60 28 58 22 48 C12 32 18 16 32 8 Z"
+        fill={SKIN}
+      />
       <path d="M24 24 H40" />
     </Mark>
   ),
@@ -66,7 +69,15 @@ const DRAWS: Record<MarkName, () => ReactNode> = {
   flower: () => (
     <Mark>
       {[0, 72, 144, 216, 288].map((angle) => (
-        <ellipse key={angle} cx="32" cy="18" rx="6" ry="10" fill={ROSE} transform={`rotate(${angle} 32 32)`} />
+        <ellipse
+          key={angle}
+          cx="32"
+          cy="18"
+          rx="6"
+          ry="10"
+          fill={ROSE}
+          transform={`rotate(${angle} 32 32)`}
+        />
       ))}
       <circle cx="32" cy="32" r="5" fill={BUTTER} />
     </Mark>
@@ -88,13 +99,19 @@ const DRAWS: Record<MarkName, () => ReactNode> = {
   ),
   pebble: () => (
     <Mark>
-      <path d="M14 36 C16 24 28 20 40 22 C52 24 56 34 50 44 C44 54 24 54 16 46 C12 42 12 40 14 36 Z" fill={STONE} />
+      <path
+        d="M14 36 C16 24 28 20 40 22 C52 24 56 34 50 44 C44 54 24 54 16 46 C12 42 12 40 14 36 Z"
+        fill={STONE}
+      />
       <path d="M22 34 C28 30 34 32 40 28" />
     </Mark>
   ),
   shop: () => (
     <Mark>
-      <path d="M8 36 C16 28 26 38 34 32 C42 26 50 36 58 30 L56 44 C42 52 16 52 8 44 Z" fill={PAPER} />
+      <path
+        d="M8 36 C16 28 26 38 34 32 C42 26 50 36 58 30 L56 44 C42 52 16 52 8 44 Z"
+        fill={PAPER}
+      />
       <circle cx="20" cy="34" r="5.5" fill={PAPER} />
       <circle cx="34" cy="30" r="6.5" fill={PAPER} />
       <circle cx="48" cy="34" r="5.5" fill={PAPER} />
@@ -136,7 +153,15 @@ const DRAWS: Record<MarkName, () => ReactNode> = {
   ),
   town: () => (
     <Mark>
-      <rect x="12" y="22" width="24" height="30" rx="4" fill={PAPER} transform="rotate(-10 24 37)" />
+      <rect
+        x="12"
+        y="22"
+        width="24"
+        height="30"
+        rx="4"
+        fill={PAPER}
+        transform="rotate(-10 24 37)"
+      />
       <rect x="28" y="16" width="24" height="32" rx="4" fill={SKY} />
       <path d="M34 26 H46 M34 34 H46" />
       <circle cx="34" cy="42" r="2" />
@@ -145,7 +170,10 @@ const DRAWS: Record<MarkName, () => ReactNode> = {
   ),
   abroad: () => (
     <Mark>
-      <path d="M26 10 H38 V20 C48 24 50 32 50 40 V48 C50 56 14 56 14 48 V40 C14 32 16 24 26 20 Z" fill={SKY} />
+      <path
+        d="M26 10 H38 V20 C48 24 50 32 50 40 V48 C50 56 14 56 14 48 V40 C14 32 16 24 26 20 Z"
+        fill={SKY}
+      />
       <path d="M24 10 H40" />
       <path d="M18 36 H46" />
       <circle cx="26" cy="44" r="1.8" fill={BUTTER} stroke="none" />
@@ -176,7 +204,10 @@ const DRAWS: Record<MarkName, () => ReactNode> = {
   ),
   bread: () => (
     <Mark>
-      <path d="M10 36 C10 22 22 16 32 16 C46 16 56 24 56 36 C56 48 46 54 32 54 C18 54 10 46 10 36 Z" fill={WOOL} />
+      <path
+        d="M10 36 C10 22 22 16 32 16 C46 16 56 24 56 36 C56 48 46 54 32 54 C18 54 10 46 10 36 Z"
+        fill={WOOL}
+      />
       <path d="M20 34 L44 30" />
     </Mark>
   ),
@@ -213,7 +244,16 @@ const DRAWS: Record<MarkName, () => ReactNode> = {
       <circle cx="32" cy="32" r="10" fill={PAPER} />
       <circle cx="32" cy="32" r="4" fill={WOOL} />
       {[0, 45, 90, 135, 180, 225, 270, 315].map((angle) => (
-        <rect key={angle} x="29" y="6" width="6" height="10" rx="2" fill={WOOL} transform={`rotate(${angle} 32 32)`} />
+        <rect
+          key={angle}
+          x="29"
+          y="6"
+          width="6"
+          height="10"
+          rx="2"
+          fill={WOOL}
+          transform={`rotate(${angle} 32 32)`}
+        />
       ))}
     </Mark>
   ),
@@ -235,7 +275,15 @@ const DRAWS: Record<MarkName, () => ReactNode> = {
   ),
 };
 
-export function TownMark({ name, size = 40, className }: { name: MarkName; size?: number; className?: string }) {
+export function TownMark({
+  name,
+  size = 40,
+  className,
+}: {
+  name: MarkName;
+  size?: number;
+  className?: string;
+}) {
   return (
     <svg
       className={className ? `town-mark ${className}` : "town-mark"}

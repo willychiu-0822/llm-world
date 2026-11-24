@@ -22,7 +22,10 @@ export function LoginPage() {
     setBusy(true);
     setError("");
     try {
-      await api("/api/auth/dev-login", { method: "POST", body: { email, name: name || undefined } });
+      await api("/api/auth/dev-login", {
+        method: "POST",
+        body: { email, name: name || undefined },
+      });
       window.location.assign(next);
     } catch (err) {
       gate.current = false;
@@ -38,16 +41,32 @@ export function LoginPage() {
     <div className="stack" style={{ maxWidth: 440, margin: "24px auto" }}>
       <section className="panel stack">
         <h1>登入後就能把寶寶帶回家</h1>
-        {next.startsWith("/oauth/") && <p className="notice">你的 AI 用戶端想連接龍角鎮，登入後會請你確認。</p>}
+        {next.startsWith("/oauth/") && (
+          <p className="notice">你的 AI 用戶端想連接龍角鎮，登入後會請你確認。</p>
+        )}
         {closed && (
           <div className="stack">
             <p role="status">小鎮還在整理門口，晚點再來。</p>
-            <Link to="/" className="btn primary">回首頁</Link>
+            <Link to="/" className="btn primary">
+              回首頁
+            </Link>
           </div>
         )}
-        {googleDown && !closed && <p role="status" className="notice">Google 登入尚未開放。{config?.devLogin ? "先用下面的方式進來就好。" : "晚點再來，或先回首頁看看。"}</p>}
+        {googleDown && !closed && (
+          <p role="status" className="notice">
+            Google 登入尚未開放。
+            {config?.devLogin ? "先用下面的方式進來就好。" : "晚點再來，或先回首頁看看。"}
+          </p>
+        )}
         {!config && !configError && <p role="status">正在確認可以使用的登入方式……</p>}
-        {configError && <div className="stack"><p role="alert">暫時無法取得登入方式，請再試一次。</p><button className="btn primary" onClick={() => void reloadConfig()}>重新載入登入方式</button></div>}
+        {configError && (
+          <div className="stack">
+            <p role="alert">暫時無法取得登入方式，請再試一次。</p>
+            <button className="btn primary" onClick={() => void reloadConfig()}>
+              重新載入登入方式
+            </button>
+          </div>
+        )}
         {config?.googleLogin && (
           <a className="btn primary" href={`/auth/google/start?next=${encodeURIComponent(next)}`}>
             使用 Google 帳號登入
@@ -55,8 +74,12 @@ export function LoginPage() {
         )}
         {!closed && <p className="muted">登入即表示你同意下面兩份說明。</p>}
         <div className="row wrap">
-          <a className="btn ghost" href="/terms">服務條款</a>
-          <a className="btn ghost" href="/privacy">隱私權政策</a>
+          <a className="btn ghost" href="/terms">
+            服務條款
+          </a>
+          <a className="btn ghost" href="/privacy">
+            隱私權政策
+          </a>
         </div>
       </section>
       {config?.devLogin && (
@@ -65,14 +88,31 @@ export function LoginPage() {
           <p className="muted">這是測試用入口。填入你的 Email 和名字，就能進鎮體驗，不需要密碼。</p>
           <label className="field">
             <span>Email</span>
-            <input aria-label="Email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+            <input
+              aria-label="Email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
           </label>
           <label className="field">
             <span>名字</span>
             <input aria-label="名字" value={name} onChange={(e) => setName(e.target.value)} />
           </label>
-          {error && <p role="alert" className="error">{error}</p>}
-          <button className={`btn ${config.googleLogin ? "ghost" : "primary"}`} type="submit" disabled={busy} aria-busy={busy}>{busy ? "進去中…" : "開發用登入"}</button>
+          {error && (
+            <p role="alert" className="error">
+              {error}
+            </p>
+          )}
+          <button
+            className={`btn ${config.googleLogin ? "ghost" : "primary"}`}
+            type="submit"
+            disabled={busy}
+            aria-busy={busy}
+          >
+            {busy ? "進去中…" : "開發用登入"}
+          </button>
         </form>
       )}
     </div>

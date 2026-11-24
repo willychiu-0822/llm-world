@@ -1,5 +1,14 @@
 import type { Appearance, District, DistrictKey } from "@lj/core";
-import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as RPointerEvent, type ReactNode, type WheelEvent as RWheelEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type PointerEvent as RPointerEvent,
+  type ReactNode,
+  type WheelEvent as RWheelEvent,
+} from "react";
 import { Link } from "react-router-dom";
 import { Avatar } from "./Avatar";
 
@@ -14,24 +23,28 @@ export interface MapPlace {
   providerName: string | null;
   deedCount: number;
   trialCount: number;
-  presence: { total: number; characters: { name: string; appearance: Appearance | Record<string, unknown> }[] };
+  presence: {
+    total: number;
+    characters: { name: string; appearance: Appearance | Record<string, unknown> }[];
+  };
 }
 
 const W = 1200;
 const H = 880;
 const INK = "#5B4636";
 
-const LAYOUT: Record<DistrictKey, { x: number; y: number; rx: number; ry: number; seed: number }> = {
-  crafts: { x: 230, y: 205, rx: 172, ry: 128, seed: 11 },
-  music: { x: 600, y: 185, rx: 180, ry: 125, seed: 23 },
-  learning: { x: 970, y: 205, rx: 172, ry: 128, seed: 37 },
-  food: { x: 215, y: 455, rx: 168, ry: 128, seed: 41 },
-  social: { x: 600, y: 445, rx: 172, ry: 132, seed: 53 },
-  sports: { x: 985, y: 455, rx: 172, ry: 132, seed: 67 },
-  outdoors: { x: 230, y: 712, rx: 182, ry: 128, seed: 71 },
-  volunteer: { x: 600, y: 722, rx: 172, ry: 122, seed: 83 },
-  misc: { x: 970, y: 712, rx: 178, ry: 128, seed: 97 },
-};
+const LAYOUT: Record<DistrictKey, { x: number; y: number; rx: number; ry: number; seed: number }> =
+  {
+    crafts: { x: 230, y: 205, rx: 172, ry: 128, seed: 11 },
+    music: { x: 600, y: 185, rx: 180, ry: 125, seed: 23 },
+    learning: { x: 970, y: 205, rx: 172, ry: 128, seed: 37 },
+    food: { x: 215, y: 455, rx: 168, ry: 128, seed: 41 },
+    social: { x: 600, y: 445, rx: 172, ry: 132, seed: 53 },
+    sports: { x: 985, y: 455, rx: 172, ry: 132, seed: 67 },
+    outdoors: { x: 230, y: 712, rx: 182, ry: 128, seed: 71 },
+    volunteer: { x: 600, y: 722, rx: 172, ry: 122, seed: 83 },
+    misc: { x: 970, y: 712, rx: 178, ry: 128, seed: 97 },
+  };
 
 /** Shop positions around a district's landmark, by slot. */
 const SLOTS: [number, number][] = [
@@ -77,7 +90,12 @@ function blobPath(cx: number, cy: number, rx: number, ry: number, seed: number, 
   return d + " Z";
 }
 
-const stroke = { stroke: INK, strokeWidth: 2.4, strokeLinejoin: "round" as const, strokeLinecap: "round" as const };
+const stroke = {
+  stroke: INK,
+  strokeWidth: 2.4,
+  strokeLinejoin: "round" as const,
+  strokeLinecap: "round" as const,
+};
 
 /** Original landmark drawings, one per district, centred on (0,0). */
 function Landmark({ k, color }: { k: string; color: string }) {
@@ -105,7 +123,15 @@ function Landmark({ k, color }: { k: string; color: string }) {
       return (
         <g {...stroke}>
           <path d="M-20 18 L-6 -30 L8 18 M-14 -4 L2 -4" fill="none" />
-          <rect x="-26" y="-26" width="38" height="28" rx="3" fill="#FFF8EC" transform="rotate(-6)" />
+          <rect
+            x="-26"
+            y="-26"
+            width="38"
+            height="28"
+            rx="3"
+            fill="#FFF8EC"
+            transform="rotate(-6)"
+          />
           <circle cx="-10" cy="-14" r="5" fill={color} />
           <circle cx="2" cy="-10" r="4" fill="#A9C7DE" />
           <path d="M22 18 L30 -18" strokeWidth="4" />
@@ -117,7 +143,10 @@ function Landmark({ k, color }: { k: string; color: string }) {
         <g {...stroke}>
           <rect x="-34" y="-8" width="68" height="26" rx="3" fill="#F6E7D2" />
           <path d="M-40 -8 L-34 -28 L34 -28 L40 -8 Z" fill="#FFFFFF" />
-          <path d="M-40 -8 L-34 -28 L-20 -28 L-26 -8 Z M-12 -8 L-6 -28 L8 -28 L2 -8 Z M16 -8 L20 -28 L34 -28 L30 -8 Z" fill={color} />
+          <path
+            d="M-40 -8 L-34 -28 L-20 -28 L-26 -8 Z M-12 -8 L-6 -28 L8 -28 L2 -8 Z M16 -8 L20 -28 L34 -28 L30 -8 Z"
+            fill={color}
+          />
           <path d="M-14 4 Q-8 -4 -2 4 M6 4 Q12 -4 18 4" fill="none" />
         </g>
       );
@@ -127,7 +156,10 @@ function Landmark({ k, color }: { k: string; color: string }) {
           <rect x="-32" y="-14" width="64" height="32" rx="3" fill="#F6E7D2" />
           <path d="M-38 -14 L0 -40 L38 -14 Z" fill={color} />
           <path d="M-14 18 L-14 2 L14 2 L14 18" fill="#FFF8EC" />
-          <path d="M-12 -24 Q-6 -28 0 -24 Q6 -28 12 -24 L12 -16 Q6 -20 0 -16 Q-6 -20 -12 -16 Z" fill="#FFF8EC" />
+          <path
+            d="M-12 -24 Q-6 -28 0 -24 Q6 -28 12 -24 L12 -16 Q6 -20 0 -16 Q-6 -20 -12 -16 Z"
+            fill="#FFF8EC"
+          />
         </g>
       );
     case "outdoors":
@@ -147,14 +179,22 @@ function Landmark({ k, color }: { k: string; color: string }) {
           <ellipse cx="0" cy="12" rx="40" ry="14" fill="#BFD7E8" />
           <ellipse cx="0" cy="6" rx="16" ry="6" fill="#F6E7D2" />
           <path d="M0 6 L0 -22" strokeWidth="4" />
-          <path d="M0 -22 Q-16 -30 -22 -10 M0 -22 Q16 -30 22 -10 M0 -22 Q-4 -38 0 -40 Q4 -38 0 -22" fill="none" stroke="#7FB0D0" strokeWidth="3" />
+          <path
+            d="M0 -22 Q-16 -30 -22 -10 M0 -22 Q16 -30 22 -10 M0 -22 Q-4 -38 0 -40 Q4 -38 0 -22"
+            fill="none"
+            stroke="#7FB0D0"
+            strokeWidth="3"
+          />
         </g>
       );
     case "volunteer":
       return (
         <g {...stroke}>
           <path d="M-34 18 L-34 -6 L0 -30 L34 -6 L34 18 Z" fill="#F6E7D2" />
-          <path d="M0 10 C-18 -2 -14 -18 -4 -16 C-1 -15 0 -12 0 -10 C0 -12 1 -15 4 -16 C14 -18 18 -2 0 10 Z" fill={color} />
+          <path
+            d="M0 10 C-18 -2 -14 -18 -4 -16 C-1 -15 0 -12 0 -10 C0 -12 1 -15 4 -16 C14 -18 18 -2 0 10 Z"
+            fill={color}
+          />
         </g>
       );
     default:
@@ -163,7 +203,15 @@ function Landmark({ k, color }: { k: string; color: string }) {
           <rect x="-32" y="-16" width="64" height="34" rx="4" fill="#F6E7D2" />
           <path d="M-38 -16 L-30 -34 L30 -34 L38 -16 Z" fill={color} />
           <rect x="-8" y="0" width="16" height="18" fill="#FFF8EC" />
-          <text x="0" y="-19" textAnchor="middle" fontSize="13" fill={INK} stroke="none" fontWeight={700}>
+          <text
+            x="0"
+            y="-19"
+            textAnchor="middle"
+            fontSize="13"
+            fill={INK}
+            stroke="none"
+            fontWeight={700}
+          >
             萬
           </text>
         </g>
@@ -188,7 +236,14 @@ function Presence({ place, x, y }: { place: MapPlace; x: number; y: number }) {
   return (
     <g className="presence">
       {shown.map((c, i) => (
-        <Avatar key={i} appearance={c.appearance as Appearance} name={`${c.name} 在這裡`} size={38} x={x + i * 24 - 8} y={y} />
+        <Avatar
+          key={i}
+          appearance={c.appearance as Appearance}
+          name={`${c.name} 在這裡`}
+          size={38}
+          x={x + i * 24 - 8}
+          y={y}
+        />
       ))}
       {extra > 0 && (
         <text x={x + shown.length * 24 + 16} y={y + 26} fontSize="16" fill={INK} fontWeight={700}>
@@ -209,14 +264,43 @@ function Tree({ x, y, s = 1, c = "#A9C79A" }: { x: number; y: number; s?: number
 }
 
 const TREES: [number, number, number][] = [
-  [40, 60, 1.1], [420, 60, 0.9], [780, 70, 1], [1150, 80, 1.2], [60, 330, 0.9], [1150, 330, 1], [420, 330, 0.8], [790, 330, 0.85],
-  [50, 850, 1.1], [420, 840, 0.9], [790, 850, 1], [1160, 840, 1.1], [400, 610, 0.8], [800, 615, 0.8],
+  [40, 60, 1.1],
+  [420, 60, 0.9],
+  [780, 70, 1],
+  [1150, 80, 1.2],
+  [60, 330, 0.9],
+  [1150, 330, 1],
+  [420, 330, 0.8],
+  [790, 330, 0.85],
+  [50, 850, 1.1],
+  [420, 840, 0.9],
+  [790, 850, 1],
+  [1160, 840, 1.1],
+  [400, 610, 0.8],
+  [800, 615, 0.8],
 ];
 
-export function TownMap({ districts, places, children, onInteract }: { districts: District[]; places: MapPlace[]; children?: ReactNode; onInteract?: () => void }) {
+export function TownMap({
+  districts,
+  places,
+  children,
+  onInteract,
+}: {
+  districts: District[];
+  places: MapPlace[];
+  children?: ReactNode;
+  onInteract?: () => void;
+}) {
   const [view, setView] = useState({ s: 1, x: 0, y: 0 });
   const svgRef = useRef<SVGSVGElement>(null);
-  const drag = useRef<{ id: number; sx: number; sy: number; vx: number; vy: number; moved: boolean } | null>(null);
+  const drag = useRef<{
+    id: number;
+    sx: number;
+    sy: number;
+    vx: number;
+    vy: number;
+    moved: boolean;
+  } | null>(null);
   const pointers = useRef(new Map<number, { x: number; y: number }>());
   const pinch = useRef<{ d: number; s: number } | null>(null);
   const suppressClick = useRef(false);
@@ -225,7 +309,9 @@ export function TownMap({ districts, places, children, onInteract }: { districts
   useEffect(() => {
     const el = svgRef.current;
     if (!el || typeof ResizeObserver === "undefined") return;
-    const ro = new ResizeObserver(([e]) => setBox({ w: e.contentRect.width || W, h: e.contentRect.height || H }));
+    const ro = new ResizeObserver(([e]) =>
+      setBox({ w: e.contentRect.width || W, h: e.contentRect.height || H }),
+    );
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
@@ -240,7 +326,11 @@ export function TownMap({ districts, places, children, onInteract }: { districts
     const maxX = (W - visW) / 2;
     const minY = (H + visH) / 2 - H * sc;
     const maxY = (H - visH) / 2;
-    return { s: sc, x: Math.min(maxX, Math.max(minX, v.x)), y: Math.min(maxY, Math.max(minY, v.y)) };
+    return {
+      s: sc,
+      x: Math.min(maxX, Math.max(minX, v.x)),
+      y: Math.min(maxY, Math.max(minY, v.y)),
+    };
   };
   const clamp = (v: { s: number; x: number; y: number }) => clampRef.current(v);
   const unitsPerPx = () => 1 / k;
@@ -254,7 +344,10 @@ export function TownMap({ districts, places, children, onInteract }: { districts
 
   const toSvgPoint = (clientX: number, clientY: number) => {
     const r = svgRef.current!.getBoundingClientRect();
-    return { x: (W - visW) / 2 + (clientX - r.left) / k, y: (H - visH) / 2 + (clientY - r.top) / k };
+    return {
+      x: (W - visW) / 2 + (clientX - r.left) / k,
+      y: (H - visH) / 2 + (clientY - r.top) / k,
+    };
   };
 
   const onWheel = (e: RWheelEvent<SVGSVGElement>) => {
@@ -269,7 +362,14 @@ export function TownMap({ districts, places, children, onInteract }: { districts
       const [a, b] = [...pointers.current.values()];
       pinch.current = { d: Math.hypot(a.x - b.x, a.y - b.y), s: view.s };
     } else {
-      drag.current = { id: e.pointerId, sx: e.clientX, sy: e.clientY, vx: view.x, vy: view.y, moved: false };
+      drag.current = {
+        id: e.pointerId,
+        sx: e.clientX,
+        sy: e.clientY,
+        vx: view.x,
+        vy: view.y,
+        moved: false,
+      };
     }
   };
   const onPointerMove = (e: RPointerEvent<SVGSVGElement>) => {
@@ -356,29 +456,80 @@ export function TownMap({ districts, places, children, onInteract }: { districts
             strokeLinecap="round"
             filter="url(#lj-wobble)"
           />
-          <path d="M-20 585 C140 545 260 640 420 600 C560 565 640 620 780 596 C930 570 1040 640 1220 598" fill="none" stroke="#fff" strokeOpacity="0.45" strokeWidth="3" strokeDasharray="14 22" />
-          {(["crafts", "music", "learning", "food", "sports", "outdoors", "volunteer", "misc"] as DistrictKey[]).map((k) => {
+          <path
+            d="M-20 585 C140 545 260 640 420 600 C560 565 640 620 780 596 C930 570 1040 640 1220 598"
+            fill="none"
+            stroke="#fff"
+            strokeOpacity="0.45"
+            strokeWidth="3"
+            strokeDasharray="14 22"
+          />
+          {(
+            [
+              "crafts",
+              "music",
+              "learning",
+              "food",
+              "sports",
+              "outdoors",
+              "volunteer",
+              "misc",
+            ] as DistrictKey[]
+          ).map((k) => {
             const a = LAYOUT.social;
             const b = LAYOUT[k];
             const mx = (a.x + b.x) / 2 + (b.y - a.y) * 0.08;
             const my = (a.y + b.y) / 2 - (b.x - a.x) * 0.05;
-            return <path key={k} d={`M${a.x} ${a.y} Q${mx} ${my} ${b.x} ${b.y}`} fill="none" stroke="var(--map-road)" strokeWidth="18" strokeLinecap="round" opacity="0.9" />;
+            return (
+              <path
+                key={k}
+                d={`M${a.x} ${a.y} Q${mx} ${my} ${b.x} ${b.y}`}
+                fill="none"
+                stroke="var(--map-road)"
+                strokeWidth="18"
+                strokeLinecap="round"
+                opacity="0.9"
+              />
+            );
           })}
           {[230, 600, 970].map((x) => (
-            <g key={x} transform={`translate(${x} ${x === 600 ? 605 : x === 230 ? 593 : 600})`} {...stroke} strokeWidth={2}>
+            <g
+              key={x}
+              transform={`translate(${x} ${x === 600 ? 605 : x === 230 ? 593 : 600})`}
+              {...stroke}
+              strokeWidth={2}
+            >
               <path d="M-26 -12 Q0 -26 26 -12 L26 12 Q0 0 -26 12 Z" fill="#E9D3B4" />
             </g>
           ))}
           {TREES.map(([x, y, s], i) => (
-            <Tree key={i} x={x} y={y} s={s} c={i % 3 === 0 ? "#B9D3A0" : i % 3 === 1 ? "#A3C48F" : "#C5DBA9"} />
+            <Tree
+              key={i}
+              x={x}
+              y={y}
+              s={s}
+              c={i % 3 === 0 ? "#B9D3A0" : i % 3 === 1 ? "#A3C48F" : "#C5DBA9"}
+            />
           ))}
 
           {districts.map((d) => {
             const L = LAYOUT[d.key];
             return (
               <g key={`blob-${d.key}`} aria-hidden>
-                <path d={blobPath(L.x, L.y, L.rx, L.ry, L.seed)} fill={d.color} fillOpacity="0.55" stroke={INK} strokeOpacity="0.35" strokeWidth="2.5" filter="url(#lj-wobble)" />
-                <path d={blobPath(L.x, L.y, L.rx * 0.82, L.ry * 0.78, L.seed + 1)} fill={d.color} fillOpacity="0.35" />
+                <path
+                  d={blobPath(L.x, L.y, L.rx, L.ry, L.seed)}
+                  fill={d.color}
+                  fillOpacity="0.55"
+                  stroke={INK}
+                  strokeOpacity="0.35"
+                  strokeWidth="2.5"
+                  filter="url(#lj-wobble)"
+                />
+                <path
+                  d={blobPath(L.x, L.y, L.rx * 0.82, L.ry * 0.78, L.seed + 1)}
+                  fill={d.color}
+                  fillOpacity="0.35"
+                />
               </g>
             );
           })}
@@ -391,7 +542,11 @@ export function TownMap({ districts, places, children, onInteract }: { districts
             return (
               <g key={d.key} data-testid={`district-${d.key}`} className="district">
                 {pub && (
-                  <Link to={`/places/${pub.id}`} aria-label={`${pub.name}（${pub.deedCount} 個信物）`} className="map-place">
+                  <Link
+                    to={`/places/${pub.id}`}
+                    aria-label={`${pub.name}（${pub.deedCount} 個信物）`}
+                    className="map-place"
+                  >
                     <g transform={`translate(${L.x} ${L.y})`}>
                       <circle r="46" fill="transparent" />
                       <Landmark k={d.key} color={d.color} />
@@ -403,11 +558,21 @@ export function TownMap({ districts, places, children, onInteract }: { districts
                   const [ox, oy] = SLOTS[i];
                   return (
                     <g key={s.id}>
-                      <Link to={`/places/${s.id}`} aria-label={`${s.name}（${s.deedCount} 個信物、${s.trialCount} 個試用機會）`} className="map-place">
+                      <Link
+                        to={`/places/${s.id}`}
+                        aria-label={`${s.name}（${s.deedCount} 個信物、${s.trialCount} 個試用機會）`}
+                        className="map-place"
+                      >
                         <g transform={`translate(${L.x + ox} ${L.y + oy})`}>
                           <rect x={-36} y={-40} width={72} height={72} fill="transparent" />
                           <Shop color={s.roofColor} />
-                          <text y="34" textAnchor="middle" fontSize="14" fill={INK} className="map-label">
+                          <text
+                            y="34"
+                            textAnchor="middle"
+                            fontSize="14"
+                            fill={INK}
+                            className="map-label"
+                          >
                             {s.name.length > 7 ? `${s.name.slice(0, 7)}…` : s.name}
                           </text>
                         </g>
@@ -422,7 +587,16 @@ export function TownMap({ districts, places, children, onInteract }: { districts
                   </text>
                 )}
                 <g transform={`translate(${L.x} ${L.y - L.ry + 14})`} className="map-banner">
-                  <rect x={-62} y={-19} width={124} height={36} rx={18} fill="var(--map-banner)" stroke={INK} strokeWidth="2" />
+                  <rect
+                    x={-62}
+                    y={-19}
+                    width={124}
+                    height={36}
+                    rx={18}
+                    fill="var(--map-banner)"
+                    stroke={INK}
+                    strokeWidth="2"
+                  />
                   <text y="7" textAnchor="middle" fontSize="20" fontWeight={700} fill={INK}>
                     {d.name}
                   </text>
@@ -437,10 +611,20 @@ export function TownMap({ districts, places, children, onInteract }: { districts
         <button type="button" className="btn round" aria-label="放大" onClick={() => zoomAt(1.25)}>
           ＋
         </button>
-        <button type="button" className="btn round" aria-label="縮小" onClick={() => zoomAt(1 / 1.25)}>
+        <button
+          type="button"
+          className="btn round"
+          aria-label="縮小"
+          onClick={() => zoomAt(1 / 1.25)}
+        >
           －
         </button>
-        <button type="button" className="btn round" aria-label="重置地圖" onClick={() => setView({ s: 1, x: 0, y: 0 })}>
+        <button
+          type="button"
+          className="btn round"
+          aria-label="重置地圖"
+          onClick={() => setView({ s: 1, x: 0, y: 0 })}
+        >
           ⟲
         </button>
       </div>

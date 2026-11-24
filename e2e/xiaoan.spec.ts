@@ -1,6 +1,15 @@
 import { expect } from "@playwright/test";
 import { test } from "./helpers";
-import { apiAs, approvedProvider, growToStageTwo, json, loginPage, look, mcpConnect, tool } from "./helpers";
+import {
+  apiAs,
+  approvedProvider,
+  growToStageTwo,
+  json,
+  loginPage,
+  look,
+  mcpConnect,
+  tool,
+} from "./helpers";
 
 /**
  * 情境 A：用戶小安（內向、想唱歌）與角色 Nova
@@ -10,23 +19,63 @@ import { apiAs, approvedProvider, growToStageTwo, json, loginPage, look, mcpConn
 test("Xiaoan's loop: AI step first, then going to the trial in person", async ({ browser }) => {
   // 鎮上已有：Mia 的真人事蹟、聲樂教室的試用機會
   const mia = await apiAs("mia@e2e.test", "Mia");
-  await json(mia.put("/api/me/character", { data: { name: "Mia 的小鳥", appearance: look("flower"), personality: "害羞", sharing: { allowAiQuotes: true } } }));
-  const mw = await json(mia.post("/api/me/wants", { data: { text: "想唱歌", districtKey: "music" } }));
-  const ms = await json(mia.post("/api/first-steps", { data: { executor: "self", text: "去上一次聲樂試用課", wantId: mw.id } }));
-  const miaDeed = (await json(mia.post(`/api/first-steps/${ms.id}/complete`, { data: { noteAfter: "老師說大家第一次都會破音", noteShared: true } }))).deed;
+  await json(
+    mia.put("/api/me/character", {
+      data: {
+        name: "Mia 的小鳥",
+        appearance: look("flower"),
+        personality: "害羞",
+        sharing: { allowAiQuotes: true },
+      },
+    }),
+  );
+  const mw = await json(
+    mia.post("/api/me/wants", { data: { text: "想唱歌", districtKey: "music" } }),
+  );
+  const ms = await json(
+    mia.post("/api/first-steps", {
+      data: { executor: "self", text: "去上一次聲樂試用課", wantId: mw.id },
+    }),
+  );
+  const miaDeed = (
+    await json(
+      mia.post(`/api/first-steps/${ms.id}/complete`, {
+        data: { noteAfter: "老師說大家第一次都會破音", noteShared: true },
+      }),
+    )
+  ).deed;
   const voice = await approvedProvider(
     "voice@e2e.test",
     "小樹聲樂教室",
     { districtKey: "music", name: "小樹聲樂教室", realAddress: "台北市音樂路 1 號" },
-    { title: "第一次聲樂試用課", whenText: "每週六 10:00", processInfo: "前十分鐘練呼吸，接著唱音階，最後選一首熟悉的歌。", aiFirstStepHint: "請角色來問老師任何問題", selfFirstStepHint: "報名這週六的試用課" },
+    {
+      title: "第一次聲樂試用課",
+      whenText: "每週六 10:00",
+      processInfo: "前十分鐘練呼吸，接著唱音階，最後選一首熟悉的歌。",
+      aiFirstStepHint: "請角色來問老師任何問題",
+      selfFirstStepHint: "報名這週六的試用課",
+    },
     [{ question: "完全不會唱也可以嗎？", answer: "可以，大部分人第一次都會破音。" }],
     "2030-11-09T10:00:00+08:00",
   );
 
   const page = await loginPage(browser, "xiaoan@e2e.test", "小安");
   await growToStageTwo(page, "Nova");
-  await json(page.request.put("/api/me/character", { data: { name: "Nova", appearance: { ...look(), description: "背著吉他的街頭歌手" }, personality: "外向、喜歡站上舞台", sharing: { allowAiQuotes: true } } }));
-  await json(page.request.post("/api/me/wants", { data: { text: "想在別人面前唱一首歌", districtKey: "music" } }));
+  await json(
+    page.request.put("/api/me/character", {
+      data: {
+        name: "Nova",
+        appearance: { ...look(), description: "背著吉他的街頭歌手" },
+        personality: "外向、喜歡站上舞台",
+        sharing: { allowAiQuotes: true },
+      },
+    }),
+  );
+  await json(
+    page.request.post("/api/me/wants", {
+      data: { text: "想在別人面前唱一首歌", districtKey: "music" },
+    }),
+  );
 
   // 連接 AI（OAuth 同意頁）
   await page.goto("/connect");
@@ -47,7 +96,10 @@ test("Xiaoan's loop: AI step first, then going to the trial in person", async ({
   await tool(ai, "trial_get", { trialId: voice.trial.id });
   await tool(ai, "discovery_bring_back", {
     message: "我在音樂坊遇到 Mia，她說第一次大家都會破音！附近還有一間聲樂教室有試用課。",
-    items: [{ type: "deed", id: miaDeed.id }, { type: "trial", id: voice.trial.id }],
+    items: [
+      { type: "deed", id: miaDeed.id },
+      { type: "trial", id: voice.trial.id },
+    ],
   });
 
   // ③ 查看發現
@@ -58,7 +110,14 @@ test("Xiaoan's loop: AI step first, then going to the trial in person", async ({
 
   // ④⑤ 也想做 → AI 建議第一步，本人確認
   const want = me.wants[0];
-  await tool(ai, "first_step_propose", { executor: "ai", text: "Nova 去問老師試用課的流程", wantId: want.id, sourceDeedIds: [miaDeed.id], trialId: voice.trial.id, reason: "先知道會發生什麼，比較不怕" });
+  await tool(ai, "first_step_propose", {
+    executor: "ai",
+    text: "Nova 去問老師試用課的流程",
+    wantId: want.id,
+    sourceDeedIds: [miaDeed.id],
+    trialId: voice.trial.id,
+    reason: "先知道會發生什麼，比較不怕",
+  });
   await page.goto("/steps");
   await page.getByRole("tab", { name: /朋友的建議/ }).click();
   await expect(page.getByText("AI 的理由：先知道會發生什麼，比較不怕")).toBeVisible();
@@ -68,11 +127,23 @@ test("Xiaoan's loop: AI step first, then going to the trial in person", async ({
   // ⑥ AI 執行：查 FAQ、轉問提供者、回報
   const todo = await tool(ai, "first_step_list");
   expect(todo).toHaveLength(1);
-  const faq = await tool(ai, "provider_ask", { trialId: voice.trial.id, question: "完全不會唱可以嗎", stepId: todo[0].id });
+  const faq = await tool(ai, "provider_ask", {
+    trialId: voice.trial.id,
+    question: "完全不會唱可以嗎",
+    stepId: todo[0].id,
+  });
   expect(faq.answered).toBe(true);
-  const fwd = await tool(ai, "provider_ask", { trialId: voice.trial.id, question: "可以只在旁邊聽嗎？", stepId: todo[0].id });
+  const fwd = await tool(ai, "provider_ask", {
+    trialId: voice.trial.id,
+    question: "可以只在旁邊聽嗎？",
+    stepId: todo[0].id,
+  });
   expect(fwd.answered).toBe(false);
-  const pending = await tool(ai, "first_step_complete", { stepId: todo[0].id, result: "前十分鐘練呼吸、接著唱音階、最後選一首熟悉的歌。完全不會唱也可以，大部分人第一次都會破音。" });
+  const pending = await tool(ai, "first_step_complete", {
+    stepId: todo[0].id,
+    result:
+      "前十分鐘練呼吸、接著唱音階、最後選一首熟悉的歌。完全不會唱也可以，大部分人第一次都會破音。",
+  });
   expect(pending.status).toBe("pending_review");
 
   // ⑦⑧ 先看過，再公開，才成為事蹟（執行者：AI 角色）
@@ -83,7 +154,11 @@ test("Xiaoan's loop: AI step first, then going to the trial in person", async ({
   await expect(page).toHaveURL(/\/steps\?tab=review/);
   await page.getByRole("button", { name: "公開到鎮上" }).click();
   await expect(page.getByRole("status")).toContainText("已公開到鎮上");
-  await page.getByRole("article").filter({ hasText: "Nova 去問老師試用課的流程" }).getByRole("link", { name: "看看這件事" }).click();
+  await page
+    .getByRole("article")
+    .filter({ hasText: "Nova 去問老師試用課的流程" })
+    .getByRole("link", { name: "看看這件事" })
+    .click();
   await expect(page).toHaveURL(/\/deeds\/deed_/);
   await expect(page.getByText("朋友做的", { exact: true })).toBeVisible();
   await expect(page.getByText("真人做過", { exact: true })).toHaveCount(0);
@@ -91,7 +166,11 @@ test("Xiaoan's loop: AI step first, then going to the trial in person", async ({
 
   // 提供者回答轉來的問題 → 小安收到通知
   const qs = await json(voice.api.get("/api/provider/questions"));
-  await json(voice.api.post(`/api/provider/questions/${qs[0].id}/answer`, { data: { answer: "可以，第一次只聽也沒關係。", addToFaq: true } }));
+  await json(
+    voice.api.post(`/api/provider/questions/${qs[0].id}/answer`, {
+      data: { answer: "可以，第一次只聽也沒關係。", addToFaq: true },
+    }),
+  );
   await page.goto("/notifications");
   await expect(page.getByText(/回答了你的 AI 問的問題/)).toBeVisible();
 
@@ -105,7 +184,9 @@ test("Xiaoan's loop: AI step first, then going to the trial in person", async ({
   await page.waitForURL("**/steps");
 
   // 提供者確認出席 → 自動紀錄
-  const sessionBookings = await json(voice.api.get(`/api/provider/sessions/${voice.session.id}/bookings`));
+  const sessionBookings = await json(
+    voice.api.get(`/api/provider/sessions/${voice.session.id}/bookings`),
+  );
   expect(sessionBookings[0].characterName).toBe("Nova");
   await json(voice.api.post(`/api/provider/bookings/${sessionBookings[0].id}/attend`));
 

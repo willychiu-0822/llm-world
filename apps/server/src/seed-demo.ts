@@ -9,5 +9,8 @@ const handle = connect(config.databaseUrl, { max: 2 });
 await runMigrations(handle.db);
 const ctx = createContext({ db: handle.db, config });
 if (process.argv.includes("--purge")) console.log("purged", await purgeDemo(ctx));
-else console.log((await seedDemo(ctx)).created ? "demo content created" : "demo content already exists");
+else
+  console.log(
+    (await seedDemo(ctx)).created ? "demo content created" : "demo content already exists",
+  );
 await handle.close();

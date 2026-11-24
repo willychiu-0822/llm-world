@@ -2,9 +2,11 @@ import { expect } from "@playwright/test";
 import { test } from "./helpers";
 import { evidence } from "./helpers";
 
-test("UAT-02 P1-1 Google login stays hidden while config loads and unavailable start explains why", async ({ page }) => {
-  await page.route("**/api/config", async route => {
-    await new Promise(resolve => setTimeout(resolve, 2000));
+test("UAT-02 P1-1 Google login stays hidden while config loads and unavailable start explains why", async ({
+  page,
+}) => {
+  await page.route("**/api/config", async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 2000));
     await route.continue();
   });
   await page.goto("/login", { waitUntil: "domcontentloaded" });

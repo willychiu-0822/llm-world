@@ -3,7 +3,7 @@ import { test, evidence } from "./helpers";
 
 test("UAT-18 登入設定失敗可重試，恢復後可登入且不閃出Google", async ({ page }) => {
   let fail = true;
-  await page.route("**/api/config", async route => {
+  await page.route("**/api/config", async (route) => {
     if (fail) await route.fulfill({ status: 503, json: { error: "temporarily unavailable" } });
     else await route.continue();
   });

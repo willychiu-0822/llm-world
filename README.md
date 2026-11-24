@@ -6,19 +6,19 @@
 
 ## 文件
 
-| 文件 | 內容 |
-|---|---|
-| [OVERVIEW](./docs/OVERVIEW.md) | 一頁架構總覽 |
-| [CORE-LOOP](./docs/CORE-LOOP.md) | 世界運作機制與 E2E 範例 |
-| [VISION](./docs/VISION.md) | 願景 |
-| [GAME-DESIGN](./docs/GAME-DESIGN.md) | 世界設計：角色、事蹟、策展、提供者、季節、內容過濾 |
-| [MVP-PLAN](./docs/MVP-PLAN.md) | 第一版範圍與開發階段 |
-| [ARCHITECTURE](./docs/ARCHITECTURE.md) | v1 技術架構 |
-| [PROTOCOL](./docs/PROTOCOL.md) | MCP 工具與 REST API |
-| [DEPLOYMENT](./docs/DEPLOYMENT.md) | 部署、設定、回滾、疑難排解 |
-| [CLOUD-SETUP](./docs/CLOUD-SETUP.md) | GCP 與 Google OAuth 資源準備 |
-| [RESEARCH](./docs/RESEARCH.md) | 類似專案調查 |
-| [ROADMAP](./ROADMAP.md) | 路線圖 |
+| 文件                                   | 內容                                               |
+| -------------------------------------- | -------------------------------------------------- |
+| [OVERVIEW](./docs/OVERVIEW.md)         | 一頁架構總覽                                       |
+| [CORE-LOOP](./docs/CORE-LOOP.md)       | 世界運作機制與 E2E 範例                            |
+| [VISION](./docs/VISION.md)             | 願景                                               |
+| [GAME-DESIGN](./docs/GAME-DESIGN.md)   | 世界設計：角色、事蹟、策展、提供者、季節、內容過濾 |
+| [MVP-PLAN](./docs/MVP-PLAN.md)         | 第一版範圍與開發階段                               |
+| [ARCHITECTURE](./docs/ARCHITECTURE.md) | v1 技術架構                                        |
+| [PROTOCOL](./docs/PROTOCOL.md)         | MCP 工具與 REST API                                |
+| [DEPLOYMENT](./docs/DEPLOYMENT.md)     | 部署、設定、回滾、疑難排解                         |
+| [CLOUD-SETUP](./docs/CLOUD-SETUP.md)   | GCP 與 Google OAuth 資源準備                       |
+| [RESEARCH](./docs/RESEARCH.md)         | 類似專案調查                                       |
+| [ROADMAP](./ROADMAP.md)                | 路線圖                                             |
 
 ## 快速開始（本機）
 

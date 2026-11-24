@@ -33,9 +33,20 @@ export function CharacterPage() {
   if (hatch) {
     return (
       <div className="hatch" role="status" aria-live="polite">
-        <div className={hatchStill ? "hatch-baby is-still" : "hatch-baby"}><Avatar appearance={hatch.appearance} name={hatch.name} size={180} /></div>
+        <div className={hatchStill ? "hatch-baby is-still" : "hatch-baby"}>
+          <Avatar appearance={hatch.appearance} name={hatch.name} size={180} />
+        </div>
         <p>嗨！我是{hatch.name}。</p>
-        <button type="button" className="btn primary" onClick={() => { sessionStorage.removeItem(HATCH_KEY); nav("/"); }}>去找牠</button>
+        <button
+          type="button"
+          className="btn primary"
+          onClick={() => {
+            sessionStorage.removeItem(HATCH_KEY);
+            nav("/");
+          }}
+        >
+          去找牠
+        </button>
       </div>
     );
   }
@@ -50,7 +61,10 @@ export function CharacterPage() {
           method: "PUT",
           body: {
             name: value.name,
-            appearance: { ...value.appearance, description: me.character?.appearance.description ?? "" },
+            appearance: {
+              ...value.appearance,
+              description: me.character?.appearance.description ?? "",
+            },
             personality: me.character?.personality ?? "",
             sharing: { allowAiQuotes: me.character?.sharing.allowAiQuotes ?? true },
           },

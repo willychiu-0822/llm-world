@@ -8,15 +8,46 @@ export async function ensureBasePlaces(db: Db): Promise<void> {
   for (const d of DISTRICTS) {
     await db
       .insert(places)
-      .values({ id: d.publicPlaceId, districtKey: d.key, kind: "public", name: d.publicPlaceName, slot: 0, roofColor: d.color })
+      .values({
+        id: d.publicPlaceId,
+        districtKey: d.key,
+        kind: "public",
+        name: d.publicPlaceName,
+        slot: 0,
+        roofColor: d.color,
+      })
       .onConflictDoNothing();
   }
 }
 
 const TABLES = [
-  "moderation_log", "oauth_tokens", "oauth_grants", "oauth_codes", "oauth_requests", "oauth_clients", "discovery_seen", "notifications",
-  "follows", "trial_events", "provider_questions", "discoveries", "deeds", "bookings", "notes", "first_steps",
-  "trial_sessions", "trial_faqs", "trials", "places", "providers", "wants", "life_items", "life_days", "characters", "sessions", "users",
+  "moderation_log",
+  "oauth_tokens",
+  "oauth_grants",
+  "oauth_codes",
+  "oauth_requests",
+  "oauth_clients",
+  "discovery_seen",
+  "notifications",
+  "follows",
+  "trial_events",
+  "provider_questions",
+  "discoveries",
+  "deeds",
+  "bookings",
+  "notes",
+  "first_steps",
+  "trial_sessions",
+  "trial_faqs",
+  "trials",
+  "places",
+  "providers",
+  "wants",
+  "life_items",
+  "life_days",
+  "characters",
+  "sessions",
+  "users",
 ];
 
 /** Test helper: wipe all data and restore base places. */

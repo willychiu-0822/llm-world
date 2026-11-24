@@ -3,7 +3,9 @@ import { test, evidence } from "./helpers";
 
 test("UAT-16 P2-6 首頁載入與截圖不依賴外部字型服務", async ({ page }) => {
   const fonts: string[] = [];
-  page.on("request", r => { if (/fonts\.(googleapis|gstatic)\.com/.test(r.url())) fonts.push(r.url()); });
+  page.on("request", (r) => {
+    if (/fonts\.(googleapis|gstatic)\.com/.test(r.url())) fonts.push(r.url());
+  });
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { name: "龍角鎮", exact: true })).toBeVisible();
   expect(fonts).toEqual([]);

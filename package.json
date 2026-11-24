@@ -11,6 +11,9 @@
     "dev:web": "pnpm --filter @lj/web dev",
     "build": "pnpm --filter @lj/web build && pnpm --filter @lj/server build",
     "typecheck": "pnpm -r typecheck",
+    "lint": "biome lint .",
+    "format:check": "biome format .",
+    "format": "biome format --write .",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
@@ -21,6 +24,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
+    "@biomejs/biome": "2.6.8",
     "@modelcontextprotocol/sdk": "1.32.2",
     "@playwright/test": "1.63.0",
     "@types/node": "^22.15.0",

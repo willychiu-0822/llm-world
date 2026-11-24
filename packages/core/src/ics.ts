@@ -13,7 +13,10 @@ function esc(v: string): string {
 }
 
 function stamp(d: Date): string {
-  return d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  return d
+    .toISOString()
+    .replace(/[-:]/g, "")
+    .replace(/\.\d{3}/, "");
 }
 
 export function buildIcs(e: IcsEvent, now = new Date()): string {
@@ -34,7 +37,13 @@ export function buildIcs(e: IcsEvent, now = new Date()): string {
   if (e.description) lines.push(`DESCRIPTION:${esc(e.description)}`);
   if (e.location) lines.push(`LOCATION:${esc(e.location)}`);
   if (e.alarmMinutesBefore !== undefined) {
-    lines.push("BEGIN:VALARM", "ACTION:DISPLAY", `DESCRIPTION:${esc(e.title)}`, `TRIGGER:-PT${e.alarmMinutesBefore}M`, "END:VALARM");
+    lines.push(
+      "BEGIN:VALARM",
+      "ACTION:DISPLAY",
+      `DESCRIPTION:${esc(e.title)}`,
+      `TRIGGER:-PT${e.alarmMinutesBefore}M`,
+      "END:VALARM",
+    );
   }
   lines.push("END:VEVENT", "END:VCALENDAR");
   return lines.join("\r\n") + "\r\n";

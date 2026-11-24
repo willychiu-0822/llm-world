@@ -12,7 +12,12 @@ export function TriesPage() {
   const { me, reload } = useSession();
   const nav = useNavigate();
   const hello = Boolean((useLocation().state as { hello?: boolean } | null)?.hello);
-  const { data, error, loading, reload: reloadSteps } = useFetch<Step[]>("/api/first-steps?status=confirmed");
+  const {
+    data,
+    error,
+    loading,
+    reload: reloadSteps,
+  } = useFetch<Step[]>("/api/first-steps?status=confirmed");
   const [active, setActive] = useState<Step | null>(null);
   const [busy, setBusy] = useState(false);
   const [formError, setFormError] = useState("");
@@ -28,7 +33,10 @@ export function TriesPage() {
     setFormError("");
     const before = me?.pet?.stars ?? 0;
     try {
-      await api(`/api/first-steps/${step.id}/complete`, { method: "POST", body: { noteShared: false, visibility: "public" } });
+      await api(`/api/first-steps/${step.id}/complete`, {
+        method: "POST",
+        body: { noteShared: false, visibility: "public" },
+      });
       await reload();
       setActive(step);
       setStarsAt(before);
@@ -65,13 +73,23 @@ export function TriesPage() {
   return (
     <div className="stack">
       <h1>我接下的事</h1>
-      {hello && <p className="notice" role="status">我幫你記著喔。</p>}
-      {drawer && <p className="notice" role="status">{drawer}</p>}
+      {hello && (
+        <p className="notice" role="status">
+          我幫你記著喔。
+        </p>
+      )}
+      {drawer && (
+        <p className="notice" role="status">
+          {drawer}
+        </p>
+      )}
       <ErrorBox error={error} />
       {!list.length ? (
         <div className="empty">
           <p>還沒有接下的事。</p>
-          <Link to="/" className="btn primary">回小龍身邊</Link>
+          <Link to="/" className="btn primary">
+            回小龍身邊
+          </Link>
         </div>
       ) : (
         <ul className="plain">
@@ -79,8 +97,25 @@ export function TriesPage() {
             <li key={step.id}>
               <article className="panel stack">
                 <h2>「{step.text}」</h2>
-                <button type="button" className={`btn ${index === 0 ? "primary" : "ghost"}`} disabled={busy} onClick={() => { setFormError(""); void claim(step); }}>我做到了！</button>
-                <button type="button" className="btn ghost" disabled={busy} onClick={() => void drop(step)}>先收進抽屜</button>
+                <button
+                  type="button"
+                  className={`btn ${index === 0 ? "primary" : "ghost"}`}
+                  disabled={busy}
+                  onClick={() => {
+                    setFormError("");
+                    void claim(step);
+                  }}
+                >
+                  我做到了！
+                </button>
+                <button
+                  type="button"
+                  className="btn ghost"
+                  disabled={busy}
+                  onClick={() => void drop(step)}
+                >
+                  先收進抽屜
+                </button>
               </article>
             </li>
           ))}

@@ -3,7 +3,9 @@ import { formatLifeDay } from "./format";
 
 describe("formatLifeDay", () => {
   it("把日子寫成「11 月 14 日，秋天的早晨」", () => {
-    expect(formatLifeDay("2026-11-14", { season: "秋", period: "早晨" })).toBe("11 月 14 日，秋天的早晨");
+    expect(formatLifeDay("2026-11-14", { season: "秋", period: "早晨" })).toBe(
+      "11 月 14 日，秋天的早晨",
+    );
   });
 
   it("只有日期時依月份補季節，不隨便猜時段", () => {
@@ -14,7 +16,9 @@ describe("formatLifeDay", () => {
   });
 
   it("季節已經帶「天」時不會寫成秋天天", () => {
-    expect(formatLifeDay("2026-11-14", { season: "秋天", period: "傍晚" })).toBe("11 月 14 日，秋天的傍晚");
+    expect(formatLifeDay("2026-11-14", { season: "秋天", period: "傍晚" })).toBe(
+      "11 月 14 日，秋天的傍晚",
+    );
   });
 
   it("不是 YYYY-MM-DD 的字串原樣留下", () => {

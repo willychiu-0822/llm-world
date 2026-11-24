@@ -2,7 +2,8 @@ import express, { type Express } from "express";
 import { existsSync } from "node:fs";
 import path from "node:path";
 
-const NOT_SPA = /^\/(api|auth|oauth|mcp|\.well-known|authorize|token|register|revoke|healthz)(\/|$)/;
+const NOT_SPA =
+  /^\/(api|auth|oauth|mcp|\.well-known|authorize|token|register|revoke|healthz)(\/|$)/;
 
 /** Serves the built React app, with index.html as the fallback for client-side routes. */
 export function serveWeb(app: Express, dist: string | undefined) {

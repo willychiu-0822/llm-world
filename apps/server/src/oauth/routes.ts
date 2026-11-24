@@ -8,7 +8,9 @@ import { getCharacter } from "../services/characters";
 import { LongjiaoOAuthProvider, mcpResourceUrl, SCOPE } from "./provider";
 
 function csrfFor(ctx: AppContext, requestId: string, userId: string) {
-  return createHmac("sha256", ctx.config.sessionSecret).update(`${requestId}:${userId}`).digest("base64url");
+  return createHmac("sha256", ctx.config.sessionSecret)
+    .update(`${requestId}:${userId}`)
+    .digest("base64url");
 }
 
 function safeEqual(a: string, b: string) {
@@ -17,9 +19,18 @@ function safeEqual(a: string, b: string) {
   return x.length === y.length && timingSafeEqual(x, y);
 }
 
-const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+const esc = (s: string) =>
+  s.replace(
+    /[&<>"']/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!,
+  );
 
-function consentPage(o: { clientName: string; characterName: string | null; req: string; csrf: string }) {
+function consentPage(o: {
+  clientName: string;
+  characterName: string | null;
+  req: string;
+  csrf: string;
+}) {
   const who = o.characterName ? `「${esc(o.characterName)}」` : "還沒取名的寶寶";
   return `<!doctype html>
 <html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -57,7 +68,10 @@ export function oauthRoutes(ctx: AppContext) {
       resourceServerUrl: new URL(mcpResourceUrl(ctx)),
       scopesSupported: [SCOPE],
       resourceName: "龍角鎮",
-      clientRegistrationOptions: { clientSecretExpirySeconds: 0, ...(rateLimit === false ? { rateLimit } : {}) },
+      clientRegistrationOptions: {
+        clientSecretExpirySeconds: 0,
+        ...(rateLimit === false ? { rateLimit } : {}),
+      },
       authorizationOptions: rateLimit === false ? { rateLimit } : {},
       tokenOptions: rateLimit === false ? { rateLimit } : {},
     }),
@@ -76,10 +90,19 @@ export function oauthRoutes(ctx: AppContext) {
         res.status(400).type("html").send("<p>這個連接請求已過期，請回到 AI 用戶端重新連接。</p>");
         return;
       }
-      const client = (await provider.clientsStore.getClient(pending.clientId)) as OAuthClientInformationFull;
+      const client = (await provider.clientsStore.getClient(
+        pending.clientId,
+      )) as OAuthClientInformationFull;
       const character = await getCharacter(ctx, req.user.id);
       res.setHeader("Cache-Control", "no-store");
-      res.type("html").send(consentPage({ clientName: client.client_name ?? "AI 用戶端", characterName: character?.name ?? null, req: reqId, csrf: csrfFor(ctx, reqId, req.user.id) }));
+      res.type("html").send(
+        consentPage({
+          clientName: client.client_name ?? "AI 用戶端",
+          characterName: character?.name ?? null,
+          req: reqId,
+          csrf: csrfFor(ctx, reqId, req.user.id),
+        }),
+      );
     }),
   );
 
@@ -95,7 +118,10 @@ export function oauthRoutes(ctx: AppContext) {
         res.status(400).send("invalid request");
         return;
       }
-      const url = req.body?.decision === "approve" ? await provider.approve(reqId, req.user.id) : await provider.deny(reqId);
+      const url =
+        req.body?.decision === "approve"
+          ? await provider.approve(reqId, req.user.id)
+          : await provider.deny(reqId);
       res.redirect(302, url);
     }),
   );

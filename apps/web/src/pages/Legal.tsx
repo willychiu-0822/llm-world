@@ -5,7 +5,9 @@ export function PrivacyPage() {
   return (
     <article className="panel stack" style={{ maxWidth: 760, margin: "0 auto" }}>
       <h1>隱私權政策</h1>
-      <Link to="/" className="btn primary">回小龍身邊</Link>
+      <Link to="/" className="btn primary">
+        回小龍身邊
+      </Link>
       <Draft />
       <h2>我們收集什麼</h2>
       <ul>
@@ -40,10 +42,15 @@ export function TermsPage() {
         <li>龍角鎮裡做過的事，必須是真人的真實經驗。請不要捏造，也不要讓聊天工具幫你捏造。</li>
         <li>請尊重其他鎮民；違反社群規範的內容會被過濾或移除。</li>
         <li>開店的人提供的試用，不得在試用後強迫推銷或綁約。</li>
-        <li>龍角鎮不是醫療或心理諮商服務。如果你正處於危機中，請聯絡當地緊急服務或心理支持專線（台灣：1925 安心專線）。</li>
+        <li>
+          龍角鎮不是醫療或心理諮商服務。如果你正處於危機中，請聯絡當地緊急服務或心理支持專線（台灣：1925
+          安心專線）。
+        </li>
         <li>標示「示範」的內容是範例，不是真人。</li>
       </ul>
-      <Link to="/" className="btn primary">回小龍身邊</Link>
+      <Link to="/" className="btn primary">
+        回小龍身邊
+      </Link>
     </article>
   );
 }

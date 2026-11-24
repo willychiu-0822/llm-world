@@ -1,4 +1,11 @@
-import { ACCESSORIES, ACCESSORY_LABELS, BODY_LABELS, BODY_SHAPES, PALETTE, type Appearance } from "@lj/core";
+import {
+  ACCESSORIES,
+  ACCESSORY_LABELS,
+  BODY_LABELS,
+  BODY_SHAPES,
+  PALETTE,
+  type Appearance,
+} from "@lj/core";
 import { useEffect, useState } from "react";
 import { ApiError, NAME_MODERATION_HINT } from "../lib/api";
 import { Avatar } from "./Avatar";
@@ -16,7 +23,17 @@ function readDraft(key?: string): { step: number; name: string; appearance: Appe
   }
 }
 
-export function AdoptWizard({ initial, draftKey, finishLabel = "帶牠回家", onSave }: { initial: { name: string; appearance: Appearance }; draftKey?: string; finishLabel?: string; onSave: (value: { name: string; appearance: Appearance }) => Promise<void> }) {
+export function AdoptWizard({
+  initial,
+  draftKey,
+  finishLabel = "帶牠回家",
+  onSave,
+}: {
+  initial: { name: string; appearance: Appearance };
+  draftKey?: string;
+  finishLabel?: string;
+  onSave: (value: { name: string; appearance: Appearance }) => Promise<void>;
+}) {
   const draft = readDraft(draftKey);
   const [step, setStep] = useState(draft?.step ?? 0);
   const [name, setName] = useState(draft?.name || initial.name);
@@ -39,7 +56,11 @@ export function AdoptWizard({ initial, draftKey, finishLabel = "帶牠回家", o
     try {
       await onSave({ name: name.trim(), appearance });
     } catch (err) {
-      setError(err instanceof ApiError && err.code === "moderation_blocked" ? NAME_MODERATION_HINT : (err as Error).message);
+      setError(
+        err instanceof ApiError && err.code === "moderation_blocked"
+          ? NAME_MODERATION_HINT
+          : (err as Error).message,
+      );
       setBusy(false);
     }
   };
@@ -54,8 +75,17 @@ export function AdoptWizard({ initial, draftKey, finishLabel = "帶牠回家", o
           <h1>圓圓的，還是高高的？</h1>
           <div className="pick" role="group" aria-label="體型">
             {BODY_SHAPES.map((b) => (
-              <button type="button" key={b} aria-pressed={appearance.body === b} onClick={() => set({ body: b })}>
-                <Avatar appearance={{ ...appearance, body: b, accessory: "none" }} name={BODY_LABELS[b]} size={44} />
+              <button
+                type="button"
+                key={b}
+                aria-pressed={appearance.body === b}
+                onClick={() => set({ body: b })}
+              >
+                <Avatar
+                  appearance={{ ...appearance, body: b, accessory: "none" }}
+                  name={BODY_LABELS[b]}
+                  size={44}
+                />
                 {BODY_LABELS[b]}
               </button>
             ))}
@@ -68,8 +98,17 @@ export function AdoptWizard({ initial, draftKey, finishLabel = "帶牠回家", o
           <p>角？葉子？還是一頂貝雷帽？</p>
           <div className="pick" role="group" aria-label="配件">
             {ACCESSORIES.map((a) => (
-              <button type="button" key={a} aria-pressed={appearance.accessory === a} onClick={() => set({ accessory: a })}>
-                <Avatar appearance={{ ...appearance, accessory: a }} name={ACCESSORY_LABELS[a]} size={44} />
+              <button
+                type="button"
+                key={a}
+                aria-pressed={appearance.accessory === a}
+                onClick={() => set({ accessory: a })}
+              >
+                <Avatar
+                  appearance={{ ...appearance, accessory: a }}
+                  name={ACCESSORY_LABELS[a]}
+                  size={44}
+                />
                 {ACCESSORY_LABELS[a]}
               </button>
             ))}
@@ -77,13 +116,33 @@ export function AdoptWizard({ initial, draftKey, finishLabel = "帶牠回家", o
           <div className="field">
             <span>身體的顏色</span>
             <div className="swatches">
-              {PALETTE.map((c) => <button type="button" key={c} className="swatch" style={{ background: c }} aria-label={`身體顏色 ${c}`} aria-pressed={appearance.main === c} onClick={() => set({ main: c })} />)}
+              {PALETTE.map((c) => (
+                <button
+                  type="button"
+                  key={c}
+                  className="swatch"
+                  style={{ background: c }}
+                  aria-label={`身體顏色 ${c}`}
+                  aria-pressed={appearance.main === c}
+                  onClick={() => set({ main: c })}
+                />
+              ))}
             </div>
           </div>
           <div className="field">
             <span>頭上的顏色</span>
             <div className="swatches">
-              {PALETTE.map((c) => <button type="button" key={`a-${c}`} className="swatch" style={{ background: c }} aria-label={`頭上顏色 ${c}`} aria-pressed={appearance.accent === c} onClick={() => set({ accent: c })} />)}
+              {PALETTE.map((c) => (
+                <button
+                  type="button"
+                  key={`a-${c}`}
+                  className="swatch"
+                  style={{ background: c }}
+                  aria-label={`頭上顏色 ${c}`}
+                  aria-pressed={appearance.accent === c}
+                  onClick={() => set({ accent: c })}
+                />
+              ))}
             </div>
           </div>
         </section>
@@ -93,14 +152,40 @@ export function AdoptWizard({ initial, draftKey, finishLabel = "帶牠回家", o
           <h1>叫什麼名字？</h1>
           <label className="field">
             <span>名字</span>
-            <input aria-label="角色名字" value={name} onChange={(e) => setName(e.target.value)} maxLength={20} required placeholder="小龍" />
+            <input
+              aria-label="角色名字"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              maxLength={20}
+              required
+              placeholder="小龍"
+            />
           </label>
         </section>
       )}
-      {error && <p role="alert" className="error">{error}</p>}
+      {error && (
+        <p role="alert" className="error">
+          {error}
+        </p>
+      )}
       <div className="adopt-actions">
-        {step > 0 && <button className="btn ghost" type="button" disabled={busy} onClick={() => setStep(step - 1)}>上一步</button>}
-        <button className="btn primary" type="button" disabled={busy || (step === 2 && !name.trim())} aria-busy={busy} onClick={() => void next()}>
+        {step > 0 && (
+          <button
+            className="btn ghost"
+            type="button"
+            disabled={busy}
+            onClick={() => setStep(step - 1)}
+          >
+            上一步
+          </button>
+        )}
+        <button
+          className="btn primary"
+          type="button"
+          disabled={busy || (step === 2 && !name.trim())}
+          aria-busy={busy}
+          onClick={() => void next()}
+        >
           {busy ? "帶回家中…" : step === 2 ? finishLabel : "下一步"}
         </button>
       </div>

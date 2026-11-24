@@ -30,12 +30,19 @@ export function TryNewPage() {
     setBusy(true);
     setError("");
     try {
-      await api("/api/first-steps", { method: "POST", body: { executor: "self", text, sourceDeedIds: deedId ? [deedId] : [] } });
+      await api("/api/first-steps", {
+        method: "POST",
+        body: { executor: "self", text, sourceDeedIds: deedId ? [deedId] : [] },
+      });
       await reload();
       nav("/tries", { state: { hello: true } });
     } catch (err) {
       const msg = (err as Error).message;
-      setError(msg.includes("事蹟") || msg.includes("參考") ? "這顆信物先放著。換一顆摸摸看？" : "咦，小龍迷路了。再試一次？");
+      setError(
+        msg.includes("事蹟") || msg.includes("參考")
+          ? "這顆信物先放著。換一顆摸摸看？"
+          : "咦，小龍迷路了。再試一次？",
+      );
       setBusy(false);
     }
   };
@@ -46,10 +53,22 @@ export function TryNewPage() {
       <ErrorBox error={deed.error} />
       <label className="field">
         <span>我要做的是</span>
-        <input aria-label="我要做的是" value={text} onChange={(e) => setText(e.target.value)} maxLength={200} required />
+        <input
+          aria-label="我要做的是"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          maxLength={200}
+          required
+        />
       </label>
-      {error && <p role="alert" className="error">{error}</p>}
-      <button className="btn primary" type="submit" disabled={busy || !text.trim()}>好，接下了！</button>
+      {error && (
+        <p role="alert" className="error">
+          {error}
+        </p>
+      )}
+      <button className="btn primary" type="submit" disabled={busy || !text.trim()}>
+        好，接下了！
+      </button>
     </form>
   );
 }

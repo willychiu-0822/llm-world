@@ -24,5 +24,13 @@ export function CabinetPage() {
     await reload();
     nav("/tries", { state: { hello: true } });
   };
-  return <CabinetView collected={data.collected} total={data.total} items={data.items} pendingId={me?.pet?.pending?.deedId} onAccept={accept} />;
+  return (
+    <CabinetView
+      collected={data.collected}
+      total={data.total}
+      items={data.items}
+      pendingId={me?.pet?.pending?.deedId}
+      onAccept={accept}
+    />
+  );
 }
