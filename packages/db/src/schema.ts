@@ -1,5 +1,15 @@
 import { sql } from "drizzle-orm";
-import { bigserial, boolean, index, integer, jsonb, pgTable, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import {
+  bigserial,
+  boolean,
+  index,
+  integer,
+  jsonb,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+} from "drizzle-orm/pg-core";
 
 const createdAt = () => timestamp("created_at", { withTimezone: true }).notNull().defaultNow();
 const ts = (name: string) => timestamp(name, { withTimezone: true });
@@ -16,7 +26,9 @@ export const users = pgTable("users", {
 
 export const sessions = pgTable("sessions", {
   id: text("id").primaryKey(), // sha256 of the cookie token
-  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   expiresAt: ts("expires_at").notNull(),
   createdAt: createdAt(),
 });
@@ -25,7 +37,10 @@ export const characters = pgTable(
   "characters",
   {
     id: text("id").primaryKey(),
-    userId: text("user_id").notNull().unique().references(() => users.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .unique()
+      .references(() => users.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     appearance: jsonb("appearance").notNull(),
     personality: text("personality").notNull().default(""),
@@ -49,7 +64,9 @@ export const lifeDays = pgTable(
   "life_days",
   {
     id: bigserial("id", { mode: "number" }).primaryKey(),
-    characterId: text("character_id").notNull().references(() => characters.id, { onDelete: "cascade" }),
+    characterId: text("character_id")
+      .notNull()
+      .references(() => characters.id, { onDelete: "cascade" }),
     day: text("day").notNull(),
     autonomous: text("autonomous").notNull().default(""),
     entries: jsonb("entries").notNull().default([]),
@@ -62,7 +79,9 @@ export const lifeItems = pgTable(
   "life_items",
   {
     id: bigserial("id", { mode: "number" }).primaryKey(),
-    characterId: text("character_id").notNull().references(() => characters.id, { onDelete: "cascade" }),
+    characterId: text("character_id")
+      .notNull()
+      .references(() => characters.id, { onDelete: "cascade" }),
     activityId: text("activity_id").notNull(),
     earnedOn: text("earned_on").notNull(),
   },
@@ -73,7 +92,9 @@ export const wants = pgTable(
   "wants",
   {
     id: text("id").primaryKey(),
-    userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
     text: text("text").notNull(),
     districtKey: text("district_key").notNull(),
     status: text("status").notNull().default("active"),
@@ -84,7 +105,10 @@ export const wants = pgTable(
 
 export const providers = pgTable("providers", {
   id: text("id").primaryKey(),
-  userId: text("user_id").notNull().unique().references(() => users.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .unique()
+    .references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   description: text("description").notNull().default(""),
   status: text("status").notNull().default("pending"), // pending | approved | suspended
@@ -113,8 +137,12 @@ export const places = pgTable(
 
 export const trials = pgTable("trials", {
   id: text("id").primaryKey(),
-  providerId: text("provider_id").notNull().references(() => providers.id, { onDelete: "cascade" }),
-  placeId: text("place_id").notNull().references(() => places.id, { onDelete: "cascade" }),
+  providerId: text("provider_id")
+    .notNull()
+    .references(() => providers.id, { onDelete: "cascade" }),
+  placeId: text("place_id")
+    .notNull()
+    .references(() => places.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   description: text("description").notNull().default(""),
   durationMin: integer("duration_min").notNull(),
@@ -131,7 +159,9 @@ export const trials = pgTable("trials", {
 
 export const trialFaqs = pgTable("trial_faqs", {
   id: text("id").primaryKey(),
-  trialId: text("trial_id").notNull().references(() => trials.id, { onDelete: "cascade" }),
+  trialId: text("trial_id")
+    .notNull()
+    .references(() => trials.id, { onDelete: "cascade" }),
   question: text("question").notNull(),
   answer: text("answer").notNull(),
   createdAt: createdAt(),
@@ -139,7 +169,9 @@ export const trialFaqs = pgTable("trial_faqs", {
 
 export const trialSessions = pgTable("trial_sessions", {
   id: text("id").primaryKey(),
-  trialId: text("trial_id").notNull().references(() => trials.id, { onDelete: "cascade" }),
+  trialId: text("trial_id")
+    .notNull()
+    .references(() => trials.id, { onDelete: "cascade" }),
   startsAt: ts("starts_at").notNull(),
   capacity: integer("capacity").notNull().default(20),
   createdAt: createdAt(),
@@ -149,7 +181,9 @@ export const firstSteps = pgTable(
   "first_steps",
   {
     id: text("id").primaryKey(),
-    userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
     wantId: text("want_id").references(() => wants.id, { onDelete: "set null" }),
     executor: text("executor").notNull(), // ai | self
     text: text("text").notNull(),
@@ -173,7 +207,9 @@ export const notes = pgTable(
   "notes",
   {
     id: text("id").primaryKey(),
-    firstStepId: text("first_step_id").notNull().references(() => firstSteps.id, { onDelete: "cascade" }),
+    firstStepId: text("first_step_id")
+      .notNull()
+      .references(() => firstSteps.id, { onDelete: "cascade" }),
     kind: text("kind").notNull(), // before | after
     body: text("body").notNull(),
     shared: boolean("shared").notNull().default(false),
@@ -186,8 +222,12 @@ export const bookings = pgTable(
   "bookings",
   {
     id: text("id").primaryKey(),
-    sessionId: text("session_id").notNull().references(() => trialSessions.id, { onDelete: "cascade" }),
-    userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    sessionId: text("session_id")
+      .notNull()
+      .references(() => trialSessions.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
     firstStepId: text("first_step_id").references(() => firstSteps.id, { onDelete: "set null" }),
     attendedAt: ts("attended_at"),
     createdAt: createdAt(),
@@ -199,13 +239,19 @@ export const deeds = pgTable(
   "deeds",
   {
     id: text("id").primaryKey(),
-    userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-    firstStepId: text("first_step_id").unique().references(() => firstSteps.id, { onDelete: "set null" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    firstStepId: text("first_step_id")
+      .unique()
+      .references(() => firstSteps.id, { onDelete: "set null" }),
     executor: text("executor").notNull(), // ai | self
     title: text("title").notNull(),
     summary: text("summary").notNull().default(""),
     districtKey: text("district_key").notNull(),
-    placeId: text("place_id").notNull().references(() => places.id),
+    placeId: text("place_id")
+      .notNull()
+      .references(() => places.id),
     trialId: text("trial_id").references(() => trials.id, { onDelete: "set null" }),
     relatedDeedIds: text("related_deed_ids").array().notNull().default(sql`ARRAY[]::text[]`),
     recordSource: text("record_source").notNull(), // provider_confirmed | self | ai
@@ -220,7 +266,9 @@ export const deeds = pgTable(
 
 export const discoveries = pgTable("discoveries", {
   id: text("id").primaryKey(),
-  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   message: text("message").notNull(),
   items: jsonb("items").notNull(),
   readAt: ts("read_at"),
@@ -229,8 +277,12 @@ export const discoveries = pgTable("discoveries", {
 
 export const providerQuestions = pgTable("provider_questions", {
   id: text("id").primaryKey(),
-  trialId: text("trial_id").notNull().references(() => trials.id, { onDelete: "cascade" }),
-  askerUserId: text("asker_user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  trialId: text("trial_id")
+    .notNull()
+    .references(() => trials.id, { onDelete: "cascade" }),
+  askerUserId: text("asker_user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   firstStepId: text("first_step_id").references(() => firstSteps.id, { onDelete: "set null" }),
   question: text("question").notNull(),
   source: text("source").notNull().default("forwarded"), // forwarded | faq
@@ -241,7 +293,9 @@ export const providerQuestions = pgTable("provider_questions", {
 
 export const trialEvents = pgTable("trial_events", {
   id: text("id").primaryKey(),
-  trialId: text("trial_id").notNull().references(() => trials.id, { onDelete: "cascade" }),
+  trialId: text("trial_id")
+    .notNull()
+    .references(() => trials.id, { onDelete: "cascade" }),
   userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
   kind: text("kind").notNull(), // ai_view | question | booking | attended
   createdAt: createdAt(),
@@ -251,9 +305,15 @@ export const follows = pgTable(
   "follows",
   {
     id: text("id").primaryKey(),
-    deedId: text("deed_id").notNull().references(() => deeds.id, { onDelete: "cascade" }),
-    followerUserId: text("follower_user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-    firstStepId: text("first_step_id").notNull().references(() => firstSteps.id, { onDelete: "cascade" }),
+    deedId: text("deed_id")
+      .notNull()
+      .references(() => deeds.id, { onDelete: "cascade" }),
+    followerUserId: text("follower_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    firstStepId: text("first_step_id")
+      .notNull()
+      .references(() => firstSteps.id, { onDelete: "cascade" }),
     status: text("status").notNull().default("referenced"), // referenced | completed
     createdAt: createdAt(),
   },
@@ -264,7 +324,9 @@ export const notifications = pgTable(
   "notifications",
   {
     id: text("id").primaryKey(),
-    userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
     kind: text("kind").notNull(),
     payload: jsonb("payload").notNull(),
     readAt: ts("read_at"),
@@ -276,7 +338,9 @@ export const notifications = pgTable(
 export const discoverySeen = pgTable(
   "discovery_seen",
   {
-    userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
     itemId: text("item_id").notNull(),
     createdAt: createdAt(),
   },
@@ -291,7 +355,9 @@ export const oauthClients = pgTable("oauth_clients", {
 
 export const oauthRequests = pgTable("oauth_requests", {
   id: text("id").primaryKey(),
-  clientId: text("client_id").notNull().references(() => oauthClients.clientId, { onDelete: "cascade" }),
+  clientId: text("client_id")
+    .notNull()
+    .references(() => oauthClients.clientId, { onDelete: "cascade" }),
   redirectUri: text("redirect_uri").notNull(),
   codeChallenge: text("code_challenge").notNull(),
   state: text("state"),
@@ -303,8 +369,12 @@ export const oauthRequests = pgTable("oauth_requests", {
 
 export const oauthCodes = pgTable("oauth_codes", {
   code: text("code").primaryKey(), // sha256
-  clientId: text("client_id").notNull().references(() => oauthClients.clientId, { onDelete: "cascade" }),
-  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  clientId: text("client_id")
+    .notNull()
+    .references(() => oauthClients.clientId, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   redirectUri: text("redirect_uri").notNull(),
   codeChallenge: text("code_challenge").notNull(),
   scopes: text("scopes").array().notNull().default(sql`ARRAY[]::text[]`),
@@ -318,8 +388,12 @@ export const oauthGrants = pgTable(
   "oauth_grants",
   {
     id: text("id").primaryKey(),
-    clientId: text("client_id").notNull().references(() => oauthClients.clientId, { onDelete: "cascade" }),
-    userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    clientId: text("client_id")
+      .notNull()
+      .references(() => oauthClients.clientId, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
     createdAt: createdAt(),
     lastUsedAt: ts("last_used_at"),
     revokedAt: ts("revoked_at"),
@@ -332,8 +406,12 @@ export const oauthTokens = pgTable(
   {
     token: text("token").primaryKey(), // sha256
     kind: text("kind").notNull(), // access | refresh
-    clientId: text("client_id").notNull().references(() => oauthClients.clientId, { onDelete: "cascade" }),
-    userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    clientId: text("client_id")
+      .notNull()
+      .references(() => oauthClients.clientId, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
     grantId: text("grant_id").references(() => oauthGrants.id, { onDelete: "cascade" }),
     scopes: text("scopes").array().notNull().default(sql`ARRAY[]::text[]`),
     resource: text("resource"),

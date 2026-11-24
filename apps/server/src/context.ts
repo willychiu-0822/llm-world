@@ -15,7 +15,10 @@ export function createContext(opts: { db: Db; config: Config; now?: () => Date }
   return {
     db: opts.db,
     config: opts.config,
-    moderator: createModerator({ mode: opts.config.moderationMode, providers: [keywordProvider({ words: opts.config.moderationWords, category: "blocklist" })] }),
+    moderator: createModerator({
+      mode: opts.config.moderationMode,
+      providers: [keywordProvider({ words: opts.config.moderationWords, category: "blocklist" })],
+    }),
     google: createGoogleClient(opts.config),
     now: opts.now ?? (() => new Date()),
   };

@@ -17,14 +17,19 @@ async function checkKeyboard(page: Page, path: string) {
       const style = getComputedStyle(el);
       const path: string[] = [];
       for (let node: Element | null = el; node; node = node.parentElement) {
-        path.push(`${node.tagName}:${node.parentElement ? [...node.parentElement.children].indexOf(node) : 0}`);
+        path.push(
+          `${node.tagName}:${node.parentElement ? [...node.parentElement.children].indexOf(node) : 0}`,
+        );
       }
       return {
         key: path.join("/"),
         inMain: !!el.closest("main"),
         action: el.matches("button, a, input, select, textarea"),
         focusVisible: el.matches(":focus-visible"),
-        indicator: style.outlineStyle !== "none" && parseFloat(style.outlineWidth) > 0 || style.boxShadow !== "none" || !!el.closest(".choice-card"),
+        indicator:
+          (style.outlineStyle !== "none" && parseFloat(style.outlineWidth) > 0) ||
+          style.boxShadow !== "none" ||
+          !!el.closest(".choice-card"),
       };
     });
     if (!state) break;
@@ -39,9 +44,25 @@ async function checkKeyboard(page: Page, path: string) {
 
 test("F2 主要頁面可用鍵盤抵達操作且焦點可見", async ({ page }) => {
   test.setTimeout(120_000);
-  await json(page.request.post("/api/auth/dev-login", { data: { email: `keyboard-${test.info().project.name}@e2e.test` } }));
+  await json(
+    page.request.post("/api/auth/dev-login", {
+      data: { email: `keyboard-${test.info().project.name}@e2e.test` },
+    }),
+  );
   await growToStageTwo(page);
-  for (const path of ["/", "/map", "/cabinet", "/life", "/life/cabinet", "/tries", "/steps", "/steps/new", "/connect", "/me", "/notifications"]) {
+  for (const path of [
+    "/",
+    "/map",
+    "/cabinet",
+    "/life",
+    "/life/cabinet",
+    "/tries",
+    "/steps",
+    "/steps/new",
+    "/connect",
+    "/me",
+    "/notifications",
+  ]) {
     await checkKeyboard(page, path);
   }
 });
@@ -49,7 +70,7 @@ test("F2 主要頁面可用鍵盤抵達操作且焦點可見", async ({ page }) 
 async function keyboardFocus(page: Page, target: Locator) {
   await expect(target).toBeVisible();
   for (let i = 0; i < 100; i++) {
-    if (await target.evaluate(el => el === document.activeElement)) {
+    if (await target.evaluate((el) => el === document.activeElement)) {
       return;
     }
     await page.keyboard.press("Tab");
@@ -65,11 +86,19 @@ async function keyboardActivate(page: Page, target: Locator) {
 test("F2 領養與信物對話框可用鍵盤完成", async ({ page }) => {
   test.setTimeout(120_000);
   const neighbor = await apiAs(`keyboard-neighbor-${test.info().project.name}@e2e.test`);
-  await json(neighbor.put("/api/me/character", { data: { name: "小雀", appearance: look("flower") } }));
-  const step = await json(neighbor.post("/api/first-steps", { data: { executor: "self", text: "去上一次聲樂課" } }));
+  await json(
+    neighbor.put("/api/me/character", { data: { name: "小雀", appearance: look("flower") } }),
+  );
+  const step = await json(
+    neighbor.post("/api/first-steps", { data: { executor: "self", text: "去上一次聲樂課" } }),
+  );
   await json(neighbor.post(`/api/first-steps/${step.id}/complete`, { data: {} }));
   await neighbor.dispose();
-  await json(page.request.post("/api/auth/dev-login", { data: { email: `keyboard-adopt-${test.info().project.name}@e2e.test` } }));
+  await json(
+    page.request.post("/api/auth/dev-login", {
+      data: { email: `keyboard-adopt-${test.info().project.name}@e2e.test` },
+    }),
+  );
   await page.goto("/");
   await keyboardActivate(page, page.getByRole("link", { name: "把牠撿回家" }));
   await expect(page.getByRole("heading", { name: "圓圓的，還是高高的？" })).toBeVisible();
@@ -95,7 +124,11 @@ test("F2 領養與信物對話框可用鍵盤完成", async ({ page }) => {
 
 test("F2 生活活動和收藏對話框可用鍵盤操作", async ({ page }) => {
   test.setTimeout(120_000);
-  await json(page.request.post("/api/auth/dev-login", { data: { email: `keyboard-life-${test.info().project.name}@e2e.test` } }));
+  await json(
+    page.request.post("/api/auth/dev-login", {
+      data: { email: `keyboard-life-${test.info().project.name}@e2e.test` },
+    }),
+  );
   await json(page.request.put("/api/me/character", { data: { name: "小龍", appearance: look() } }));
   await page.goto("/life");
   const play = page.getByRole("button", { name: "陪牠去玩" });

@@ -24,7 +24,11 @@ export const characterInput = z.object({
 });
 
 export const wantInput = z.object({ text: text(100), districtKey });
-export const wantUpdate = z.object({ text: text(100).optional(), districtKey: districtKey.optional(), status: z.enum(["active", "done", "dropped"]).optional() });
+export const wantUpdate = z.object({
+  text: text(100).optional(),
+  districtKey: districtKey.optional(),
+  status: z.enum(["active", "done", "dropped"]).optional(),
+});
 
 export const executor = z.enum(["ai", "self"]);
 
@@ -46,11 +50,17 @@ export const completeStepInput = z.object({
   visibility: z.enum(["public", "private"]).default("public"),
 });
 
-export const noteInput = z.object({ body: z.string().trim().max(2000), shared: z.boolean().default(false) });
+export const noteInput = z.object({
+  body: z.string().trim().max(2000),
+  shared: z.boolean().default(false),
+});
 
 export const deedVisibilityInput = z.object({ visibility: z.enum(["public", "private"]) });
 
-export const providerApplyInput = z.object({ name: text(40), description: z.string().trim().max(500).default("") });
+export const providerApplyInput = z.object({
+  name: text(40),
+  description: z.string().trim().max(500).default(""),
+});
 
 export const shopInput = z.object({
   districtKey,
@@ -75,11 +85,17 @@ export const trialInput = z.object({
 });
 
 export const faqInput = z.object({ question: text(200), answer: text(1000) });
-export const sessionInput = z.object({ startsAt: z.string().datetime({ offset: true }), capacity: z.number().int().min(1).max(500).default(20) });
+export const sessionInput = z.object({
+  startsAt: z.string().datetime({ offset: true }),
+  capacity: z.number().int().min(1).max(500).default(20),
+});
 export const answerInput = z.object({ answer: text(1000), addToFaq: z.boolean().default(true) });
 
 export const discoveryItem = z.object({ type: z.enum(["deed", "trial", "place"]), id });
-export const bringBackInput = z.object({ message: text(1000), items: z.array(discoveryItem).min(1).max(10) });
+export const bringBackInput = z.object({
+  message: text(1000),
+  items: z.array(discoveryItem).min(1).max(10),
+});
 export const providerAskInput = z.object({ trialId: id, question: text(300) });
 export const aiCompleteInput = z.object({ stepId: id, result: text(2000) });
 export const reviewStepInput = z.object({

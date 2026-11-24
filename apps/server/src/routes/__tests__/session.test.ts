@@ -13,12 +13,16 @@ describe("P2-2 optional session probe", () => {
   });
   it("returns the same signed-in identity as the protected endpoint, then null after logout", async () => {
     const agent = await login(env.app, "session@example.com");
-    expect((await agent.get("/api/session")).body).toEqual({ me: (await agent.get("/api/me")).body });
+    expect((await agent.get("/api/session")).body).toEqual({
+      me: (await agent.get("/api/me")).body,
+    });
     await agent.post("/api/auth/logout");
     expect((await agent.get("/api/session")).body).toEqual({ me: null });
   });
   it("treats an unknown session cookie as an anonymous visit", async () => {
-    const res = await request(env.app).get("/api/session").set("Cookie", "lj_sid=expired-test-session");
+    const res = await request(env.app)
+      .get("/api/session")
+      .set("Cookie", "lj_sid=expired-test-session");
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ me: null });
   });

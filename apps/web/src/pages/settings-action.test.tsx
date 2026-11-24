@@ -24,11 +24,28 @@ const look = { ...DEFAULT_APPEARANCE, description: "" };
 function baby(): Me {
   return {
     user: { id: "u", email: "baby@example.com", displayName: "安", roles: ["user"] },
-    character: { id: "c", name: "小龍", appearance: look, personality: "溫柔", sharing: { allowAiQuotes: true } },
+    character: {
+      id: "c",
+      name: "小龍",
+      appearance: look,
+      personality: "溫柔",
+      sharing: { allowAiQuotes: true },
+    },
     wants: [],
     provider: null,
     unread: { notifications: 0, discoveries: 0 },
-    pet: { stars: 0, stage: 0, nextAt: 3, accessories: [], canWalk: true, collected: 0, total: 4, letter: false, notify: true, pending: null },
+    pet: {
+      stars: 0,
+      stage: 0,
+      nextAt: 3,
+      accessories: [],
+      canWalk: true,
+      collected: 0,
+      total: 4,
+      letter: false,
+      notify: true,
+      pending: null,
+    },
   };
 }
 
@@ -45,9 +62,15 @@ describe("LW-11 settings action errors", () => {
     const assign = vi.fn();
     vi.stubGlobal("location", { assign });
     apiMock.mockRejectedValueOnce(new Error("network"));
-    render(<MemoryRouter><MePage /></MemoryRouter>);
+    render(
+      <MemoryRouter>
+        <MePage />
+      </MemoryRouter>,
+    );
     await userEvent.click(screen.getByRole("button", { name: "登出" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("剛剛沒有登出成功。再按一次登出就好。");
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "剛剛沒有登出成功。再按一次登出就好。",
+    );
     expect(assign).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: "登出" })).toBeEnabled();
 
@@ -61,7 +84,11 @@ describe("LW-11 settings action errors", () => {
     const assign = vi.fn();
     vi.stubGlobal("location", { assign });
     apiMock.mockRejectedValueOnce(new Error("network"));
-    render(<MemoryRouter><MePage /></MemoryRouter>);
+    render(
+      <MemoryRouter>
+        <MePage />
+      </MemoryRouter>,
+    );
     (document.querySelector("details.advanced") as HTMLDetailsElement).open = true;
     await userEvent.click(screen.getByRole("button", { name: "刪除帳號" }));
     await userEvent.click(screen.getByRole("button", { name: "刪掉小龍和所有紀錄" }));
@@ -77,7 +104,11 @@ describe("LW-11 settings action errors", () => {
   it("提醒開關失敗時把勾選還原，並提示再按一次", async () => {
     state.me = baby();
     apiMock.mockRejectedValueOnce(new Error("network"));
-    render(<MemoryRouter><MePage /></MemoryRouter>);
+    render(
+      <MemoryRouter>
+        <MePage />
+      </MemoryRouter>,
+    );
     const box = screen.getByLabelText("新消息提醒");
     expect(box).toBeChecked();
     await userEvent.click(box);

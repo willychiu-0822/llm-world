@@ -6,7 +6,15 @@ const TownMap = lazy(() => import("./TownMap").then((m) => ({ default: m.TownMap
 
 const SEEN = "lj-map-gesture";
 
-export function MapBoard({ town, error, loading }: { town: Town | null; error: Error | null; loading: boolean }) {
+export function MapBoard({
+  town,
+  error,
+  loading,
+}: {
+  town: Town | null;
+  error: Error | null;
+  loading: boolean;
+}) {
   const [hint, setHint] = useState(false);
   const shown = useRef(false);
   const interact = () => {
@@ -21,12 +29,20 @@ export function MapBoard({ town, error, loading }: { town: Town | null; error: E
   return (
     <section id="map" className="map-board" aria-label="龍角鎮地圖">
       <ErrorBox error={error} />
-      {loading && !town ? <Loading /> : town && (
-        <Suspense fallback={<Loading />}>
-          <TownMap districts={town.districts} places={town.places} onInteract={interact} />
-        </Suspense>
+      {loading && !town ? (
+        <Loading />
+      ) : (
+        town && (
+          <Suspense fallback={<Loading />}>
+            <TownMap districts={town.districts} places={town.places} onInteract={interact} />
+          </Suspense>
+        )
       )}
-      {hint && <div className="gesture-hint" aria-hidden><span>👆</span></div>}
+      {hint && (
+        <div className="gesture-hint" aria-hidden>
+          <span>👆</span>
+        </div>
+      )}
     </section>
   );
 }

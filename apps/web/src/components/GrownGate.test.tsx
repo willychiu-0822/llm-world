@@ -15,7 +15,13 @@ vi.mock("../lib/session", () => ({
 describe("GrownGate", () => {
   it("還沒長大時不提階段名稱，並說明這裡之後會開門", () => {
     state.stage = 0;
-    render(<MemoryRouter><GrownGate><p>裡面的內容</p></GrownGate></MemoryRouter>);
+    render(
+      <MemoryRouter>
+        <GrownGate>
+          <p>裡面的內容</p>
+        </GrownGate>
+      </MemoryRouter>,
+    );
     expect(screen.getByRole("heading", { name: "小龍還沒長大" })).toBeInTheDocument();
     expect(screen.getByText("等小龍再長大一點，這裡就會開門。先回家陪牠。")).toBeInTheDocument();
     expect(document.body.textContent ?? "").not.toMatch(/圍巾尺寸/);
@@ -25,7 +31,13 @@ describe("GrownGate", () => {
 
   it("長大後直接顯示裡面的內容", () => {
     state.stage = 2;
-    render(<MemoryRouter><GrownGate><p>裡面的內容</p></GrownGate></MemoryRouter>);
+    render(
+      <MemoryRouter>
+        <GrownGate>
+          <p>裡面的內容</p>
+        </GrownGate>
+      </MemoryRouter>,
+    );
     expect(screen.getByText("裡面的內容")).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "小龍還沒長大" })).toBeNull();
   });

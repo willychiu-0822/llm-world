@@ -10,25 +10,48 @@ describe("town, places and moderation admin", () => {
   it("lists districts and public places with presence of recently active characters", async () => {
     const u = await userWithCharacter(env.app, "xiaoan@example.com");
     const w = (await u.post("/api/me/wants").send({ text: "想唱歌", districtKey: "music" })).body;
-    const s = (await u.post("/api/first-steps").send({ executor: "self", text: "在家唱一首", wantId: w.id })).body;
+    const s = (
+      await u.post("/api/first-steps").send({ executor: "self", text: "在家唱一首", wantId: w.id })
+    ).body;
     await u.post(`/api/first-steps/${s.id}/complete`).send({});
 
     const town = (await request(env.app).get("/api/town")).body;
-    expect(town.districts.map((d: { key: string }) => d.key)).toEqual(["music", "sports", "crafts", "food", "learning", "outdoors", "social", "volunteer", "misc"]);
+    expect(town.districts.map((d: { key: string }) => d.key)).toEqual([
+      "music",
+      "sports",
+      "crafts",
+      "food",
+      "learning",
+      "outdoors",
+      "social",
+      "volunteer",
+      "misc",
+    ]);
     const music = town.places.find((p: { id: string }) => p.id === "pub_music");
     expect(music).toMatchObject({ kind: "public", deedCount: 1, trialCount: 0 });
-    expect(music.presence).toEqual({ total: 1, characters: [{ name: "Nova", appearance: expect.any(Object) }] });
+    expect(music.presence).toEqual({
+      total: 1,
+      characters: [{ name: "Nova", appearance: expect.any(Object) }],
+    });
   });
 
   it("shows a place with its public deeds, real ones before demo", async () => {
     const u = await userWithCharacter(env.app, "a@example.com");
     const w = (await u.post("/api/me/wants").send({ text: "想唱歌", districtKey: "music" })).body;
     const made = [];
-    for (const [text, visibility] of [["公開的", "public"], ["私人的", "private"], ["示範的", "public"]] as const) {
-      const s = (await u.post("/api/first-steps").send({ executor: "self", text, wantId: w.id })).body;
+    for (const [text, visibility] of [
+      ["公開的", "public"],
+      ["私人的", "private"],
+      ["示範的", "public"],
+    ] as const) {
+      const s = (await u.post("/api/first-steps").send({ executor: "self", text, wantId: w.id }))
+        .body;
       made.push((await u.post(`/api/first-steps/${s.id}/complete`).send({ visibility })).body.deed);
     }
-    await env.handle.db.update(deeds).set({ isDemo: true, createdAt: new Date(Date.now() + 1000) }).where(eq(deeds.id, made[2].id));
+    await env.handle.db
+      .update(deeds)
+      .set({ isDemo: true, createdAt: new Date(Date.now() + 1000) })
+      .where(eq(deeds.id, made[2].id));
     const place = (await request(env.app).get("/api/places/pub_music")).body;
     expect(place).toMatchObject({ id: "pub_music", name: "音樂坊小廣場", districtKey: "music" });
     expect(place.deeds.map((d: { title: string }) => d.title)).toEqual(["公開的", "示範的"]);
@@ -41,12 +64,19 @@ describe("town, places and moderation admin", () => {
   });
 
   it("lets admins review moderation logs and remove a deed", async () => {
-    const u = await userWithCharacter(env.app, "rude@example.com", { ...nova, personality: "fuck" });
+    const u = await userWithCharacter(env.app, "rude@example.com", {
+      ...nova,
+      personality: "fuck",
+    });
     const s = (await u.post("/api/first-steps").send({ executor: "self", text: "唱歌" })).body;
     const deed = (await u.post(`/api/first-steps/${s.id}/complete`).send({})).body.deed;
     const admin = await userWithCharacter(env.app, "admin@example.com");
     const log = (await admin.get("/api/admin/moderation")).body;
-    expect(log[0]).toMatchObject({ targetType: "character", action: "filter", categories: ["blocklist"] });
+    expect(log[0]).toMatchObject({
+      targetType: "character",
+      action: "filter",
+      categories: ["blocklist"],
+    });
     expect((await admin.post(`/api/admin/deeds/${deed.id}/remove`)).status).toBe(200);
     expect((await request(env.app).get(`/api/deeds/${deed.id}`)).status).toBe(404);
   });

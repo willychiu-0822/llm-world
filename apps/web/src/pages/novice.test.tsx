@@ -20,7 +20,12 @@ vi.mock("../lib/session", () => ({
   useSession: () => ({
     me: state.me,
     loading: false,
-    config: { appName: "龍角鎮", devLogin: true, googleLogin: false, mcpUrl: "http://127.0.0.1/mcp" },
+    config: {
+      appName: "龍角鎮",
+      devLogin: true,
+      googleLogin: false,
+      mcpUrl: "http://127.0.0.1/mcp",
+    },
     configError: false,
     reloadConfig: vi.fn(),
     reload: vi.fn(),
@@ -31,26 +36,51 @@ vi.mock("../lib/session", () => ({
 vi.mock("../lib/useFetch", () => ({
   useFetch: (path: string | null) => {
     if (!path) return { data: null, error: null, loading: false, reload: vi.fn() };
-    if (path.includes("town")) return { data: { districts: [], places: [] }, error: null, loading: false, reload: vi.fn() };
-    if (path.includes("first-steps")) return { data: [], error: null, loading: false, reload: vi.fn() };
+    if (path.includes("town"))
+      return { data: { districts: [], places: [] }, error: null, loading: false, reload: vi.fn() };
+    if (path.includes("first-steps"))
+      return { data: [], error: null, loading: false, reload: vi.fn() };
     return { data: null, error: null, loading: false, reload: vi.fn() };
   },
 }));
 
 const baby = (): Me => ({
   user: { id: "u", email: "baby@example.com", displayName: "安", roles: ["user"] },
-  character: { id: "c", name: "小龍", appearance: look, personality: "", sharing: { allowAiQuotes: true } },
+  character: {
+    id: "c",
+    name: "小龍",
+    appearance: look,
+    personality: "",
+    sharing: { allowAiQuotes: true },
+  },
   wants: [],
   provider: null,
   unread: { notifications: 0, discoveries: 0 },
-  pet: { stars: 0, stage: 0, nextAt: 3, accessories: [], canWalk: true, collected: 0, total: 4, letter: false, notify: true, pending: null },
+  pet: {
+    stars: 0,
+    stage: 0,
+    nextAt: 3,
+    accessories: [],
+    canWalk: true,
+    collected: 0,
+    total: 4,
+    letter: false,
+    notify: true,
+    pending: null,
+  },
 });
 
 describe("novice loop", () => {
-  beforeEach(() => { state.me = null; });
+  beforeEach(() => {
+    state.me = null;
+  });
 
   it("gives a guest one way in, with no jargon", () => {
-    render(<MemoryRouter><HomePage /></MemoryRouter>);
+    render(
+      <MemoryRouter>
+        <HomePage />
+      </MemoryRouter>,
+    );
     expect(screen.getByRole("link", { name: "把牠撿回家" })).toHaveClass("btn primary");
     expect(screen.queryByRole("link", { name: "先隨便看看" })).not.toBeInTheDocument();
     expect(screen.queryByText(/滾輪/)).not.toBeInTheDocument();
@@ -59,7 +89,13 @@ describe("novice loop", () => {
 
   it("shows the baby and a single main action", async () => {
     state.me = baby();
-    render(<MemoryRouter><Layout><HomePage /></Layout></MemoryRouter>);
+    render(
+      <MemoryRouter>
+        <Layout>
+          <HomePage />
+        </Layout>
+      </MemoryRouter>,
+    );
     expect(document.querySelector("[data-mark='home']")).not.toBeNull();
     expect(document.querySelector("[data-mark='map']")).not.toBeNull();
     expect(document.querySelector("[data-mark='basket']")).not.toBeNull();
@@ -81,9 +117,17 @@ describe("novice loop", () => {
   it("wears the backpack and cloud scarf on the dragon for that body", () => {
     const me = baby();
     me.pet = { ...me.pet!, stage: 2, accessories: ["backpack"] };
-    me.character = { ...me.character!, appearance: { ...look, body: "pear" }, life: { outfit: "shop", decoration: "festival" } };
+    me.character = {
+      ...me.character!,
+      appearance: { ...look, body: "pear" },
+      life: { outfit: "shop", decoration: "festival" },
+    };
     state.me = me;
-    render(<MemoryRouter><HomePage /></MemoryRouter>);
+    render(
+      <MemoryRouter>
+        <HomePage />
+      </MemoryRouter>,
+    );
     const dragon = screen.getByRole("img", { name: "小龍" });
     expect(dragon.querySelector("[data-part='cloud-scarf']")).toHaveAttribute("data-neck", "66");
     expect(dragon.querySelector("[data-part='backpack']")).toHaveAttribute("data-y", "66");
@@ -107,7 +151,11 @@ describe("novice loop", () => {
   });
 
   it("shows a soft name hint when the name is blocked, with a next step and no jargon", async () => {
-    const onSave = vi.fn().mockRejectedValue(new ApiError(422, "moderation_blocked", "這段話小龍唸不出來，換一個寫法試試？"));
+    const onSave = vi
+      .fn()
+      .mockRejectedValue(
+        new ApiError(422, "moderation_blocked", "這段話小龍唸不出來，換一個寫法試試？"),
+      );
     render(<AdoptWizard initial={{ name: "", appearance: look }} onSave={onSave} />);
     await userEvent.click(screen.getByRole("button", { name: "下一步" }));
     await userEvent.click(screen.getByRole("button", { name: "下一步" }));
@@ -132,10 +180,36 @@ describe("novice loop", () => {
   });
 
   it("greys out keepsakes that are still missing", () => {
-    render(<MemoryRouter><CabinetView collected={1} total={2} items={[
-      { deedId: "a", districtKey: "music", placeId: "p", placeName: "音樂坊小廣場", object: "吉他撥片", collected: true, createdAt: "2026-11-10T00:00:00.000Z", warmLine: "小雀的吉他撥片。去上了聲樂課。", mood: "😆" },
-      { deedId: "b", districtKey: "music", placeId: "p", placeName: "音樂坊小廣場", object: "吉他撥片", collected: false, createdAt: "2026-11-10T00:00:00.000Z" },
-    ]} /></MemoryRouter>);
+    render(
+      <MemoryRouter>
+        <CabinetView
+          collected={1}
+          total={2}
+          items={[
+            {
+              deedId: "a",
+              districtKey: "music",
+              placeId: "p",
+              placeName: "音樂坊小廣場",
+              object: "吉他撥片",
+              collected: true,
+              createdAt: "2026-11-10T00:00:00.000Z",
+              warmLine: "小雀的吉他撥片。去上了聲樂課。",
+              mood: "😆",
+            },
+            {
+              deedId: "b",
+              districtKey: "music",
+              placeId: "p",
+              placeName: "音樂坊小廣場",
+              object: "吉他撥片",
+              collected: false,
+              createdAt: "2026-11-10T00:00:00.000Z",
+            },
+          ]}
+        />
+      </MemoryRouter>,
+    );
     expect(screen.getByLabelText("收藏進度")).toHaveTextContent("1/9");
     expect(document.querySelectorAll(".keepsake-cell")).toHaveLength(9);
     expect(document.querySelectorAll(".is-missing")).toHaveLength(8);
@@ -147,12 +221,18 @@ describe("novice loop", () => {
 
   it("keeps helpers and deletion inside the folded advanced section", () => {
     state.me = baby();
-    render(<MemoryRouter><MePage /></MemoryRouter>);
+    render(
+      <MemoryRouter>
+        <MePage />
+      </MemoryRouter>,
+    );
     const advanced = document.querySelector("details.advanced") as HTMLDetailsElement | null;
     expect(advanced?.open).toBe(false);
     expect(advanced?.textContent).not.toContain("幫手");
     expect(advanced?.textContent).toContain("刪除帳號");
     expect(advanced?.textContent).toContain("開一間小店");
-    expect(bannedHits(document.body.textContent?.replace(advanced?.textContent ?? "", "") ?? "")).toEqual([]);
+    expect(
+      bannedHits(document.body.textContent?.replace(advanced?.textContent ?? "", "") ?? ""),
+    ).toEqual([]);
   });
 });

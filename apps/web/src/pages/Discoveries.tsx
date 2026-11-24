@@ -13,13 +13,25 @@ interface Discovery {
   message: string;
   readAt: string | null;
   createdAt: string;
-  items: { type: "deed" | "trial" | "place"; id: string; title: string; districtKey: string; isDemo: boolean; executor?: string; characterName?: string | null }[];
+  items: {
+    type: "deed" | "trial" | "place";
+    id: string;
+    title: string;
+    districtKey: string;
+    isDemo: boolean;
+    executor?: string;
+    characterName?: string | null;
+  }[];
 }
 
 const LINK = { deed: "deeds", trial: "trials", place: "places" } as const;
 
 export function DiscoveriesPage() {
-  return <GrownGate><DiscoveriesBody /></GrownGate>;
+  return (
+    <GrownGate>
+      <DiscoveriesBody />
+    </GrownGate>
+  );
 }
 
 function DiscoveriesBody() {
@@ -28,7 +40,9 @@ function DiscoveriesBody() {
   useEffect(() => {
     const unread = data?.filter((d) => !d.readAt) ?? [];
     if (!unread.length) return;
-    void Promise.all(unread.map((d) => api(`/api/discoveries/${d.id}/read`, { method: "POST" }))).then(() => reloadMe());
+    void Promise.all(
+      unread.map((d) => api(`/api/discoveries/${d.id}/read`, { method: "POST" })),
+    ).then(() => reloadMe());
   }, [data]);
   if (loading && !data) return <Loading />;
   return (
@@ -38,13 +52,21 @@ function DiscoveriesBody() {
       {!data?.length && (
         <Empty>
           <p>還沒有發現。請朋友去鎮上逛逛，或到地圖上看看大家做過的事。</p>
-          <Link to="/connect" className="btn ghost">請朋友去逛逛</Link>
-          <Link to="/map" className="btn primary">去地圖看看</Link>
+          <Link to="/connect" className="btn ghost">
+            請朋友去逛逛
+          </Link>
+          <Link to="/map" className="btn primary">
+            去地圖看看
+          </Link>
         </Empty>
       )}
       {data?.map((d) => (
         <article key={d.id} className="who">
-          <Avatar appearance={me?.character?.appearance} name={me?.character?.name ?? "我的角色"} size={52} />
+          <Avatar
+            appearance={me?.character?.appearance}
+            name={me?.character?.name ?? "我的角色"}
+            size={52}
+          />
           <div className="bubble grow stack" style={{ gap: 8 }}>
             <div className="row">
               <strong className="grow">{me?.character?.name ?? "我的角色"}</strong>
@@ -57,9 +79,17 @@ function DiscoveriesBody() {
                 <li key={`${i.type}-${i.id}`}>
                   <Link to={`/${LINK[i.type]}/${i.id}`} className="card-link">
                     <div className="panel soft row wrap" style={{ padding: 10 }}>
-                      {i.type === "deed" ? <ExecutorTag executor={i.executor ?? "self"} /> : <span className="tag tag-first">{i.type === "trial" ? "試用機會" : "地點"}</span>}
+                      {i.type === "deed" ? (
+                        <ExecutorTag executor={i.executor ?? "self"} />
+                      ) : (
+                        <span className="tag tag-first">
+                          {i.type === "trial" ? "試用機會" : "地點"}
+                        </span>
+                      )}
                       {i.isDemo && <span className="tag tag-demo">示範</span>}
-                      <span className="grow">「{i.title}」{i.characterName && <small> — {i.characterName}</small>}</span>
+                      <span className="grow">
+                        「{i.title}」{i.characterName && <small> — {i.characterName}</small>}
+                      </span>
                     </div>
                   </Link>
                 </li>

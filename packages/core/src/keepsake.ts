@@ -8,7 +8,17 @@ export const STICKERS = ["😆", "🙂", "😮‍💨"] as const;
 export type Sticker = (typeof STICKERS)[number];
 
 /** Stable picture ids. The web draws these; nothing here is a system emoji. */
-export const KEEPSAKE_MARKS = ["pick", "ribbon", "clay", "spoon", "bookmark", "flower", "cup", "pouch", "pebble"] as const;
+export const KEEPSAKE_MARKS = [
+  "pick",
+  "ribbon",
+  "clay",
+  "spoon",
+  "bookmark",
+  "flower",
+  "cup",
+  "pouch",
+  "pebble",
+] as const;
 export type KeepsakeMark = (typeof KEEPSAKE_MARKS)[number];
 
 export interface KeepsakeKind {

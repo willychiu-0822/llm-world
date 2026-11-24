@@ -1,4 +1,5 @@
-const INTERNAL_ID = /\b(?:pq|stp|want|deed|chr|usr|trl|faq|ses|tev|bkg|fol|ntf|dsc|note|mod|prv|plc|oar|grt)_[0-9a-z]{6,}\b/gi;
+const INTERNAL_ID =
+  /\b(?:pq|stp|want|deed|chr|usr|trl|faq|ses|tev|bkg|fol|ntf|dsc|note|mod|prv|plc|oar|grt)_[0-9a-z]{6,}\b/gi;
 
 /**
  * Text a player (or later, the town) will read.
@@ -42,7 +43,11 @@ export function textSimilarity(a: string, b: string): number {
   return inter / (A.size + B.size - inter);
 }
 
-export function bestMatch<T extends { text: string }>(query: string, items: T[], threshold = 0.3): T | undefined {
+export function bestMatch<T extends { text: string }>(
+  query: string,
+  items: T[],
+  threshold = 0.3,
+): T | undefined {
   let best: T | undefined;
   let bestScore = threshold;
   for (const item of items) {

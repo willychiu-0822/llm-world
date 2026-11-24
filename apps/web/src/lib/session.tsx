@@ -21,7 +21,17 @@ interface SessionValue {
   dismissMessage(): void;
 }
 
-const Ctx = createContext<SessionValue>({ me: null, config: null, configError: false, reloadConfig: async () => {}, loading: true, reload: async () => {}, toast: () => {}, message: "", dismissMessage: () => {} });
+const Ctx = createContext<SessionValue>({
+  me: null,
+  config: null,
+  configError: false,
+  reloadConfig: async () => {},
+  loading: true,
+  reload: async () => {},
+  toast: () => {},
+  message: "",
+  dismissMessage: () => {},
+});
 
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [me, setMe] = useState<Me | null>(null);
@@ -60,7 +70,19 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const dismissMessage = useCallback(() => setMessage(""), []);
 
   return (
-    <Ctx.Provider value={{ me, config, configError, reloadConfig, loading, reload, toast, message, dismissMessage }}>
+    <Ctx.Provider
+      value={{
+        me,
+        config,
+        configError,
+        reloadConfig,
+        loading,
+        reload,
+        toast,
+        message,
+        dismissMessage,
+      }}
+    >
       {children}
     </Ctx.Provider>
   );

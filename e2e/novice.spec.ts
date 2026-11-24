@@ -2,7 +2,40 @@ import { expect } from "@playwright/test";
 import { test } from "./helpers";
 import { apiAs, evidence, json, look } from "./helpers";
 
-const BANNED = ["AI", "MCP", "token", "agent", "provider", "連接器", "用戶端", "伺服器", "事蹟", "主題區", "鏡子", "隨筆", "本人執行", "定義", "映照", "許可證", "可能的自己", "明信片", "合照", "相簿", "照片", "相片", "拍照", "越小越好", "不計分", "勇氣", "踏出", "第一步", "你應該", "試著", "記得", "反思"];
+const BANNED = [
+  "AI",
+  "MCP",
+  "token",
+  "agent",
+  "provider",
+  "連接器",
+  "用戶端",
+  "伺服器",
+  "事蹟",
+  "主題區",
+  "鏡子",
+  "隨筆",
+  "本人執行",
+  "定義",
+  "映照",
+  "許可證",
+  "可能的自己",
+  "明信片",
+  "合照",
+  "相簿",
+  "照片",
+  "相片",
+  "拍照",
+  "越小越好",
+  "不計分",
+  "勇氣",
+  "踏出",
+  "第一步",
+  "你應該",
+  "試著",
+  "記得",
+  "反思",
+];
 
 async function expectClean(page: import("@playwright/test").Page) {
   const text = await page.evaluate(() => document.body.innerText);
@@ -11,7 +44,16 @@ async function expectClean(page: import("@playwright/test").Page) {
 
 test("新手：領養、出門、信物、做到了、收藏", async ({ page }) => {
   const mia = await apiAs("novice-mia@e2e.test", "Mia");
-  await json(mia.put("/api/me/character", { data: { name: "小雀", appearance: look("flower"), personality: "", sharing: { allowAiQuotes: true } } }));
+  await json(
+    mia.put("/api/me/character", {
+      data: {
+        name: "小雀",
+        appearance: look("flower"),
+        personality: "",
+        sharing: { allowAiQuotes: true },
+      },
+    }),
+  );
   for (const text of ["去上一次聲樂課", "在樂器行摸一把吉他"]) {
     const step = await json(mia.post("/api/first-steps", { data: { executor: "self", text } }));
     await json(mia.post(`/api/first-steps/${step.id}/complete`, { data: {} }));
@@ -19,7 +61,9 @@ test("新手：領養、出門、信物、做到了、收藏", async ({ page }) 
   await mia.dispose();
 
   const errors: string[] = [];
-  page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
+  page.on("console", (m) => {
+    if (m.type() === "error") errors.push(m.text());
+  });
   page.on("pageerror", (e) => errors.push(e.message));
 
   await page.goto("/");
@@ -85,7 +129,9 @@ test("新手：領養、出門、信物、做到了、收藏", async ({ page }) 
   await expectClean(page);
   await evidence(page, "novice-05-home-star");
 
-  const nav = page.getByRole("navigation", { name: test.info().project.name === "mobile" ? "快速導覽" : "主要導覽" });
+  const nav = page.getByRole("navigation", {
+    name: test.info().project.name === "mobile" ? "快速導覽" : "主要導覽",
+  });
   await nav.getByRole("link", { name: "收藏櫃" }).click();
   await expect(page.getByRole("heading", { name: "收藏櫃" })).toBeVisible();
   await expect(page.getByLabel("收藏進度")).toHaveText("1/9");

@@ -43,7 +43,10 @@ export const NAME_MODERATION_HINT = "這個名字小龍唸不出來，換一個�
 
 const hasCjk = (s: string) => /[㐀-鿿]/.test(s);
 
-export async function api<T = unknown>(path: string, opts: { method?: string; body?: unknown } = {}): Promise<T> {
+export async function api<T = unknown>(
+  path: string,
+  opts: { method?: string; body?: unknown } = {},
+): Promise<T> {
   const method = opts.method ?? "GET";
   // 讀取最多等 20 秒；等不到就報錯，畫面會出現「再試一次」，不會一直轉圈。寫入不設時限，免得重複送出。
   const res = await fetch(path, {
@@ -53,7 +56,8 @@ export async function api<T = unknown>(path: string, opts: { method?: string; bo
     headers: opts.body !== undefined ? { "content-type": "application/json" } : {},
     body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
   }).catch((e: unknown) => {
-    if (e instanceof DOMException && (e.name === "TimeoutError" || e.name === "AbortError")) throw new ApiError(0, "timeout", "連線有點慢，再試一次看看");
+    if (e instanceof DOMException && (e.name === "TimeoutError" || e.name === "AbortError"))
+      throw new ApiError(0, "timeout", "連線有點慢，再試一次看看");
     throw e;
   });
   if (res.status === 204) return null as T;

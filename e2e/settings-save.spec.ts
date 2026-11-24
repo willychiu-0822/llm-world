@@ -3,7 +3,16 @@ import { json, look, loginPage, test } from "./helpers";
 
 test("設定頁改脾氣與分享不必捲回上方就能存，重整後還在", async ({ browser }) => {
   const page = await loginPage(browser, "lw10-settings@e2e.test", "安");
-  await json(page.request.put("/api/me/character", { data: { name: "小龍", appearance: look(), personality: "溫柔", sharing: { allowAiQuotes: true } } }));
+  await json(
+    page.request.put("/api/me/character", {
+      data: {
+        name: "小龍",
+        appearance: look(),
+        personality: "溫柔",
+        sharing: { allowAiQuotes: true },
+      },
+    }),
+  );
   await page.goto("/me");
   await expect(page.getByRole("button", { name: "存起來" })).toBeVisible();
   await expect(page.getByRole("button", { name: "儲存名字" })).toHaveCount(0);

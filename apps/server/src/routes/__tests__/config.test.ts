@@ -7,7 +7,10 @@ import { useTestApp } from "../../test/helpers";
 
 const dist = mkdtempSync(path.join(tmpdir(), "lj-web-"));
 mkdirSync(path.join(dist, "assets"));
-writeFileSync(path.join(dist, "index.html"), "<!doctype html><title>龍角鎮</title><div id=root></div>");
+writeFileSync(
+  path.join(dist, "index.html"),
+  "<!doctype html><title>龍角鎮</title><div id=root></div>",
+);
 writeFileSync(path.join(dist, "assets", "app.js"), "console.log('hi')");
 
 describe("public config and web app serving", () => {
@@ -15,7 +18,12 @@ describe("public config and web app serving", () => {
 
   it("exposes public config", async () => {
     const res = await request(env.app).get("/api/config");
-    expect(res.body).toEqual({ appName: "龍角鎮", devLogin: true, googleLogin: false, mcpUrl: "http://localhost:8080/mcp" });
+    expect(res.body).toEqual({
+      appName: "龍角鎮",
+      devLogin: true,
+      googleLogin: false,
+      mcpUrl: "http://localhost:8080/mcp",
+    });
   });
 
   it("serves static assets and falls back to index.html for app routes", async () => {
@@ -28,7 +36,9 @@ describe("public config and web app serving", () => {
 
   it("does not swallow API, OAuth or MCP routes", async () => {
     expect((await request(env.app).get("/api/nope")).status).toBe(404);
-    expect((await request(env.app).get("/.well-known/oauth-authorization-server")).body.issuer).toBeTruthy();
+    expect(
+      (await request(env.app).get("/.well-known/oauth-authorization-server")).body.issuer,
+    ).toBeTruthy();
     expect((await request(env.app).get("/healthz")).body).toEqual({ ok: true });
   });
 });

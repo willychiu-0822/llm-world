@@ -90,6 +90,9 @@ describe("keepsakes", () => {
       { who: "小雀", title: "摸吉他" },
       { who: "阿杰", title: "摸吉他" },
     ]);
-    expect(items).toEqual([{ who: "小雀", title: "摸吉他" }, { who: "阿杰", title: "摸吉他" }]);
+    expect(items).toEqual([
+      { who: "小雀", title: "摸吉他" },
+      { who: "阿杰", title: "摸吉他" },
+    ]);
   });
 });

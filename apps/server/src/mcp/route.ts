@@ -10,7 +10,11 @@ import { buildMcpServer } from "./server";
 export function mcpRoutes(ctx: AppContext, provider: LongjiaoOAuthProvider) {
   const r = Router();
   const resource = new URL(mcpResourceUrl(ctx));
-  const auth = requireBearerAuth({ verifier: provider, resourceMetadataUrl: getOAuthProtectedResourceMetadataUrl(resource), expectedResource: resource });
+  const auth = requireBearerAuth({
+    verifier: provider,
+    resourceMetadataUrl: getOAuthProtectedResourceMetadataUrl(resource),
+    expectedResource: resource,
+  });
   const limiter = rateLimit({
     windowMs: 60_000,
     limit: ctx.config.mcpRateLimitPerMinute,
@@ -18,7 +22,10 @@ export function mcpRoutes(ctx: AppContext, provider: LongjiaoOAuthProvider) {
     legacyHeaders: false,
     keyGenerator: (req) => req.auth?.clientId ?? "anonymous",
     validate: { keyGeneratorIpFallback: false },
-    handler: (_req, res) => res.status(429).json({ jsonrpc: "2.0", error: { code: -32000, message: "rate limited" }, id: null }),
+    handler: (_req, res) =>
+      res
+        .status(429)
+        .json({ jsonrpc: "2.0", error: { code: -32000, message: "rate limited" }, id: null }),
     skip: () => ctx.config.env === "test",
   });
 
@@ -27,7 +34,10 @@ export function mcpRoutes(ctx: AppContext, provider: LongjiaoOAuthProvider) {
       const userId = String(req.auth?.extra?.userId);
       const server = buildMcpServer(ctx, userId);
       // Stateless: one server + transport per request, so any Cloud Run instance can serve any call.
-      const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });
+      const transport = new StreamableHTTPServerTransport({
+        sessionIdGenerator: undefined,
+        enableJsonResponse: true,
+      });
       res.on("close", () => {
         void transport.close();
         void server.close();
@@ -39,7 +49,9 @@ export function mcpRoutes(ctx: AppContext, provider: LongjiaoOAuthProvider) {
     }
   });
   const notAllowed = (_req: unknown, res: { status(n: number): { json(v: unknown): void } }) =>
-    res.status(405).json({ jsonrpc: "2.0", error: { code: -32000, message: "Method not allowed" }, id: null });
+    res
+      .status(405)
+      .json({ jsonrpc: "2.0", error: { code: -32000, message: "Method not allowed" }, id: null });
   r.get("/mcp", auth, notAllowed);
   r.delete("/mcp", auth, notAllowed);
   return r;

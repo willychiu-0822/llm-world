@@ -12,7 +12,9 @@ function Probe({ path }: { path: string | null }) {
       <span data-testid="loading">{String(loading)}</span>
       <span data-testid="data">{data ? data.id : "none"}</span>
       <span data-testid="error">{error ? error.message : "none"}</span>
-      <button type="button" onClick={() => void reload()}>再抓一次</button>
+      <button type="button" onClick={() => void reload()}>
+        再抓一次
+      </button>
     </div>
   );
 }

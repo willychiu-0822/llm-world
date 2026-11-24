@@ -2,7 +2,9 @@ import { expect } from "@playwright/test";
 import { test } from "./helpers";
 import { growToStageTwo, loginPage, mcpConnect, tool } from "./helpers";
 
-test("Codex instructions are on the connect page, and disconnect cuts the AI off", async ({ browser }) => {
+test("Codex instructions are on the connect page, and disconnect cuts the AI off", async ({
+  browser,
+}) => {
   const page = await loginPage(browser, "connect@e2e.test", "連線");
   await growToStageTwo(page);
   await page.goto("/connect");
@@ -28,7 +30,10 @@ test("Codex instructions are on the connect page, and disconnect cuts the AI off
   await expect(page.getByText("E2E 測試 AI")).toBeVisible();
   await expect(page.getByText("最後使用")).toBeVisible();
   await page.getByRole("button", { name: "中斷連接" }).click();
-  await page.getByRole("dialog", { name: "中斷連接" }).getByRole("button", { name: /中斷「/ }).click();
+  await page
+    .getByRole("dialog", { name: "中斷連接" })
+    .getByRole("button", { name: /中斷「/ })
+    .click();
   await expect(page.getByRole("status")).toContainText("已中斷連接");
   await expect(page.getByText("還沒有連上的朋友")).toBeVisible();
   await expect(tool(ai, "character_get")).rejects.toThrow();

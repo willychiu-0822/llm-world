@@ -2,9 +2,15 @@ import { login, type useTestApp } from "./helpers";
 
 type Env = ReturnType<typeof useTestApp>;
 
-export async function approvedProvider(env: Env, email = "leo@example.com", name = "Leo 的新手慢跑") {
+export async function approvedProvider(
+  env: Env,
+  email = "leo@example.com",
+  name = "Leo 的新手慢跑",
+) {
   const leo = await login(env.app, email, "Leo");
-  const applied = await leo.post("/api/provider/apply").send({ name, description: "每週日帶新手慢跑" });
+  const applied = await leo
+    .post("/api/provider/apply")
+    .send({ name, description: "每週日帶新手慢跑" });
   if (applied.status !== 201) throw new Error(JSON.stringify(applied.body));
   const admin = await login(env.app, "admin@example.com");
   const ok = await admin.post(`/api/admin/providers/${applied.body.id}/approve`);
@@ -13,7 +19,14 @@ export async function approvedProvider(env: Env, email = "leo@example.com", name
 }
 
 export async function leoTrial(env: Env, leo: Awaited<ReturnType<typeof login>>) {
-  const shop = (await leo.post("/api/provider/shops").send({ districtKey: "sports", name: "Leo 慢跑站", realAddress: "台北市河濱公園入口", roofColor: "#A8C8A0" })).body;
+  const shop = (
+    await leo.post("/api/provider/shops").send({
+      districtKey: "sports",
+      name: "Leo 慢跑站",
+      realAddress: "台北市河濱公園入口",
+      roofColor: "#A8C8A0",
+    })
+  ).body;
   const trial = (
     await leo.post("/api/provider/trials").send({
       placeId: shop.id,
@@ -27,8 +40,13 @@ export async function leoTrial(env: Env, leo: Awaited<ReturnType<typeof login>>)
       selfFirstStepHint: "報名這週日的慢跑",
     })
   ).body;
-  await leo.post(`/api/provider/trials/${trial.id}/faqs`).send({ question: "跟不上怎麼辦？", answer: "可以走跑交替，我會陪最後一位。" });
-  const session = (await leo.post(`/api/provider/trials/${trial.id}/sessions`).send({ startsAt: "2030-11-10T07:00:00+08:00", capacity: 2 })).body;
+  await leo
+    .post(`/api/provider/trials/${trial.id}/faqs`)
+    .send({ question: "跟不上怎麼辦？", answer: "可以走跑交替，我會陪最後一位。" });
+  const session = (
+    await leo
+      .post(`/api/provider/trials/${trial.id}/sessions`)
+      .send({ startsAt: "2030-11-10T07:00:00+08:00", capacity: 2 })
+  ).body;
   return { shop, trial, session };
 }
-

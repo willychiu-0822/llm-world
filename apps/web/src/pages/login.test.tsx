@@ -4,8 +4,16 @@ import { describe, expect, it, vi } from "vitest";
 import { LoginPage } from "./Login";
 
 const state = vi.hoisted(() => ({
-  config: { appName: "龍角鎮", devLogin: true, googleLogin: false, mcpUrl: "http://127.0.0.1/mcp" } as {
-    appName: string; devLogin: boolean; googleLogin: boolean; mcpUrl: string;
+  config: {
+    appName: "龍角鎮",
+    devLogin: true,
+    googleLogin: false,
+    mcpUrl: "http://127.0.0.1/mcp",
+  } as {
+    appName: string;
+    devLogin: boolean;
+    googleLogin: boolean;
+    mcpUrl: string;
   } | null,
   configError: false,
 }));
@@ -32,7 +40,12 @@ function renderLogin(search = "") {
 
 describe("LoginPage — LW-20 closed door", () => {
   it("explains the town is still preparing and offers a way home when no sign-in is available", () => {
-    state.config = { appName: "龍角鎮", devLogin: false, googleLogin: false, mcpUrl: "http://127.0.0.1/mcp" };
+    state.config = {
+      appName: "龍角鎮",
+      devLogin: false,
+      googleLogin: false,
+      mcpUrl: "http://127.0.0.1/mcp",
+    };
     renderLogin();
     expect(screen.getByRole("status")).toHaveTextContent("小鎮還在整理門口，晚點再來。");
     expect(screen.getByRole("link", { name: "回首頁" })).toHaveAttribute("href", "/");
@@ -41,7 +54,12 @@ describe("LoginPage — LW-20 closed door", () => {
   });
 
   it("does not mention the development login when Google is unavailable", () => {
-    state.config = { appName: "龍角鎮", devLogin: true, googleLogin: false, mcpUrl: "http://127.0.0.1/mcp" };
+    state.config = {
+      appName: "龍角鎮",
+      devLogin: true,
+      googleLogin: false,
+      mcpUrl: "http://127.0.0.1/mcp",
+    };
     renderLogin("?error=google_unavailable");
     const notice = screen.getByRole("status");
     expect(notice).toHaveTextContent(/Google 登入尚未開放/);
@@ -50,7 +68,12 @@ describe("LoginPage — LW-20 closed door", () => {
   });
 
   it("keeps the closed-door notice when Google is also flagged unavailable", () => {
-    state.config = { appName: "龍角鎮", devLogin: false, googleLogin: false, mcpUrl: "http://127.0.0.1/mcp" };
+    state.config = {
+      appName: "龍角鎮",
+      devLogin: false,
+      googleLogin: false,
+      mcpUrl: "http://127.0.0.1/mcp",
+    };
     renderLogin("?error=google_unavailable");
     expect(screen.getByRole("status")).toHaveTextContent("小鎮還在整理門口，晚點再來。");
     expect(screen.getByRole("link", { name: "回首頁" })).toBeInTheDocument();

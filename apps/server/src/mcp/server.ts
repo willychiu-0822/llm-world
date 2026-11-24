@@ -37,7 +37,14 @@ function ok(data: unknown) {
 }
 
 function fail(e: unknown) {
-  const message = e instanceof AppError ? (e.code === "step_already_done" ? `${e.code}: ${e.message}` : e.message) : e instanceof ZodError ? `invalid input: ${e.issues.map((i) => `${i.path.join(".")} ${i.message}`).join("; ")}` : "unexpected error";
+  const message =
+    e instanceof AppError
+      ? e.code === "step_already_done"
+        ? `${e.code}: ${e.message}`
+        : e.message
+      : e instanceof ZodError
+        ? `invalid input: ${e.issues.map((i) => `${i.path.join(".")} ${i.message}`).join("; ")}`
+        : "unexpected error";
   if (!(e instanceof AppError) && !(e instanceof ZodError)) console.error(e);
   return { isError: true, content: [{ type: "text" as const, text: message }] };
 }
@@ -52,7 +59,10 @@ async function run(fn: () => Promise<unknown>) {
 
 async function setPresence(ctx: AppContext, userId: string, placeId: string | null | undefined) {
   if (!placeId) return;
-  await ctx.db.update(characters).set({ lastActivePlaceId: placeId, lastActiveAt: ctx.now() }).where(eq(characters.userId, userId));
+  await ctx.db
+    .update(characters)
+    .set({ lastActivePlaceId: placeId, lastActiveAt: ctx.now() })
+    .where(eq(characters.userId, userId));
 }
 
 const id = z.string().min(1).max(64);
@@ -61,13 +71,17 @@ const WRITE = { readOnlyHint: false, destructiveHint: false, idempotentHint: fal
 const WRITE_ONCE = { readOnlyHint: false, destructiveHint: false, idempotentHint: true };
 
 export function buildMcpServer(ctx: AppContext, userId: string) {
-  const server = new McpServer({ name: "longjiao-town", title: "龍角鎮", version: "1.0.0" }, { instructions: INSTRUCTIONS });
+  const server = new McpServer(
+    { name: "longjiao-town", title: "龍角鎮", version: "1.0.0" },
+    { instructions: INSTRUCTIONS },
+  );
 
   server.registerTool(
     "character_get",
     {
       title: "Get my character",
-      description: "Get the user's character (name, appearance, personality), their active wants (things they want to do), town districts, pending AI steps and the town rules. Call this first.",
+      description:
+        "Get the user's character (name, appearance, personality), their active wants (things they want to do), town districts, pending AI steps and the town rules. Call this first.",
       inputSchema: {},
       annotations: READ,
     },
@@ -77,11 +91,18 @@ export function buildMcpServer(ctx: AppContext, userId: string) {
         const wants = (await listWants(ctx, userId)).filter((w) => w.status === "active");
         const pending = await listSteps(ctx, userId, "confirmed", "ai");
         return {
-          character: c ? { name: c.name, appearance: c.appearance, personality: c.personality } : null,
+          character: c
+            ? { name: c.name, appearance: c.appearance, personality: c.personality }
+            : null,
           note: c ? undefined : "你還沒有設定角色，請先到龍角鎮設定角色。",
           wants: wants.map((w) => ({ id: w.id, text: w.text, districtKey: w.districtKey })),
           pendingAiSteps: pending.length,
-          districts: DISTRICTS.map((d) => ({ key: d.key, name: d.name, theme: d.theme, publicPlaceId: d.publicPlaceId })),
+          districts: DISTRICTS.map((d) => ({
+            key: d.key,
+            name: d.name,
+            theme: d.theme,
+            publicPlaceId: d.publicPlaceId,
+          })),
           rules: RULES,
         };
       }),
@@ -91,7 +112,8 @@ export function buildMcpServer(ctx: AppContext, userId: string) {
     "life_get",
     {
       title: "Read my character's day",
-      description: "Read-only. The character's made-up day in town: mood, what it wants today, what it already did, recent diary days and its keepsake collection. All of it is fictional play, not real people's deeds. It never includes other players. Use it for a small story; use world_discover for real experiences.",
+      description:
+        "Read-only. The character's made-up day in town: mood, what it wants today, what it already did, recent diary days and its keepsake collection. All of it is fictional play, not real people's deeds. It never includes other players. Use it for a small story; use world_discover for real experiences.",
       inputSchema: {},
       annotations: READ,
     },
@@ -102,8 +124,12 @@ export function buildMcpServer(ctx: AppContext, userId: string) {
     "world_discover",
     {
       title: "Discover in town",
-      description: "Find real deeds (other people's first steps) and trial opportunities related to the user's wants, ranked by relevance, similarity, first-time and small-step. Optionally focus on one want.",
-      inputSchema: { wantId: id.optional().describe("Focus on one want"), limit: z.number().int().min(1).max(20).optional() },
+      description:
+        "Find real deeds (other people's first steps) and trial opportunities related to the user's wants, ranked by relevance, similarity, first-time and small-step. Optionally focus on one want.",
+      inputSchema: {
+        wantId: id.optional().describe("Focus on one want"),
+        limit: z.number().int().min(1).max(20).optional(),
+      },
       annotations: READ,
     },
     async (args) => run(() => discover(ctx, userId, { wantId: args.wantId, limit: args.limit })),
@@ -113,7 +139,8 @@ export function buildMcpServer(ctx: AppContext, userId: string) {
     "place_get",
     {
       title: "Visit a place",
-      description: "Visit a place in town (a district's public place or a provider's shop) and see its public deeds and trials. Your character will appear there on the town map.",
+      description:
+        "Visit a place in town (a district's public place or a provider's shop) and see its public deeds and trials. Your character will appear there on the town map.",
       inputSchema: { placeId: id },
       annotations: READ,
     },
@@ -129,7 +156,8 @@ export function buildMcpServer(ctx: AppContext, userId: string) {
     "deed_get",
     {
       title: "Read a deed",
-      description: "Read one deed in detail: what the person's first step was, who executed it (ai or self), and notes they chose to share.",
+      description:
+        "Read one deed in detail: what the person's first step was, who executed it (ai or self), and notes they chose to share.",
       inputSchema: { deedId: id },
       annotations: READ,
     },
@@ -145,14 +173,17 @@ export function buildMcpServer(ctx: AppContext, userId: string) {
     "trial_get",
     {
       title: "Look at a trial",
-      description: "Look at a provider's trial opportunity: what happens (process info), duration, whether you can leave anytime, FAQ, upcoming sessions and the real address.",
+      description:
+        "Look at a provider's trial opportunity: what happens (process info), duration, whether you can leave anytime, FAQ, upcoming sessions and the real address.",
       inputSchema: { trialId: id },
       annotations: READ,
     },
     async (args) =>
       run(async () => {
         const t = await getTrialView(ctx, args.trialId);
-        await ctx.db.insert(trialEvents).values({ id: newId("tev"), trialId: t.id, userId, kind: "ai_view" });
+        await ctx.db
+          .insert(trialEvents)
+          .values({ id: newId("tev"), trialId: t.id, userId, kind: "ai_view" });
         await setPresence(ctx, userId, t.place.id);
         return t;
       }),
@@ -162,21 +193,38 @@ export function buildMcpServer(ctx: AppContext, userId: string) {
     "provider_ask",
     {
       title: "Ask a provider",
-      description: "Ask a trial's provider a question on the user's behalf. Answered from the FAQ when possible; otherwise forwarded to the provider, and the user is notified when they answer.",
-      inputSchema: { trialId: id, question: z.string().min(1).max(300), stepId: id.optional().describe("The AI step this question belongs to, if any") },
+      description:
+        "Ask a trial's provider a question on the user's behalf. Answered from the FAQ when possible; otherwise forwarded to the provider, and the user is notified when they answer.",
+      inputSchema: {
+        trialId: id,
+        question: z.string().min(1).max(300),
+        stepId: id.optional().describe("The AI step this question belongs to, if any"),
+      },
       annotations: WRITE,
     },
-    async (args) => run(() => askProvider(ctx, userId, { trialId: args.trialId, question: args.question }, { stepId: args.stepId })),
+    async (args) =>
+      run(() =>
+        askProvider(
+          ctx,
+          userId,
+          { trialId: args.trialId, question: args.question },
+          { stepId: args.stepId },
+        ),
+      ),
   );
 
   server.registerTool(
     "discovery_bring_back",
     {
       title: "Bring discoveries back",
-      description: "Save what you found to the user's discovery inbox, with a short message in the character's voice. Items must be deeds, trials or places you actually read.",
+      description:
+        "Save what you found to the user's discovery inbox, with a short message in the character's voice. Items must be deeds, trials or places you actually read.",
       inputSchema: {
         message: z.string().min(1).max(1000),
-        items: z.array(z.object({ type: z.enum(["deed", "trial", "place"]), id })).min(1).max(10),
+        items: z
+          .array(z.object({ type: z.enum(["deed", "trial", "place"]), id }))
+          .min(1)
+          .max(10),
       },
       annotations: WRITE,
     },
@@ -187,32 +235,48 @@ export function buildMcpServer(ctx: AppContext, userId: string) {
     "first_step_propose",
     {
       title: "Propose a first step",
-      description: "Propose a small, concrete first step for the user. executor 'ai' = something you will do in town; 'self' = something the person does in real life. It stays a draft until the user confirms it in the web app.",
+      description:
+        "Propose a small, concrete first step for the user. executor 'ai' = something you will do in town; 'self' = something the person does in real life. It stays a draft until the user confirms it in the web app.",
       inputSchema: {
         executor,
         text: z.string().min(1).max(200),
         wantId: id.optional(),
-        sourceDeedIds: z.array(id).max(5).optional().describe("Deeds that inspired this step (their owners get thanked)"),
+        sourceDeedIds: z
+          .array(id)
+          .max(5)
+          .optional()
+          .describe("Deeds that inspired this step (their owners get thanked)"),
         trialId: id.optional(),
         reason: z.string().max(500).optional(),
       },
       annotations: WRITE,
     },
     async (args) =>
-      run(async () => ({ ...(await proposeStep(ctx, userId, { ...args, sourceDeedIds: args.sourceDeedIds ?? [] })), note: "已送出建議，等你在龍角鎮確認後才會成立。" })),
+      run(async () => ({
+        ...(await proposeStep(ctx, userId, { ...args, sourceDeedIds: args.sourceDeedIds ?? [] })),
+        note: "已送出建議，等你在龍角鎮確認後才會成立。",
+      })),
   );
 
   server.registerTool(
     "first_step_list",
     {
       title: "List my AI steps",
-      description: "List first steps the user has confirmed and assigned to you (executor ai) that are not done yet.",
+      description:
+        "List first steps the user has confirmed and assigned to you (executor ai) that are not done yet.",
       inputSchema: {},
       annotations: READ,
     },
     async () =>
       run(async () =>
-        (await listSteps(ctx, userId, "confirmed", "ai")).map((s) => ({ id: s.id, text: s.text, wantId: s.wantId, sourceDeedIds: s.sourceDeedIds, trialId: s.trialId, createdAt: s.createdAt })),
+        (await listSteps(ctx, userId, "confirmed", "ai")).map((s) => ({
+          id: s.id,
+          text: s.text,
+          wantId: s.wantId,
+          sourceDeedIds: s.sourceDeedIds,
+          trialId: s.trialId,
+          createdAt: s.createdAt,
+        })),
       ),
   );
 
@@ -220,7 +284,8 @@ export function buildMcpServer(ctx: AppContext, userId: string) {
     "first_step_complete",
     {
       title: "Complete an AI step",
-      description: "Report the result of a confirmed AI step assigned to you. It is NOT published. The person reviews, edits, or rejects it in 龍角鎮; others cannot read it until they approve. Write what may later be public: no private details, no internal ids (pq_, stp_, want_), and address the person as 你, never 主人. Never complete a step the person must do themselves. Completing an already finished step returns step_already_done.",
+      description:
+        "Report the result of a confirmed AI step assigned to you. It is NOT published. The person reviews, edits, or rejects it in 龍角鎮; others cannot read it until they approve. Write what may later be public: no private details, no internal ids (pq_, stp_, want_), and address the person as 你, never 主人. Never complete a step the person must do themselves. Completing an already finished step returns step_already_done.",
       inputSchema: { stepId: id, result: z.string().min(1).max(2000) },
       annotations: WRITE_ONCE,
     },
