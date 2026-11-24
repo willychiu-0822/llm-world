@@ -55,6 +55,9 @@ export async function destroySession(ctx: AppContext, req: Request, res: Respons
 export function loadSession(ctx: AppContext): RequestHandler {
   return async (req, _res, next) => {
     try {
+      // Bundles do not need the signed-in user. A busy pool would otherwise hold
+      // the lazy chunk, and the page stays on「載入中……」after a refresh.
+      if (req.path.startsWith("/assets/")) return next();
       const token = readCookie(req, SESSION_COOKIE);
       if (token) {
         const rows = await ctx.db

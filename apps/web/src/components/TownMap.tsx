@@ -300,7 +300,10 @@ export function TownMap({ districts, places, children, onInteract }: { districts
     pointers.current.delete(e.pointerId);
     if (pointers.current.size < 2) pinch.current = null;
     if (drag.current?.id === e.pointerId) drag.current = null;
-    setTimeout(() => (suppressClick.current = false), 0);
+    // The click that belongs to this drag is dispatched after pointerup, still
+    // before the next task. If the browser never emits that click, drop the
+    // flag on the next turn so a later tap is not swallowed too.
+    if (suppressClick.current) setTimeout(() => { suppressClick.current = false; }, 0);
   };
 
   const byDistrict = useMemo(() => {
@@ -324,10 +327,14 @@ export function TownMap({ districts, places, children, onInteract }: { districts
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
         onClickCapture={(e) => {
-          if (suppressClick.current) {
-            e.preventDefault();
-            e.stopPropagation();
-          }
+          if (!suppressClick.current) return;
+          // Only the click that finishes the drag is discarded. Clear the flag
+          // here — not on a timer — so a tap that arrives in the same turn
+          // (a person, or Playwright, clicking a building right after panning)
+          // still opens the place.
+          suppressClick.current = false;
+          e.preventDefault();
+          e.stopPropagation();
         }}
       >
         <defs>

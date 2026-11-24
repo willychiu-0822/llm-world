@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { api, ApiError } from "./api";
 import type { Me } from "./types";
 
@@ -30,14 +30,19 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
+  const latest = useRef(0);
   const reload = useCallback(async () => {
+    const mine = ++latest.current;
     try {
-      setMe((await api<{ me: Me | null }>("/api/session")).me);
+      const next = (await api<{ me: Me | null }>("/api/session")).me;
+      if (mine !== latest.current) return;
+      setMe(next);
     } catch (e) {
+      if (mine !== latest.current) return;
       if (e instanceof ApiError && e.status === 401) setMe(null);
       else throw e;
     } finally {
-      setLoading(false);
+      if (mine === latest.current) setLoading(false);
     }
   }, []);
 
@@ -54,6 +59,13 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     void reload();
     void reloadConfig();
+    // A restored page keeps loading=true and the aborted /api/session promise.
+    // Read it again, or the whole app stays on「載入中……」.
+    const onShow = (e: PageTransitionEvent) => {
+      if (e.persisted) void reload();
+    };
+    window.addEventListener("pageshow", onShow);
+    return () => window.removeEventListener("pageshow", onShow);
   }, [reload, reloadConfig]);
 
   const toast = useCallback((msg: string) => setMessage(msg), []);
