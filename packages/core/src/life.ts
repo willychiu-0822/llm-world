@@ -10,7 +10,11 @@ export const LIFE_ACTIVITIES = [
   { id: "abroad", name: "去星砂島出國玩", emoji: "🐚", place: "星砂島", wish: "想學海那邊的招呼。", help: "陪我練一次招手？", story: "星砂島向導帶小龍聽海。牠學會島上的招呼，把一小瓶星砂帶回家。", reward: "星砂瓶", category: "旅行紀念品" },
 ] as const;
 export type LifeActivityId = typeof LIFE_ACTIVITIES[number]["id"];
-export const lifeActivityId = z.enum(["shop", "exercise", "music", "visit", "festival", "town", "abroad"]);
+export const LIFE_STATE_VERSION = 1 as const;
+/** One collection slot per activity, so adding an activity raises the cap with it. */
+export const LIFE_INVENTORY_CAP = LIFE_ACTIVITIES.length;
+const LIFE_ACTIVITY_IDS = new Set<string>(LIFE_ACTIVITIES.map(a => a.id));
+export const lifeActivityId = z.enum(LIFE_ACTIVITIES.map(a => a.id) as [LifeActivityId, ...LifeActivityId[]]);
 export const lifeActivityInput = z.object({ activityId: lifeActivityId });
 export const lifePatchInput = z.object({
   allowVisits: z.boolean().optional(),
@@ -28,19 +32,155 @@ export function lifeActivityStory(id: LifeActivityId, now: Date): string {
 }
 const entry = z.object({ activityId: lifeActivityId, at: z.string() });
 export const lifeStateSchema = z.object({
-  version: z.literal(1).default(1),
-  days: z.array(z.object({ day: z.string(), autonomous: z.string(), entries: z.array(entry).max(7) })).max(60).default([]),
-  inventory: z.array(z.object({ activityId: lifeActivityId, earnedOn: z.string() })).max(7).default([]),
+  version: z.literal(LIFE_STATE_VERSION).default(LIFE_STATE_VERSION),
+  days: z.array(z.object({ day: z.string(), autonomous: z.string(), entries: z.array(entry).max(LIFE_ACTIVITIES.length) })).max(60).default([]),
+  inventory: z.array(z.object({ activityId: lifeActivityId, earnedOn: z.string() })).max(LIFE_INVENTORY_CAP).default([]),
   outfit: z.literal("shop").nullable().default(null),
   decoration: z.literal("festival").nullable().default(null),
   allowVisits: z.boolean().default(false),
 });
 export type LifeState = z.infer<typeof lifeStateSchema>;
-export const readLife = (sharing: unknown): LifeState => {
-  const raw = sharing && typeof sharing === "object" ? (sharing as Record<string, unknown>).life : undefined;
-  const parsed = lifeStateSchema.safeParse(raw ?? {});
-  return parsed.success ? parsed.data : lifeStateSchema.parse({});
-};
+
+export interface LifeMigration {
+  from: number;
+  to: number;
+  migrate: (doc: Record<string, unknown>) => Record<string, unknown>;
+}
+/** Each step advances one version. Add the step from N to N+1 before raising LIFE_STATE_VERSION. */
+export const LIFE_MIGRATIONS: LifeMigration[] = [];
+export type LifeMigrationResult = { ok: true; document: Record<string, unknown> } | { ok: false; reason: string };
+
+/** Bring a stored document up to `target`. A newer version is refused so it cannot be rewritten as an older shape. */
+export function migrateLifeState(raw: unknown, migrations: readonly LifeMigration[] = LIFE_MIGRATIONS, target: number = LIFE_STATE_VERSION): LifeMigrationResult {
+  if (raw === null || typeof raw !== "object" || Array.isArray(raw)) return { ok: false, reason: "life state is not an object" };
+  const source = raw as Record<string, unknown>;
+  let version: number;
+  if (!("version" in source) || source.version === undefined) version = 1;
+  else if (typeof source.version !== "number" || !Number.isInteger(source.version)) return { ok: false, reason: `unrecognised life version ${JSON.stringify(source.version)}` };
+  else version = source.version;
+  if (version > target) return { ok: false, reason: `life version ${version} is newer than supported version ${target}` };
+  if (version < 1) return { ok: false, reason: `life version ${version} is not supported` };
+  let document: Record<string, unknown> = { ...source };
+  while (version < target) {
+    const step = migrations.find(m => m.from === version);
+    if (!step || step.to !== version + 1) return { ok: false, reason: `no migration from life version ${version} to ${version + 1}` };
+    document = step.migrate(document);
+    version = step.to;
+  }
+  return { ok: true, document: { ...document, version: target } };
+}
+
+const looseEntry = z.object({ activityId: z.string(), at: z.string() });
+const looseItem = z.object({ activityId: z.string(), earnedOn: z.string() });
+function logLife(message: string) {
+  console.warn(`life: ${message}`);
+}
+function emptyLife(): LifeState {
+  return { version: LIFE_STATE_VERSION, days: [], inventory: [], outfit: null, decoration: null, allowVisits: false };
+}
+function isActivityId(id: string): id is LifeActivityId {
+  return LIFE_ACTIVITY_IDS.has(id);
+}
+function readEntries(raw: unknown, day: string): LifeState["days"][number]["entries"] {
+  if (raw === undefined) return [];
+  if (!Array.isArray(raw)) {
+    logLife(`skipped diary entries for ${day}: not an array`);
+    return [];
+  }
+  const entries: LifeState["days"][number]["entries"] = [];
+  for (const item of raw) {
+    const parsed = looseEntry.safeParse(item);
+    if (!parsed.success) {
+      logLife(`skipped malformed diary entry on ${day}`);
+      continue;
+    }
+    if (!isActivityId(parsed.data.activityId)) {
+      logLife(`skipped unrecognised activityId "${parsed.data.activityId}" in diary ${day}`);
+      continue;
+    }
+    entries.push({ activityId: parsed.data.activityId, at: parsed.data.at });
+  }
+  return entries;
+}
+function readInventory(raw: unknown): LifeState["inventory"] {
+  if (raw === undefined) return [];
+  if (!Array.isArray(raw)) {
+    logLife("skipped inventory: not an array");
+    return [];
+  }
+  const inventory: LifeState["inventory"] = [];
+  for (const item of raw) {
+    const parsed = looseItem.safeParse(item);
+    if (!parsed.success) {
+      logLife("skipped malformed collection item");
+      continue;
+    }
+    if (!isActivityId(parsed.data.activityId)) {
+      logLife(`skipped unrecognised activityId "${parsed.data.activityId}" in inventory`);
+      continue;
+    }
+    inventory.push({ activityId: parsed.data.activityId, earnedOn: parsed.data.earnedOn });
+  }
+  return inventory;
+}
+function readDays(raw: unknown): LifeState["days"] {
+  if (raw === undefined) return [];
+  if (!Array.isArray(raw)) {
+    logLife("skipped diary: not an array");
+    return [];
+  }
+  const days: LifeState["days"] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== "object" || Array.isArray(item)) {
+      logLife("skipped malformed diary day");
+      continue;
+    }
+    const day = item as Record<string, unknown>;
+    if (typeof day.day !== "string" || !day.day) {
+      logLife("skipped diary day without a date");
+      continue;
+    }
+    if (typeof day.autonomous !== "string") logLife(`skipped unrecognised autonomous text on ${day.day}`);
+    days.push({ day: day.day, autonomous: typeof day.autonomous === "string" ? day.autonomous : "", entries: readEntries(day.entries, day.day) });
+  }
+  return days;
+}
+function readChoice<T extends string>(value: unknown, allowed: T, label: string): T | null {
+  if (value == null) return null;
+  if (value === allowed) return allowed;
+  logLife(`skipped unrecognised ${label} ${JSON.stringify(value)}`);
+  return null;
+}
+function readLenient(doc: Record<string, unknown>): LifeState {
+  const allowVisits = doc.allowVisits;
+  if (allowVisits !== undefined && typeof allowVisits !== "boolean") logLife(`skipped unrecognised allowVisits ${JSON.stringify(allowVisits)}`);
+  return {
+    version: LIFE_STATE_VERSION,
+    days: readDays(doc.days),
+    inventory: readInventory(doc.inventory),
+    outfit: readChoice(doc.outfit, "shop", "outfit"),
+    decoration: readChoice(doc.decoration, "festival", "decoration"),
+    allowVisits: allowVisits === true,
+  };
+}
+
+export type LifeParseResult = { ok: true; state: LifeState } | { ok: false; reason: string };
+/** Read stored life. Unknown activity ids are dropped one by one. A document we cannot upgrade is a failure, not an empty diary. */
+export function parseLife(sharing: unknown): LifeParseResult {
+  if (sharing === null || typeof sharing !== "object" || Array.isArray(sharing) || !("life" in sharing)) return { ok: true, state: emptyLife() };
+  const raw = (sharing as Record<string, unknown>).life;
+  if (raw == null) return { ok: true, state: emptyLife() };
+  const migrated = migrateLifeState(raw);
+  if (!migrated.ok) {
+    logLife(`parse failed: ${migrated.reason}`);
+    return migrated;
+  }
+  return { ok: true, state: readLenient(migrated.document) };
+}
+export function readLife(sharing: unknown): LifeState {
+  const parsed = parseLife(sharing);
+  return parsed.ok ? parsed.state : emptyLife();
+}
 export function lifePick(seed: string, length: number) {
   let n = 2166136261;
   for (const c of seed) n = Math.imul(n ^ c.charCodeAt(0), 16777619);

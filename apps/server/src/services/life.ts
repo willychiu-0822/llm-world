@@ -1,4 +1,4 @@
-import { autonomousLife, LIFE_ACTIVITIES, lifeActivityInput, lifeActivityStory, lifeClock, lifePatchInput, lifePick, lifeScene, readLife, type LifeState, type LifeView } from "@lj/core";
+import { autonomousLife, LIFE_ACTIVITIES, LIFE_INVENTORY_CAP, lifeActivityInput, lifeActivityStory, lifeClock, lifePatchInput, lifePick, lifeScene, parseLife, readLife, type LifeState, type LifeView } from "@lj/core";
 import { characters, deeds, places, providers } from "@lj/db";
 import { and, asc, desc, eq, ne, sql } from "drizzle-orm";
 import type { AppContext } from "../context";
@@ -71,7 +71,9 @@ async function mutate(ctx: AppContext, userId: string, change: (life: LifeState,
   const c = await ctx.db.transaction(async tx => {
     const [c] = await tx.select().from(characters).where(eq(characters.userId, userId)).for("update");
     if (!c) throw new AppError("conflict", "先把小龍帶回家");
-    const life = readLife(c.sharing);
+    const parsed = parseLife(c.sharing);
+    if (!parsed.ok) throw new Error(`refusing to write life state: ${parsed.reason}`);
+    const life = parsed.state;
     change(life, c.id, ctx.now());
     await tx.update(characters).set({ sharing: sql`jsonb_set(${characters.sharing}, '{life}', ${JSON.stringify(life)}::jsonb)` }).where(eq(characters.id, c.id));
     return c;
@@ -89,7 +91,8 @@ export async function playLife(ctx: AppContext, userId: string, raw: unknown) {
     }
     if (today.entries.some(e => e.activityId === activityId)) return;
     today.entries.push({activityId, at: now.toISOString()});
-    if (!life.inventory.some(i => i.activityId === activityId)) life.inventory.push({ activityId, earnedOn: day });
+    const owned = new Set(life.inventory.map(i => i.activityId));
+    if (!owned.has(activityId) && owned.size < LIFE_INVENTORY_CAP) life.inventory.push({ activityId, earnedOn: day });
   });
 }
 export async function patchLife(ctx: AppContext, userId: string, raw: unknown) {
