@@ -15,12 +15,23 @@ export function Dialog({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const closeRef = useRef(onClose);
+  // The control that opened the dialog. `busy` re-runs the focus trap; don't replace this with
+  // whatever was focused after that (often the dialog itself), or Esc can't return there.
+  const openerRef = useRef<HTMLElement | null>(null);
   closeRef.current = onClose;
 
   useEffect(() => {
     const root = ref.current;
     if (!root) return;
-    const previous = document.activeElement as HTMLElement | null;
+    const active = document.activeElement;
+    if (
+      openerRef.current == null &&
+      active instanceof HTMLElement &&
+      active !== document.body &&
+      !root.contains(active)
+    ) {
+      openerRef.current = active;
+    }
     const app = document.querySelector(".app");
     app?.setAttribute("inert", "");
     const items = () => [
@@ -54,7 +65,7 @@ export function Dialog({
     return () => {
       document.removeEventListener("keydown", onKey);
       app?.removeAttribute("inert");
-      previous?.focus?.();
+      openerRef.current?.focus();
     };
   }, [busy]);
 
