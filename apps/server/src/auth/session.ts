@@ -13,7 +13,6 @@ export interface SessionUser {
 }
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
       user?: SessionUser;
@@ -25,7 +24,13 @@ export const SESSION_COOKIE = "lj_sid";
 const SESSION_DAYS = 30;
 
 export function cookieOptions(ctx: AppContext, maxAgeSec: number): SerializeOptions {
-  return { httpOnly: true, sameSite: "lax", secure: ctx.config.baseUrl.startsWith("https://"), path: "/", maxAge: maxAgeSec };
+  return {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: ctx.config.baseUrl.startsWith("https://"),
+    path: "/",
+    maxAge: maxAgeSec,
+  };
 }
 
 export function readCookie(req: Request, name: string): string | undefined {
@@ -58,7 +63,12 @@ export function loadSession(ctx: AppContext): RequestHandler {
       const token = readCookie(req, SESSION_COOKIE);
       if (token) {
         const rows = await ctx.db
-          .select({ id: users.id, email: users.email, displayName: users.displayName, roles: users.roles })
+          .select({
+            id: users.id,
+            email: users.email,
+            displayName: users.displayName,
+            roles: users.roles,
+          })
           .from(sessions)
           .innerJoin(users, eq(users.id, sessions.userId))
           .where(and(eq(sessions.id, sha256(token)), gt(sessions.expiresAt, ctx.now())))
@@ -80,7 +90,8 @@ export function requireUser(req: Request, _res: Response, next: NextFunction) {
 export function requireRole(role: "admin" | "provider"): RequestHandler {
   return (req, _res, next) => {
     if (!req.user) return next(new AppError("unauthorized", "login required"));
-    if (!req.user.roles.includes(role)) return next(new AppError("forbidden", `${role} role required`));
+    if (!req.user.roles.includes(role))
+      return next(new AppError("forbidden", `${role} role required`));
     next();
   };
 }

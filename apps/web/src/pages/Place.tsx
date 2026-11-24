@@ -25,8 +25,14 @@ interface PlaceView {
 }
 
 function uniqueKeepsakes(deeds: Deed[]) {
-  const tagged = deeds.map((deed) => ({ deed, who: deed.character?.name ?? "", title: deed.title }));
-  return dedupeKeepsakes(tagged).slice(0, 3).map((item) => item.deed);
+  const tagged = deeds.map((deed) => ({
+    deed,
+    who: deed.character?.name ?? "",
+    title: deed.title,
+  }));
+  return dedupeKeepsakes(tagged)
+    .slice(0, 3)
+    .map((item) => item.deed);
 }
 
 export function PlacePage() {
@@ -42,7 +48,7 @@ export function PlacePage() {
   if (error) return <ErrorBox error={error} />;
   if (!data) return null;
   const folk = townFolk(data.districtKey);
-  const keepsakes = uniqueKeepsakes(data.deeds.filter(d => !d.isMine));
+  const keepsakes = uniqueKeepsakes(data.deeds.filter((d) => !d.isMine));
   const grown = (me?.pet?.stage ?? 0) >= 2;
   const accept = async (deed: Deed) => {
     if (!me) {
@@ -54,7 +60,11 @@ export function PlacePage() {
     setAcceptError("");
     setBusy(true);
     try {
-      await acceptKeepsake({ deedId: deed.id, title: deed.title, object: keepsakeFor(deed.districtKey).name });
+      await acceptKeepsake({
+        deedId: deed.id,
+        title: deed.title,
+        object: keepsakeFor(deed.districtKey).name,
+      });
       nav("/tries", { state: { hello: true } });
     } catch {
       setAcceptError("這顆先放著，再試一次或換一顆看看。");
@@ -67,10 +77,16 @@ export function PlacePage() {
     <div className="stack">
       <section className="panel hero stack" style={{ gap: 6 }}>
         <h1>{data.name}</h1>
-        {data.kind === "shop" && data.providerName && <p>{joinWords(data.providerName, "的小店")}</p>}
-        <p><strong>{folk.name}</strong>：「{folk.line}」</p>
+        {data.kind === "shop" && data.providerName && (
+          <p>{joinWords(data.providerName, "的小店")}</p>
+        )}
+        <p>
+          <strong>{folk.name}</strong>：「{folk.line}」
+        </p>
         {data.description && <p className="muted">{data.description}</p>}
-        {data.kind === "shop" && <p>{data.online ? "線上見" : data.realAddress ? `📍 ${data.realAddress}` : ""}</p>}
+        {data.kind === "shop" && (
+          <p>{data.online ? "線上見" : data.realAddress ? `📍 ${data.realAddress}` : ""}</p>
+        )}
       </section>
       {grown && data.trials.length > 0 && (
         <section className="stack">
@@ -80,7 +96,9 @@ export function PlacePage() {
               <Link key={t.id} to={`/trials/${t.id}`} className="card-link">
                 <div className="panel stack" style={{ gap: 4 }}>
                   <strong>{t.title}</strong>
-                  <small>{t.durationMin} 分鐘{t.whenText ? `・${t.whenText}` : ""}</small>
+                  <small>
+                    {t.durationMin} 分鐘{t.whenText ? `・${t.whenText}` : ""}
+                  </small>
                 </div>
               </Link>
             ))}
@@ -91,12 +109,23 @@ export function PlacePage() {
         <h2>留下的信物</h2>
         {keepsakes.length ? (
           <>
-            <button type="button" className="btn primary" onClick={() => setOpen(keepsakes[0])}>看看這顆信物</button>
+            <button type="button" className="btn primary" onClick={() => setOpen(keepsakes[0])}>
+              看看這顆信物
+            </button>
             <div className="stack">
               {keepsakes.map((deed) => {
-                const line = warmLine({ name: deed.character?.name ?? "一位鎮民", title: deed.title, districtKey: deed.districtKey });
+                const line = warmLine({
+                  name: deed.character?.name ?? "一位鎮民",
+                  title: deed.title,
+                  districtKey: deed.districtKey,
+                });
                 return (
-                  <button key={deed.id} type="button" className="panel row card-link" onClick={() => setOpen(deed)}>
+                  <button
+                    key={deed.id}
+                    type="button"
+                    className="panel row card-link"
+                    onClick={() => setOpen(deed)}
+                  >
                     <TownMark name={keepsakeFor(deed.districtKey).key} size={40} />
                     <span className="grow" style={{ textAlign: "left" }}>
                       <strong>{line}</strong>
@@ -110,17 +139,47 @@ export function PlacePage() {
         ) : (
           <div className="empty stack">
             <p>這裡還沒有信物。小龍說牠想去別的地方聞聞。</p>
-            <Link to="/map" className="btn primary">換個地方看看</Link>
+            <Link to="/map" className="btn primary">
+              換個地方看看
+            </Link>
           </div>
         )}
       </section>
       {open && (
-        <Dialog title={keepsakeFor(open.districtKey).name} busy={busy} onClose={() => { if (!busy) setOpen(null); }}>
+        <Dialog
+          title={keepsakeFor(open.districtKey).name}
+          busy={busy}
+          onClose={() => {
+            if (!busy) setOpen(null);
+          }}
+        >
           <TownMark name={keepsakeFor(open.districtKey).key} size={56} />
-          <p>{warmLine({ name: open.character?.name ?? "一位鎮民", title: open.title, districtKey: open.districtKey })}</p>
-          {acceptError && <p role="alert" className="error">{acceptError}</p>}
-          <button type="button" className="btn primary" disabled={busy} aria-busy={busy} onClick={() => void accept(open)}>{busy ? "記下來…" : "我也去摸摸看"}</button>
-          {grown && <Link className="btn ghost" to={`/deeds/${open.id}`}>看看完整分享</Link>}
+          <p>
+            {warmLine({
+              name: open.character?.name ?? "一位鎮民",
+              title: open.title,
+              districtKey: open.districtKey,
+            })}
+          </p>
+          {acceptError && (
+            <p role="alert" className="error">
+              {acceptError}
+            </p>
+          )}
+          <button
+            type="button"
+            className="btn primary"
+            disabled={busy}
+            aria-busy={busy}
+            onClick={() => void accept(open)}
+          >
+            {busy ? "記下來…" : "我也去摸摸看"}
+          </button>
+          {grown && (
+            <Link className="btn ghost" to={`/deeds/${open.id}`}>
+              看看完整分享
+            </Link>
+          )}
         </Dialog>
       )}
     </div>

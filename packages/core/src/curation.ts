@@ -22,7 +22,14 @@ export interface CurationContext {
   now: Date;
 }
 
-export type Reason = "same_district" | "similar_text" | "first_time" | "small_step" | "fresh" | "seen" | "demo";
+export type Reason =
+  | "same_district"
+  | "similar_text"
+  | "first_time"
+  | "small_step"
+  | "fresh"
+  | "seen"
+  | "demo";
 
 export interface Ranked<C extends Candidate = Candidate> extends Candidate {
   score: number;
@@ -36,7 +43,11 @@ const DAY = 86_400_000;
  * Rule-based curation: related, similar, achievable ("first time"), one step away.
  * Never influenced by payment. Real content always ranks before demo content.
  */
-export function rankCandidates<C extends Candidate>(candidates: C[], ctx: CurationContext, limit = 20): Ranked<C>[] {
+export function rankCandidates<C extends Candidate>(
+  candidates: C[],
+  ctx: CurationContext,
+  limit = 20,
+): Ranked<C>[] {
   const ranked: Ranked<C>[] = [];
   for (const c of candidates) {
     if (ctx.selfUserId && c.ownerId === ctx.selfUserId) continue;

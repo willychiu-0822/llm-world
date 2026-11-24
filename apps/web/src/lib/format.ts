@@ -4,12 +4,25 @@ const TZ = "Asia/Taipei";
 
 export function formatDateTime(v: string | Date | null | undefined): string {
   if (!v) return "";
-  return new Intl.DateTimeFormat("zh-TW", { timeZone: TZ, month: "numeric", day: "numeric", weekday: "short", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(v));
+  return new Intl.DateTimeFormat("zh-TW", {
+    timeZone: TZ,
+    month: "numeric",
+    day: "numeric",
+    weekday: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(new Date(v));
 }
 
 export function formatDate(v: string | Date | null | undefined): string {
   if (!v) return "";
-  return new Intl.DateTimeFormat("zh-TW", { timeZone: TZ, year: "numeric", month: "numeric", day: "numeric" }).format(new Date(v));
+  return new Intl.DateTimeFormat("zh-TW", {
+    timeZone: TZ,
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+  }).format(new Date(v));
 }
 
 export function timeAgo(v: string | Date, now = new Date()): string {

@@ -46,8 +46,13 @@ export function createGoogleClient(config: Config): GoogleClient {
         issuer: ["https://accounts.google.com", "accounts.google.com"],
         audience: config.google.clientId,
       });
-      if (!payload.email || payload.email_verified === false) throw new Error("google email not verified");
-      return { sub: String(payload.sub), email: String(payload.email), name: String(payload.name ?? payload.email) };
+      if (!payload.email || payload.email_verified === false)
+        throw new Error("google email not verified");
+      return {
+        sub: String(payload.sub),
+        email: String(payload.email),
+        name: String(payload.name ?? payload.email),
+      };
     },
   };
 }

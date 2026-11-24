@@ -33,7 +33,16 @@ export async function upcomingSessions(ctx: AppContext, trialIds: string[]) {
     .where(and(inArray(trialSessions.trialId, trialIds), gte(trialSessions.startsAt, since)))
     .orderBy(asc(trialSessions.startsAt));
   const taken = ss.length
-    ? await ctx.db.select({ sessionId: bookings.sessionId, c: count() }).from(bookings).where(inArray(bookings.sessionId, ss.map((s) => s.id))).groupBy(bookings.sessionId)
+    ? await ctx.db
+        .select({ sessionId: bookings.sessionId, c: count() })
+        .from(bookings)
+        .where(
+          inArray(
+            bookings.sessionId,
+            ss.map((s) => s.id),
+          ),
+        )
+        .groupBy(bookings.sessionId)
     : [];
   return ss.map((s) => ({
     trialId: s.trialId,
@@ -49,7 +58,13 @@ export async function listTrialsForPlace(ctx: AppContext, placeId: string) {
     .select({ trial: trials })
     .from(trials)
     .innerJoin(providers, eq(providers.id, trials.providerId))
-    .where(and(eq(trials.placeId, placeId), eq(trials.status, "active"), eq(providers.status, "approved")));
+    .where(
+      and(
+        eq(trials.placeId, placeId),
+        eq(trials.status, "active"),
+        eq(providers.status, "approved"),
+      ),
+    );
   return ts.map(({ trial }) => trialDto(trial));
 }
 
@@ -60,15 +75,31 @@ export async function getTrialView(ctx: AppContext, trialId: string) {
     .from(trials)
     .innerJoin(providers, eq(providers.id, trials.providerId))
     .innerJoin(places, eq(places.id, trials.placeId))
-    .where(and(eq(trials.id, trialId), eq(trials.status, "active"), eq(providers.status, "approved")))
+    .where(
+      and(eq(trials.id, trialId), eq(trials.status, "active"), eq(providers.status, "approved")),
+    )
     .limit(1);
   if (!row) throw notFound("trial");
-  const faqs = await ctx.db.select({ id: trialFaqs.id, question: trialFaqs.question, answer: trialFaqs.answer }).from(trialFaqs).where(eq(trialFaqs.trialId, trialId)).orderBy(asc(trialFaqs.createdAt));
+  const faqs = await ctx.db
+    .select({ id: trialFaqs.id, question: trialFaqs.question, answer: trialFaqs.answer })
+    .from(trialFaqs)
+    .where(eq(trialFaqs.trialId, trialId))
+    .orderBy(asc(trialFaqs.createdAt));
   const sessions = (await upcomingSessions(ctx, [trialId])).map(({ trialId: _t, ...s }) => s);
   return {
     ...trialDto(row.trial),
-    provider: { id: row.provider.id, name: row.provider.name, description: row.provider.description },
-    place: { id: row.place.id, name: row.place.name, districtKey: row.place.districtKey, realAddress: row.place.realAddress, online: row.place.online },
+    provider: {
+      id: row.provider.id,
+      name: row.provider.name,
+      description: row.provider.description,
+    },
+    place: {
+      id: row.place.id,
+      name: row.place.name,
+      districtKey: row.place.districtKey,
+      realAddress: row.place.realAddress,
+      online: row.place.online,
+    },
     faqs,
     sessions,
   };

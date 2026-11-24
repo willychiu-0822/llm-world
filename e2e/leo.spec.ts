@@ -6,7 +6,9 @@ import { growToStageTwo, json, loginPage, look } from "./helpers";
  * 情境 B：活動推廣者 Leo
  * 申請 → 管理者核准 → 開店 → 上架試用機會（FAQ、場次）→ 有人報名 → 確認出席 → 收到隨筆與需求訊號
  */
-test("Leo opens a shop, publishes a trial, confirms attendance and sees thanks", async ({ browser }) => {
+test("Leo opens a shop, publishes a trial, confirms attendance and sees thanks", async ({
+  browser,
+}) => {
   // ① 建立：申請成為提供者
   const leo = await loginPage(browser, "leo@e2e.test", "Leo");
   await leo.goto("/provider");
@@ -34,7 +36,9 @@ test("Leo opens a shop, publishes a trial, confirms attendance and sees thanks",
   await leo.getByLabel("試用機會名稱").fill("新手 5K 慢跑");
   await leo.getByLabel("時長（分鐘）").fill("60");
   await leo.getByLabel("時間說明").fill("每週日 07:00");
-  await leo.getByLabel("過程資訊").fill("前 10 分鐘只做暖身；大約一半的人是第一次跑；最慢的人由我陪跑。");
+  await leo
+    .getByLabel("過程資訊")
+    .fill("前 10 分鐘只做暖身；大約一半的人是第一次跑；最慢的人由我陪跑。");
   await leo.getByLabel("建議的 AI 第一步").fill("來問 Leo 的 agent 任何問題");
   await leo.getByLabel("建議的本人第一步").fill("報名這週日的慢跑");
   await leo.getByRole("button", { name: "上架" }).click();
@@ -51,7 +55,11 @@ test("Leo opens a shop, publishes a trial, confirms attendance and sees thanks",
 
   // ② 被發現：店出現在龍角鎮地圖的運動場
   const runner = await loginPage(browser, "runner@e2e.test", "跑者");
-  await json(runner.request.put("/api/me/character", { data: { name: "小跑", appearance: look(), personality: "", sharing: { allowAiQuotes: true } } }));
+  await json(
+    runner.request.put("/api/me/character", {
+      data: { name: "小跑", appearance: look(), personality: "", sharing: { allowAiQuotes: true } },
+    }),
+  );
   await growToStageTwo(runner, "小跑");
   await runner.goto("/map");
   await runner.getByRole("link", { name: /Leo 慢跑站/ }).click();

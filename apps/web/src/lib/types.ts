@@ -22,7 +22,14 @@ export interface PetSummary {
 
 export interface Me {
   user: { id: string; email: string; displayName: string; roles: string[] };
-  character: { id: string; name: string; appearance: Appearance; personality: string; sharing: { allowAiQuotes: boolean }; life?: { outfit: "shop" | null; decoration: "festival" | null } } | null;
+  character: {
+    id: string;
+    name: string;
+    appearance: Appearance;
+    personality: string;
+    sharing: { allowAiQuotes: boolean };
+    life?: { outfit: "shop" | null; decoration: "festival" | null };
+  } | null;
   wants: Want[];
   provider: { id: string; name: string; status: string } | null;
   unread: { notifications: number; discoveries: number };
@@ -108,7 +115,13 @@ export interface Trial {
 
 export interface TrialView extends Trial {
   provider: { id: string; name: string; description: string };
-  place: { id: string; name: string; districtKey: string; realAddress: string | null; online: boolean };
+  place: {
+    id: string;
+    name: string;
+    districtKey: string;
+    realAddress: string | null;
+    online: boolean;
+  };
   faqs: { id: string; question: string; answer: string }[];
   sessions: Session[];
 }
@@ -134,7 +147,10 @@ export interface Step {
   result: string | null;
   createdAt: string;
   doneAt: string | null;
-  notes: { before: { body: string; shared: boolean } | null; after: { body: string; shared: boolean } | null };
+  notes: {
+    before: { body: string; shared: boolean } | null;
+    after: { body: string; shared: boolean } | null;
+  };
   deedId: string | null;
   trial: { id: string; title: string } | null;
   session: { id: string; startsAt: string } | null;

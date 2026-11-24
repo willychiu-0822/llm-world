@@ -6,8 +6,12 @@ test("UAT-08 P2-3 非管理者不呼叫管理 API 並能回到地圖", async ({ 
   await json(page.request.post("/api/auth/dev-login", { data: { email: "non-admin@e2e.test" } }));
   const adminRequests: string[] = [];
   const errors: string[] = [];
-  page.on("request", r => { if (new URL(r.url()).pathname.startsWith("/api/admin/")) adminRequests.push(r.url()); });
-  page.on("console", m => { if (m.type() === "error") errors.push(m.text()); });
+  page.on("request", (r) => {
+    if (new URL(r.url()).pathname.startsWith("/api/admin/")) adminRequests.push(r.url());
+  });
+  page.on("console", (m) => {
+    if (m.type() === "error") errors.push(m.text());
+  });
   await page.goto("/admin");
   await expect(page.getByText("需要管理者權限。", { exact: true })).toBeVisible();
   expect(adminRequests).toEqual([]);

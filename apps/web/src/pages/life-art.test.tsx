@@ -6,15 +6,42 @@ import { describe, expect, it, vi } from "vitest";
 import { LifePage } from "./Life";
 
 const life = vi.hoisted(() => {
-  const row = (id: LifeActivityId, name: string, reward: string, category: string, open: boolean) => ({
-    id, name, place: "鎮上", wish: "想出去。", help: "陪我一下？", story: `${name}的故事。`, reward, category, done: false, open,
+  const row = (
+    id: LifeActivityId,
+    name: string,
+    reward: string,
+    category: string,
+    open: boolean,
+  ) => ({
+    id,
+    name,
+    place: "鎮上",
+    wish: "想出去。",
+    help: "陪我一下？",
+    story: `${name}的故事。`,
+    reward,
+    category,
+    done: false,
+    open,
   });
   const view: LifeView = {
     day: "2026-11-14",
     season: "秋",
     period: "早晨",
-    today: { day: "2026-11-14", autonomous: "早些時候，小龍曬了太陽。", entries: [{ activityId: "music", at: "2026-11-14T01:00:00.000Z", story: "阿芽敲了三下鈴。" }] },
-    history: [{ day: "2026-11-14", autonomous: "早些時候，小龍曬了太陽。", entries: [{ activityId: "music", at: "2026-11-14T01:00:00.000Z", story: "阿芽敲了三下鈴。" }] }],
+    today: {
+      day: "2026-11-14",
+      autonomous: "早些時候，小龍曬了太陽。",
+      entries: [{ activityId: "music", at: "2026-11-14T01:00:00.000Z", story: "阿芽敲了三下鈴。" }],
+    },
+    history: [
+      {
+        day: "2026-11-14",
+        autonomous: "早些時候，小龍曬了太陽。",
+        entries: [
+          { activityId: "music", at: "2026-11-14T01:00:00.000Z", story: "阿芽敲了三下鈴。" },
+        ],
+      },
+    ],
     inventory: [{ activityId: "shop", earnedOn: "2026-11-14" }],
     outfit: null,
     decoration: null,
@@ -41,7 +68,21 @@ const life = vi.hoisted(() => {
 
 vi.mock("../lib/session", () => ({
   useSession: () => ({
-    me: { character: { id: "c", name: "小龍", appearance: { body: "round", accessory: "none", main: "#F2C6A8", accent: "#A9C7DE", description: "" }, personality: "", sharing: { allowAiQuotes: false } } },
+    me: {
+      character: {
+        id: "c",
+        name: "小龍",
+        appearance: {
+          body: "round",
+          accessory: "none",
+          main: "#F2C6A8",
+          accent: "#A9C7DE",
+          description: "",
+        },
+        personality: "",
+        sharing: { allowAiQuotes: false },
+      },
+    },
     reload: vi.fn(),
   }),
 }));
@@ -54,13 +95,21 @@ const pictured = /[\u{1F300}-\u{1FAFF}\u2600-\u27BF]/u;
 
 describe("life pictures", () => {
   it("shows the seven souvenirs as drawings, and the day's choices too", async () => {
-    const { unmount } = render(<MemoryRouter><LifePage cabinet /></MemoryRouter>);
+    const { unmount } = render(
+      <MemoryRouter>
+        <LifePage cabinet />
+      </MemoryRouter>,
+    );
     expect(document.querySelectorAll(".life-shelf [data-mark]")).toHaveLength(7);
     expect(document.querySelector("[data-mark='shop']")).not.toBeNull();
     expect(document.body.textContent ?? "").not.toMatch(pictured);
     unmount();
 
-    render(<MemoryRouter><LifePage /></MemoryRouter>);
+    render(
+      <MemoryRouter>
+        <LifePage />
+      </MemoryRouter>,
+    );
     expect(document.querySelector(".life-entry [data-mark='music']")).not.toBeNull();
     await userEvent.click(screen.getByRole("button", { name: "陪牠去玩" }));
     expect(screen.getByRole("radio", { name: "逛逛小店" })).toBeEnabled();
@@ -76,13 +125,21 @@ describe("life pictures", () => {
       { day: "2026-11-13", autonomous: "昨天去散步。", entries: [] },
     ];
     try {
-      const { unmount } = render(<MemoryRouter><LifePage /></MemoryRouter>);
+      const { unmount } = render(
+        <MemoryRouter>
+          <LifePage />
+        </MemoryRouter>,
+      );
       expect(screen.getByText("11 月 14 日，秋天的早晨")).toBeInTheDocument();
       expect(screen.getByRole("heading", { name: "11 月 13 日，秋天" })).toBeInTheDocument();
       expect(document.body.textContent ?? "").not.toMatch(/\d{4}-\d{2}-\d{2}/);
       unmount();
 
-      render(<MemoryRouter><LifePage cabinet /></MemoryRouter>);
+      render(
+        <MemoryRouter>
+          <LifePage cabinet />
+        </MemoryRouter>,
+      );
       await userEvent.click(screen.getByRole("button", { name: "雲朵圍巾，已收集" }));
       expect(screen.getByText(/11 月 14 日，秋天/)).toBeInTheDocument();
       expect(document.body.textContent ?? "").not.toMatch(/\d{4}-\d{2}-\d{2}/);

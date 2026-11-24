@@ -12,13 +12,26 @@ export type NotificationKind =
   | "provider_approved"
   | "new_question";
 
-export async function notify(ctx: AppContext, userId: string, kind: NotificationKind, payload: Record<string, unknown>) {
-  await ctx.db.insert(notifications).values({ id: newId("ntf"), userId, kind, payload, createdAt: ctx.now() });
+export async function notify(
+  ctx: AppContext,
+  userId: string,
+  kind: NotificationKind,
+  payload: Record<string, unknown>,
+) {
+  await ctx.db
+    .insert(notifications)
+    .values({ id: newId("ntf"), userId, kind, payload, createdAt: ctx.now() });
 }
 
 export async function listNotifications(ctx: AppContext, userId: string) {
   return ctx.db
-    .select({ id: notifications.id, kind: notifications.kind, payload: notifications.payload, readAt: notifications.readAt, createdAt: notifications.createdAt })
+    .select({
+      id: notifications.id,
+      kind: notifications.kind,
+      payload: notifications.payload,
+      readAt: notifications.readAt,
+      createdAt: notifications.createdAt,
+    })
     .from(notifications)
     .where(eq(notifications.userId, userId))
     .orderBy(desc(notifications.createdAt), desc(notifications.id))
@@ -26,11 +39,20 @@ export async function listNotifications(ctx: AppContext, userId: string) {
 }
 
 export async function readAllNotifications(ctx: AppContext, userId: string) {
-  await ctx.db.update(notifications).set({ readAt: ctx.now() }).where(and(eq(notifications.userId, userId), isNull(notifications.readAt)));
+  await ctx.db
+    .update(notifications)
+    .set({ readAt: ctx.now() })
+    .where(and(eq(notifications.userId, userId), isNull(notifications.readAt)));
 }
 
 /** Merge fields into notifications for one step, so a confirmed or published step no longer says it is waiting. */
-export async function touchStepNotice(ctx: AppContext, userId: string, stepId: string, kind: NotificationKind, patch: Record<string, unknown>) {
+export async function touchStepNotice(
+  ctx: AppContext,
+  userId: string,
+  stepId: string,
+  kind: NotificationKind,
+  patch: Record<string, unknown>,
+) {
   const rows = await ctx.db
     .select({ id: notifications.id, payload: notifications.payload })
     .from(notifications)
@@ -40,6 +62,9 @@ export async function touchStepNotice(ctx: AppContext, userId: string, stepId: s
     if (payload.stepId !== stepId) continue;
     // A later result gets its own notice; don't rewrite one the player already handled.
     if (kind === "ai_step_done" && payload.handled === true) continue;
-    await ctx.db.update(notifications).set({ payload: { ...payload, ...patch } }).where(eq(notifications.id, row.id));
+    await ctx.db
+      .update(notifications)
+      .set({ payload: { ...payload, ...patch } })
+      .where(eq(notifications.id, row.id));
   }
 }

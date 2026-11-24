@@ -3,7 +3,9 @@ import { describe, expect, it } from "vitest";
 import { login, useTestApp } from "../test/helpers";
 
 describe("auth", () => {
-  const env = useTestApp({ google: { clientId: "test-client", clientSecret: "test-client-secret" } });
+  const env = useTestApp({
+    google: { clientId: "test-client", clientSecret: "test-client-secret" },
+  });
 
   it("rejects /api/me without a session", async () => {
     const res = await request(env.app).get("/api/me");
@@ -15,7 +17,11 @@ describe("auth", () => {
     const agent = await login(env.app, "xiaoan@example.com", "小安");
     const res = await agent.get("/api/me");
     expect(res.status).toBe(200);
-    expect(res.body.user).toMatchObject({ email: "xiaoan@example.com", displayName: "小安", roles: ["user"] });
+    expect(res.body.user).toMatchObject({
+      email: "xiaoan@example.com",
+      displayName: "小安",
+      roles: ["user"],
+    });
     expect(res.body.character).toBeNull();
     expect(res.body.wants).toEqual([]);
     expect(res.body.unread).toEqual({ notifications: 0, discoveries: 0 });
@@ -52,12 +58,18 @@ describe("auth", () => {
     const res = await request(env.app).get("/auth/google/start?next=/town");
     expect(res.status).toBe(302);
     expect(res.headers.location).toContain("https://accounts.google.com/o/oauth2/v2/auth");
-    expect(res.headers.location).toContain("redirect_uri=" + encodeURIComponent("http://localhost:8080/auth/google/callback"));
+    expect(res.headers.location).toContain(
+      "redirect_uri=" + encodeURIComponent("http://localhost:8080/auth/google/callback"),
+    );
     expect(String(res.headers["set-cookie"])).toContain("lj_oauth_state=");
   });
 
   it("google callback signs in through the injected verifier and redirects to next", async () => {
-    env.ctx.google.exchange = async (code) => ({ sub: "g-123", email: "mia@example.com", name: code === "ok" ? "Mia" : "?" });
+    env.ctx.google.exchange = async (code) => ({
+      sub: "g-123",
+      email: "mia@example.com",
+      name: code === "ok" ? "Mia" : "?",
+    });
     const agent = request.agent(env.app);
     const start = await agent.get("/auth/google/start?next=/me");
     const state = new URL(start.headers.location).searchParams.get("state");
@@ -92,7 +104,6 @@ describe("auth without dev login", () => {
     expect(res.status).toBe(404);
   });
 });
-
 
 describe("P1-1 Google login without configuration", () => {
   const env = useTestApp({ google: { clientId: "", clientSecret: "" } });

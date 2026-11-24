@@ -4,7 +4,8 @@ import { connect } from "./client";
 import { migrateWithLock } from "./migrate";
 import { places } from "./schema";
 
-const url = process.env.TEST_DATABASE_URL ?? "postgres://postgres:postgres@localhost:5432/longjiao_test";
+const url =
+  process.env.TEST_DATABASE_URL ?? "postgres://postgres:postgres@localhost:5432/longjiao_test";
 
 describe("migrateWithLock", () => {
   it("can run concurrently without errors", async () => {

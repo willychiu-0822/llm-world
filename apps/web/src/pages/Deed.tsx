@@ -8,10 +8,18 @@ import { useSession } from "../lib/session";
 import type { DeedView } from "../lib/types";
 import { useFetch } from "../lib/useFetch";
 
-const SOURCE: Record<string, string> = { provider_confirmed: "店家確認出席", self: "自己記下", ai: "朋友帶回" };
+const SOURCE: Record<string, string> = {
+  provider_confirmed: "店家確認出席",
+  self: "自己記下",
+  ai: "朋友帶回",
+};
 
 export function DeedPage() {
-  return <GrownGate><DeedBody /></GrownGate>;
+  return (
+    <GrownGate>
+      <DeedBody />
+    </GrownGate>
+  );
 }
 
 function DeedBody() {
@@ -22,7 +30,10 @@ function DeedBody() {
   if (error) return <ErrorBox error={error} />;
   if (!data) return null;
   const toggle = async () => {
-    await api(`/api/deeds/${data.id}`, { method: "PATCH", body: { visibility: data.visibility === "public" ? "private" : "public" } });
+    await api(`/api/deeds/${data.id}`, {
+      method: "PATCH",
+      body: { visibility: data.visibility === "public" ? "private" : "public" },
+    });
     toast(data.visibility === "public" ? "已改成私人" : "已公開到鎮上");
     await reload();
   };
@@ -30,7 +41,11 @@ function DeedBody() {
     <div className="stack" style={{ maxWidth: 760, margin: "0 auto" }}>
       <article className="panel stack">
         <div className="row">
-          <Avatar appearance={data.character?.appearance} name={data.character?.name ?? "鎮民"} size={72} />
+          <Avatar
+            appearance={data.character?.appearance}
+            name={data.character?.name ?? "鎮民"}
+            size={72}
+          />
           <div className="grow">
             <h2 style={{ margin: 0 }}>{data.character?.name ?? "某位鎮民"}</h2>
             <div className="row wrap" style={{ gap: 6 }}>
@@ -54,18 +69,46 @@ function DeedBody() {
         )}
         {(data.sharedNotes.before || data.sharedNotes.after) && (
           <div className="notes-pair">
-            <div className="before"><small>做之前</small><p>{data.sharedNotes.before ?? "（沒有分享）"}</p></div>
-            <div className="after"><small>做之後</small><p>{data.sharedNotes.after ?? "（沒有分享）"}</p></div>
+            <div className="before">
+              <small>做之前</small>
+              <p>{data.sharedNotes.before ?? "（沒有分享）"}</p>
+            </div>
+            <div className="after">
+              <small>做之後</small>
+              <p>{data.sharedNotes.after ?? "（沒有分享）"}</p>
+            </div>
           </div>
         )}
         <small>
           {formatDate(data.createdAt)}・{SOURCE[data.recordSource] ?? data.recordSource}
-          {data.place && <>・<Link className="btn ghost" to={`/places/${data.place.id}`}>{data.place.name}</Link></>}
-          {data.trial && <>・<Link className="btn ghost" to={`/trials/${data.trial.id}`}>{data.trial.title}</Link></>}
+          {data.place && (
+            <>
+              ・
+              <Link className="btn ghost" to={`/places/${data.place.id}`}>
+                {data.place.name}
+              </Link>
+            </>
+          )}
+          {data.trial && (
+            <>
+              ・
+              <Link className="btn ghost" to={`/trials/${data.trial.id}`}>
+                {data.trial.title}
+              </Link>
+            </>
+          )}
         </small>
         {data.related.length > 0 && (
           <p className="muted">
-            這一步參考了：{data.related.map((r, i) => <span key={r.id}>{i > 0 && "、"}<Link className="btn ghost" to={`/deeds/${r.id}`}>「{r.title}」</Link></span>)}
+            這一步參考了：
+            {data.related.map((r, i) => (
+              <span key={r.id}>
+                {i > 0 && "、"}
+                <Link className="btn ghost" to={`/deeds/${r.id}`}>
+                  「{r.title}」
+                </Link>
+              </span>
+            ))}
           </p>
         )}
         {data.isMine ? (
@@ -81,12 +124,21 @@ function DeedBody() {
             )}
             <div className="row wrap">
               <span>目前：{data.visibility === "public" ? "公開" : "私人"}</span>
-              <button className="btn small" onClick={toggle}>{data.visibility === "public" ? "改成私人" : "公開到鎮上"}</button>
+              <button className="btn small" onClick={toggle}>
+                {data.visibility === "public" ? "改成私人" : "公開到鎮上"}
+              </button>
             </div>
           </div>
         ) : (
           <div className="row wrap">
-            <Link className="btn primary" to={me ? `/steps/new?deedId=${data.id}` : `/login?next=${encodeURIComponent(`/steps/new?deedId=${data.id}`)}`}>
+            <Link
+              className="btn primary"
+              to={
+                me
+                  ? `/steps/new?deedId=${data.id}`
+                  : `/login?next=${encodeURIComponent(`/steps/new?deedId=${data.id}`)}`
+              }
+            >
               我也想做
             </Link>
             <small className="muted">寫下你要做的一件小事</small>

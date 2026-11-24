@@ -4,7 +4,11 @@ import { apiAs, evidence, json, look, test } from "./helpers";
 test("空鎮：出門逛逛不出紅字，帶回見聞，主按鈕換成下一件事", async ({ page }) => {
   // The fixture clears all users, so nobody else has left a keepsake in town.
   const me = await apiAs("empty-town@e2e.test", "空鎮新手");
-  await json(me.put("/api/me/character", { data: { name: "小龍", appearance: look(), personality: "", sharing: { allowAiQuotes: true } } }));
+  await json(
+    me.put("/api/me/character", {
+      data: { name: "小龍", appearance: look(), personality: "", sharing: { allowAiQuotes: true } },
+    }),
+  );
   await me.dispose();
 
   await page.goto("/login", { waitUntil: "domcontentloaded" });

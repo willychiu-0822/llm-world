@@ -25,7 +25,11 @@ const STATUS: Record<ErrorCode, number> = {
 };
 
 export class AppError extends Error {
-  constructor(public code: ErrorCode, message: string = code, public details?: unknown) {
+  constructor(
+    public code: ErrorCode,
+    message: string = code,
+    public details?: unknown,
+  ) {
     super(message);
   }
   get status() {
@@ -44,11 +48,15 @@ export const h =
 
 export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   if (err instanceof ZodError) {
-    res.status(400).json({ error: { code: "invalid_input", message: "invalid input", details: err.issues } });
+    res
+      .status(400)
+      .json({ error: { code: "invalid_input", message: "invalid input", details: err.issues } });
     return;
   }
   if (err instanceof AppError) {
-    res.status(err.status).json({ error: { code: err.code, message: err.message, details: err.details } });
+    res
+      .status(err.status)
+      .json({ error: { code: err.code, message: err.message, details: err.details } });
     return;
   }
   if (err?.type === "entity.parse.failed") {

@@ -6,7 +6,22 @@ import pg from "pg";
 import { assertE2eDatabase } from "./assert-e2e-database.mjs";
 import { test, json, look, panToPlace, growToStageTwo } from "./helpers";
 
-const BANNED = ["AI", "MCP", "token", "agent", "provider", "事蹟", "鏡子", "許可證", "發現匣", "隨筆", "你應該", "越小越好", "映照", "可能的自己"];
+const BANNED = [
+  "AI",
+  "MCP",
+  "token",
+  "agent",
+  "provider",
+  "事蹟",
+  "鏡子",
+  "許可證",
+  "發現匣",
+  "隨筆",
+  "你應該",
+  "越小越好",
+  "映照",
+  "可能的自己",
+];
 
 test("隱私權頁首屏有回家按鈕", async ({ page }) => {
   await page.goto("/privacy");
@@ -33,11 +48,12 @@ async function checkState(page: Page, id: string) {
   for (const word of BANNED) expect(text, `${id} saw ${word}`).not.toContain(word);
 
   const dialogs = page.getByRole("dialog");
-  for (let i = 0; i < await dialogs.count(); i++) {
+  for (let i = 0; i < (await dialogs.count()); i++) {
     const dialog = dialogs.nth(i);
     if (!(await dialog.isVisible())) continue;
     await expect(dialog, id).toHaveAttribute("aria-modal", "true");
-    const name = (await dialog.getAttribute("aria-label")) || (await dialog.getAttribute("aria-labelledby"));
+    const name =
+      (await dialog.getAttribute("aria-label")) || (await dialog.getAttribute("aria-labelledby"));
     expect(name, id).toBeTruthy();
     await expect(dialog.locator(".btn.primary"), id).toHaveCount(1);
     await expect(dialog.getByRole("button", { name: "關閉" }), id).toBeVisible();
@@ -46,14 +62,25 @@ async function checkState(page: Page, id: string) {
   const layout = await page.evaluate(() => {
     const shown = (el: Element) => {
       const s = getComputedStyle(el);
-      if (s.display === "none" || s.visibility === "hidden" || Number(s.opacity) === 0) return false;
+      if (s.display === "none" || s.visibility === "hidden" || Number(s.opacity) === 0)
+        return false;
       const r = el.getBoundingClientRect();
-      return r.width > 1 && r.height > 1 && r.bottom > 0 && r.top < innerHeight && r.right > 0 && r.left < innerWidth;
+      return (
+        r.width > 1 &&
+        r.height > 1 &&
+        r.bottom > 0 &&
+        r.top < innerHeight &&
+        r.right > 0 &&
+        r.left < innerWidth
+      );
     };
     const primaries = [...document.querySelectorAll(".btn.primary")].filter((el) => {
       if (!shown(el)) return false;
       const r = el.getBoundingClientRect();
-      const hit = document.elementFromPoint(r.left + r.width / 2, r.top + Math.min(r.height / 2, 22));
+      const hit = document.elementFromPoint(
+        r.left + r.width / 2,
+        r.top + Math.min(r.height / 2, 22),
+      );
       return !!hit && (hit === el || el.contains(hit));
     }).length;
     const small = [...document.querySelectorAll("button, a")].flatMap((el) => {
@@ -62,12 +89,20 @@ async function checkState(page: Page, id: string) {
       const r = el.getBoundingClientRect();
       if (r.width < 1 || r.height < 1) return [];
       if (r.width < 44 || r.height < 44) {
-        const label = (el.getAttribute("aria-label") || el.textContent || "").replace(/\s+/g, " ").trim().slice(0, 24);
+        const label = (el.getAttribute("aria-label") || el.textContent || "")
+          .replace(/\s+/g, " ")
+          .trim()
+          .slice(0, 24);
         return [`${Math.round(r.width)}x${Math.round(r.height)} ${label}`];
       }
       return [];
     });
-    const pointer = [...document.querySelectorAll("span, div")].filter((el) => getComputedStyle(el).cursor === "pointer" && !el.closest("a, button, label, summary")).map((el) => el.className?.toString?.().slice(0, 40) || el.tagName);
+    const pointer = [...document.querySelectorAll("span, div")]
+      .filter(
+        (el) =>
+          getComputedStyle(el).cursor === "pointer" && !el.closest("a, button, label, summary"),
+      )
+      .map((el) => el.className?.toString?.().slice(0, 40) || el.tagName);
     return { primaries, small, pointer };
   });
   expect(layout.primaries, `${id} primary buttons`).toBe(1);
@@ -75,7 +110,9 @@ async function checkState(page: Page, id: string) {
   expect(layout.pointer, `${id} pointer on plain elements`).toEqual([]);
 
   const contrast = await new AxeBuilder({ page }).withRules(["color-contrast"]).analyze();
-  const problems = contrast.violations.flatMap((v) => v.nodes.map((n) => `${n.target.join(" ")} ${n.failureSummary?.split("\n")[0] ?? ""}`));
+  const problems = contrast.violations.flatMap((v) =>
+    v.nodes.map((n) => `${n.target.join(" ")} ${n.failureSummary?.split("\n")[0] ?? ""}`),
+  );
   expect(problems, `${id} contrast`).toEqual([]);
 }
 
@@ -84,7 +121,9 @@ test("檢核 A1–A5、B1–B3、C1–C3、F1–F2、D3", async ({ page }) => {
   const errors: string[] = [];
   const http: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
-  page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
+  page.on("console", (m) => {
+    if (m.type() === "error") errors.push(m.text());
+  });
   page.on("response", (res) => {
     const url = res.url();
     if (res.status() < 400) return;
@@ -93,11 +132,24 @@ test("檢核 A1–A5、B1–B3、C1–C3、F1–F2、D3", async ({ page }) => {
     http.push(`${res.status()} ${url}`);
   });
 
-  const mia = await page.request.post("/api/auth/dev-login", { data: { email: `check-mia-${test.info().project.name}-${Date.now()}@e2e.test`, name: "Mia" } });
+  const mia = await page.request.post("/api/auth/dev-login", {
+    data: { email: `check-mia-${test.info().project.name}-${Date.now()}@e2e.test`, name: "Mia" },
+  });
   expect(mia.ok()).toBeTruthy();
-  await json(page.request.put("/api/me/character", { data: { name: "小雀", appearance: look("flower"), personality: "", sharing: { allowAiQuotes: true } } }));
+  await json(
+    page.request.put("/api/me/character", {
+      data: {
+        name: "小雀",
+        appearance: look("flower"),
+        personality: "",
+        sharing: { allowAiQuotes: true },
+      },
+    }),
+  );
   for (const text of ["去上一次聲樂課", "在樂器行摸一把吉他"]) {
-    const step = await json(page.request.post("/api/first-steps", { data: { executor: "self", text } }));
+    const step = await json(
+      page.request.post("/api/first-steps", { data: { executor: "self", text } }),
+    );
     await json(page.request.post(`/api/first-steps/${step.id}/complete`, { data: {} }));
   }
   await page.request.post("/api/auth/logout");
@@ -126,7 +178,9 @@ test("檢核 A1–A5、B1–B3、C1–C3、F1–F2、D3", async ({ page }) => {
     if (req.method() === "POST" && req.url().includes("/api/auth/dev-login")) logins += 1;
   };
   page.on("request", countLogin);
-  await page.getByLabel("Email").fill(`check-baby-${test.info().project.name}-${Date.now()}@e2e.test`);
+  await page
+    .getByLabel("Email")
+    .fill(`check-baby-${test.info().project.name}-${Date.now()}@e2e.test`);
   await page.getByLabel("名字", { exact: true }).fill("新手");
   await page.getByRole("button", { name: "開發用登入" }).dblclick();
   await page.getByRole("link", { name: "把牠撿回家" }).waitFor();
@@ -197,14 +251,19 @@ test("檢核 A1–A5、B1–B3、C1–C3、F1–F2、D3", async ({ page }) => {
   await expect(celebrate.getByRole("button", { name: "收下星星" })).toBeVisible();
   await expect(celebrate.getByRole("button", { name: "先不要" })).toHaveCount(0);
   expect(taps, "B1").toBeLessThanOrEqual(3);
-  expect((await (await page.request.get("/api/me")).json()).pet.stars, "star credited before dismiss").toBe(1);
+  expect(
+    (await (await page.request.get("/api/me")).json()).pet.stars,
+    "star credited before dismiss",
+  ).toBe(1);
   expect(claims, "A5 claim").toBe(1);
   await checkState(page, "12-celebrate");
   await page.getByRole("button", { name: "關閉" }).click();
   await expect(page.getByText("★ 1/3")).toBeVisible();
   await expect(page.getByRole("button", { name: "我做到了！" })).toHaveCount(0);
 
-  await json(page.request.post("/api/first-steps", { data: { executor: "self", text: "再做一件小事" } }));
+  await json(
+    page.request.post("/api/first-steps", { data: { executor: "self", text: "再做一件小事" } }),
+  );
   await page.goto("/tries");
   await page.getByRole("button", { name: "我做到了！" }).click();
   await expect(page.getByRole("dialog", { name: "做到了" })).toBeVisible();
@@ -218,20 +277,30 @@ test("檢核 A1–A5、B1–B3、C1–C3、F1–F2、D3", async ({ page }) => {
     const baby = await page.locator(".baby-hit").boundingBox();
     const pack = await page.locator(".backpack").boundingBox();
     expect(baby && pack, "desktop backpack").toBeTruthy();
-    const overlaps = !!baby && !!pack && pack.x < baby.x + baby.width && pack.x + pack.width > baby.x && pack.y < baby.y + baby.height && pack.y + pack.height > baby.y;
+    const overlaps =
+      !!baby &&
+      !!pack &&
+      pack.x < baby.x + baby.width &&
+      pack.x + pack.width > baby.x &&
+      pack.y < baby.y + baby.height &&
+      pack.y + pack.height > baby.y;
     expect(overlaps, "backpack stays on the baby").toBe(true);
     await shot(page, "13b-desktop-backpack");
   }
   await expect(page.getByRole("link", { name: "去收藏櫃看看" })).toBeVisible();
 
-  const nav = page.getByRole("navigation", { name: test.info().project.name === "mobile" ? "快速導覽" : "主要導覽" });
+  const nav = page.getByRole("navigation", {
+    name: test.info().project.name === "mobile" ? "快速導覽" : "主要導覽",
+  });
   await nav.getByRole("link", { name: "收藏櫃" }).click();
   await expect(page.getByRole("heading", { name: "收藏櫃" })).toBeVisible();
   await expect(page.getByText("那一排")).toHaveCount(0);
   const progress = (await page.getByLabel("收藏進度").innerText()).trim();
   const catalog = Number(progress.split("/")[1]);
   await expect(page.locator(".keepsake-cell")).toHaveCount(catalog);
-  await expect(page.locator(".keepsake-cell.is-missing")).toHaveCount(catalog - await page.locator(".keepsake-cell:not(.is-missing)").count());
+  await expect(page.locator(".keepsake-cell.is-missing")).toHaveCount(
+    catalog - (await page.locator(".keepsake-cell:not(.is-missing)").count()),
+  );
   await expect(page.getByText(/收到了/)).toBeVisible();
   const fresh = page.locator(".keepsake-cell.is-new");
   await expect(fresh).toHaveCount(1);
@@ -249,7 +318,9 @@ test("檢核 A1–A5、B1–B3、C1–C3、F1–F2、D3", async ({ page }) => {
 
   await page.getByRole("button", { name: "郵筒" }).click();
   await expect(page.getByRole("dialog", { name: "郵筒" })).toBeVisible();
-  await expect(page.getByRole("dialog", { name: "郵筒" }).getByRole("button", { name: "關上郵筒" })).toBeVisible();
+  await expect(
+    page.getByRole("dialog", { name: "郵筒" }).getByRole("button", { name: "關上郵筒" }),
+  ).toBeVisible();
   await checkState(page, "16-mailbox");
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).toHaveCount(0);
@@ -278,7 +349,9 @@ test("檢核 A1–A5、B1–B3、C1–C3、F1–F2、D3", async ({ page }) => {
   await page.goto("/");
 
   for (let n = 0; n < 6; n++) {
-    const step = await json(page.request.post("/api/first-steps", { data: { executor: "self", text: `小事${n}` } }));
+    const step = await json(
+      page.request.post("/api/first-steps", { data: { executor: "self", text: `小事${n}` } }),
+    );
     await json(page.request.post(`/api/first-steps/${step.id}/complete`, { data: {} }));
   }
   await page.reload();
@@ -309,76 +382,99 @@ test("檢核 A1–A5、B1–B3、C1–C3、F1–F2、D3", async ({ page }) => {
 test("檢核 G1–G8：小龍有自己的今天、七種生活與四類收藏", async ({ page }) => {
   test.setTimeout(180_000);
   const errors: string[] = [];
-  page.on("pageerror", e => errors.push(e.message));
-  page.on("console", m => { if (m.type() === "error") errors.push(m.text()); });
-  await json(page.request.post("/api/auth/dev-login", {data: {email: `life-${test.info().project.name}@e2e.test`}}));
-  await json(page.request.put("/api/me/character", {data: {name: "栗子", appearance: look(), sharing: {allowAiQuotes: false}}}));
+  page.on("pageerror", (e) => errors.push(e.message));
+  page.on("console", (m) => {
+    if (m.type() === "error") errors.push(m.text());
+  });
+  await json(
+    page.request.post("/api/auth/dev-login", {
+      data: { email: `life-${test.info().project.name}@e2e.test` },
+    }),
+  );
+  await json(
+    page.request.put("/api/me/character", {
+      data: { name: "栗子", appearance: look(), sharing: { allowAiQuotes: false } },
+    }),
+  );
   await page.goto("/");
-  await page.getByRole("link", {name: "小龍的今天"}).click();
-  await expect(page.getByRole("heading", {name: "小龍的今天"})).toBeVisible();
-  await expect(page.getByText("想要什麼？", {exact: true})).toBeVisible();
+  await page.getByRole("link", { name: "小龍的今天" }).click();
+  await expect(page.getByRole("heading", { name: "小龍的今天" })).toBeVisible();
+  await expect(page.getByText("想要什麼？", { exact: true })).toBeVisible();
   await checkState(page, "G01-today");
   const before = await json(page.request.get("/api/me/life"));
   await page.reload();
-  await expect(page.getByText(before.today.autonomous, {exact:true})).toBeVisible();
+  await expect(page.getByText(before.today.autonomous, { exact: true })).toBeVisible();
   await checkState(page, "G02-today-reload");
-  await page.getByRole("button", {name: "陪牠去玩", exact:true}).click();
+  await page.getByRole("button", { name: "陪牠去玩", exact: true }).click();
   await checkState(page, "G03-choices-cancel");
-  await page.getByRole("button", {name: "先待在家"}).click();
+  await page.getByRole("button", { name: "先待在家" }).click();
   expect((await json(page.request.get("/api/me/life"))).today.entries).toHaveLength(0);
   let submissions = 0;
-  page.on("request", req => { if (req.method() === "POST" && req.url().endsWith("/life/activities")) submissions++; });
+  page.on("request", (req) => {
+    if (req.method() === "POST" && req.url().endsWith("/life/activities")) submissions++;
+  });
   // Only one or two places are open on the first day; the rest say so and cannot be chosen.
-  const openToday = LIFE_ACTIVITIES.filter(a => before.activities.find((x: {id: string; open: boolean}) => x.id === a.id)?.open);
+  const openToday = LIFE_ACTIVITIES.filter(
+    (a) => before.activities.find((x: { id: string; open: boolean }) => x.id === a.id)?.open,
+  );
   expect(openToday.length).toBeGreaterThanOrEqual(1);
   expect(openToday.length).toBeLessThanOrEqual(2);
-  await page.getByRole("button", {name: "陪牠去玩", exact:true}).click();
-  for (const a of LIFE_ACTIVITIES.filter(a => !openToday.includes(a))) {
-    await expect(page.getByRole("radio", {name: new RegExp(`${a.name}.*今天沒開`)})).toBeDisabled();
+  await page.getByRole("button", { name: "陪牠去玩", exact: true }).click();
+  for (const a of LIFE_ACTIVITIES.filter((a) => !openToday.includes(a))) {
+    await expect(
+      page.getByRole("radio", { name: new RegExp(`${a.name}.*今天沒開`) }),
+    ).toBeDisabled();
   }
-  await page.getByRole("button", {name: "先待在家"}).click();
+  await page.getByRole("button", { name: "先待在家" }).click();
   for (const [i, a] of openToday.entries()) {
-    await page.getByRole("button", {name: "陪牠去玩", exact:true}).click();
-    await page.getByRole("radio", {name: new RegExp(a.name), exact:false}).click();
+    await page.getByRole("button", { name: "陪牠去玩", exact: true }).click();
+    await page.getByRole("radio", { name: new RegExp(a.name), exact: false }).click();
     await checkState(page, `G04-${a.id}-preview`);
-    await page.getByRole("button", {name: "就去這裡"}).dblclick();
-    await expect(page.getByRole("dialog", {name: "帶回小驚喜"})).toBeVisible();
-    expect(submissions).toBe(i+1);
+    await page.getByRole("button", { name: "就去這裡" }).dblclick();
+    await expect(page.getByRole("dialog", { name: "帶回小驚喜" })).toBeVisible();
+    expect(submissions).toBe(i + 1);
     await checkState(page, `G05-${a.id}-result`);
     if (i === 0) await page.keyboard.press("Escape");
-    else await page.getByRole("button", {name: "收好紀念品"}).click();
+    else await page.getByRole("button", { name: "收好紀念品" }).click();
     await page.reload();
-    await expect(page.locator(".life-entry")).toHaveCount(i+1);
-    await page.evaluate(() => window.scrollTo(0,0));
+    await expect(page.locator(".life-entry")).toHaveCount(i + 1);
+    await page.evaluate(() => window.scrollTo(0, 0));
     await checkState(page, `G06-${a.id}-saved`);
   }
   expect((await json(page.request.get("/api/me"))).pet.stars).toBe(0);
-  await page.getByRole("link", {name: "看看今天帶回來的"}).click();
+  await page.getByRole("link", { name: "看看今天帶回來的" }).click();
   await expect(page.getByLabel("生活收藏進度")).toHaveText(`${openToday.length}/7`);
   // The other keepsakes come on other days; hand them over directly so the cabinet can be checked in full.
-  const dbUrl = process.env.E2E_DATABASE_URL ?? "postgres://postgres:postgres@127.0.0.1:5433/longjiao_laned_e2e";
+  const dbUrl =
+    process.env.E2E_DATABASE_URL ??
+    "postgres://postgres:postgres@127.0.0.1:5433/longjiao_laned_e2e";
   assertE2eDatabase(dbUrl);
   const db = new pg.Client({ connectionString: dbUrl });
   await db.connect();
   try {
-    const inventory = LIFE_ACTIVITIES.map(a => ({activityId: a.id, earnedOn: "2026-01-01"}));
+    const inventory = LIFE_ACTIVITIES.map((a) => ({ activityId: a.id, earnedOn: "2026-01-01" }));
     const who = `(SELECT c.id FROM characters c JOIN users u ON u.id = c.user_id WHERE u.email = $1)`;
     const email = `life-${test.info().project.name}@e2e.test`;
     await db.query(`DELETE FROM life_items WHERE character_id = ${who}`, [email]);
-    const seeded = await db.query(`INSERT INTO life_items (character_id, activity_id, earned_on) SELECT ${who}, x->>'activityId', x->>'earnedOn' FROM jsonb_array_elements($2::jsonb) x WHERE ${who} IS NOT NULL`, [email, JSON.stringify(inventory)]);
+    const seeded = await db.query(
+      `INSERT INTO life_items (character_id, activity_id, earned_on) SELECT ${who}, x->>'activityId', x->>'earnedOn' FROM jsonb_array_elements($2::jsonb) x WHERE ${who} IS NOT NULL`,
+      [email, JSON.stringify(inventory)],
+    );
     expect(seeded.rowCount).toBe(inventory.length);
-  } finally { await db.end(); }
+  } finally {
+    await db.end();
+  }
   await page.reload();
   await expect(page.getByLabel("生活收藏進度")).toHaveText("7/7");
   await checkState(page, "G07-life-cabinet");
   for (const a of LIFE_ACTIVITIES) {
-    await page.getByRole("button", {name: `${a.reward}，已收集`, exact:true}).click();
+    await page.getByRole("button", { name: `${a.reward}，已收集`, exact: true }).click();
     await checkState(page, `G08-${a.id}-detail`);
-    if (a.id === "shop") await page.getByRole("button", {name:"穿上圍巾"}).click();
-    else if (a.id === "festival") await page.getByRole("button", {name:"擺在家裡"}).click();
-    else await page.getByRole("button", {name: "收好", exact:true}).click();
+    if (a.id === "shop") await page.getByRole("button", { name: "穿上圍巾" }).click();
+    else if (a.id === "festival") await page.getByRole("button", { name: "擺在家裡" }).click();
+    else await page.getByRole("button", { name: "收好", exact: true }).click();
   }
-  await page.getByRole("link", {name: "回小龍身邊", exact:true}).click();
+  await page.getByRole("link", { name: "回小龍身邊", exact: true }).click();
   await expect(page.getByLabel("穿著雲朵圍巾")).toBeVisible();
   await expect(page.getByLabel("房間的四季小燈")).toBeVisible();
   await expect(page.locator(".baby-hit [data-part='cloud-scarf']")).toBeVisible();
@@ -387,61 +483,84 @@ test("檢核 G1–G8：小龍有自己的今天、七種生活與四類收藏", 
   await page.reload();
   await expect(page.getByLabel("房間的四季小燈")).toBeVisible();
   await page.goto("/life/cabinet");
-  await page.getByRole("button", {name:"雲朵圍巾，已收集",exact:true}).click();
-  await page.getByRole("button", {name:"收回圍巾"}).click();
-  await page.getByRole("button", {name:"四季小燈，已收集",exact:true}).click();
-  await page.getByRole("button", {name:"收起小燈"}).click();
+  await page.getByRole("button", { name: "雲朵圍巾，已收集", exact: true }).click();
+  await page.getByRole("button", { name: "收回圍巾" }).click();
+  await page.getByRole("button", { name: "四季小燈，已收集", exact: true }).click();
+  await page.getByRole("button", { name: "收起小燈" }).click();
   await page.goto("/");
   await expect(page.getByLabel("穿著雲朵圍巾")).toHaveCount(0);
   await expect(page.getByLabel("房間的四季小燈")).toHaveCount(0);
   expect(errors).toEqual([]);
 });
 
-test("檢核 G8：新頁未領養、斷網重試、未收集與鍵盤返回", async ({page}) => {
+test("檢核 G8：新頁未領養、斷網重試、未收集與鍵盤返回", async ({ page }) => {
   await page.goto("/life");
   await expect(page).toHaveURL(/login/);
-  await json(page.request.post("/api/auth/dev-login", {data:{email:"life-empty@e2e.test"}}));
+  await json(page.request.post("/api/auth/dev-login", { data: { email: "life-empty@e2e.test" } }));
   await page.goto("/life");
-  await expect(page.getByRole("heading", {name:"小龍還在蛋裡"})).toBeVisible();
+  await expect(page.getByRole("heading", { name: "小龍還在蛋裡" })).toBeVisible();
   await checkState(page, "G10-no-dragon");
-  await json(page.request.put("/api/me/character", {data:{name:"小雨",appearance:look()}}));
-  await page.route("**/api/me/life", route => route.fulfill({status:503,json:{error:{code:"unavailable",message:"unavailable"}}}));
+  await json(page.request.put("/api/me/character", { data: { name: "小雨", appearance: look() } }));
+  await page.route("**/api/me/life", (route) =>
+    route.fulfill({
+      status: 503,
+      json: { error: { code: "unavailable", message: "unavailable" } },
+    }),
+  );
   await page.goto("/life");
-  await expect(page.getByRole("button", {name:"再看一次"})).toBeVisible();
+  await expect(page.getByRole("button", { name: "再看一次" })).toBeVisible();
   await checkState(page, "G11-retry");
   await page.unroute("**/api/me/life");
-  await page.getByRole("button", {name:"再看一次"}).click();
-  await expect(page.getByRole("button", {name:"陪牠去玩"})).toBeVisible();
+  await page.getByRole("button", { name: "再看一次" }).click();
+  await expect(page.getByRole("button", { name: "陪牠去玩" })).toBeVisible();
   await page.goto("/life/cabinet");
   await expect(page.getByLabel("生活收藏進度")).toHaveText("0/7");
   await checkState(page, "G12-empty-cabinet");
-  await page.getByRole("button", {name:"雲朵圍巾，還沒帶回家",exact:true}).click();
+  await page.getByRole("button", { name: "雲朵圍巾，還沒帶回家", exact: true }).click();
   await checkState(page, "G13-missing-item");
   await page.keyboard.press("Escape");
-  await expect(page.getByRole("button", {name:"雲朵圍巾，還沒帶回家",exact:true})).toBeFocused();
-  await page.getByRole("link", {name:"回小龍身邊",exact:true}).click();
+  await expect(
+    page.getByRole("button", { name: "雲朵圍巾，還沒帶回家", exact: true }),
+  ).toBeFocused();
+  await page.getByRole("link", { name: "回小龍身邊", exact: true }).click();
   await expect(page).toHaveURL(/\/$/);
 });
 
 test("B4 重新整理常用頁面保留角色與生活資料", async ({ page }) => {
   test.setTimeout(120_000);
-  await json(page.request.post("/api/auth/dev-login", { data: { email: `reload-${test.info().project.name}@e2e.test` } }));
+  await json(
+    page.request.post("/api/auth/dev-login", {
+      data: { email: `reload-${test.info().project.name}@e2e.test` },
+    }),
+  );
   await growToStageTwo(page, "小圓");
-  const openNow = (await json(page.request.get("/api/me/life"))).activities.find((a: {open: boolean}) => a.open);
+  const openNow = (await json(page.request.get("/api/me/life"))).activities.find(
+    (a: { open: boolean }) => a.open,
+  );
   await json(page.request.post("/api/me/life/activities", { data: { activityId: openNow.id } }));
   const before = await json(page.request.get("/api/me"));
   const lifeBefore = await json(page.request.get("/api/me/life"));
   for (const [path, text] of [
-    ["/", "小圓"], ["/map", "地圖"], ["/places/pub_misc", "萬事屋門口"],
-    ["/cabinet", "收藏櫃"], ["/life", "小龍的今天"], ["/life/cabinet", "生活收藏"],
-    ["/tries", "接下"], ["/steps", "一步"], ["/steps/new", "第一步"],
-    ["/connect", "會說話的朋友"], ["/me", "設定"], ["/notifications", "通知"],
+    ["/", "小圓"],
+    ["/map", "地圖"],
+    ["/places/pub_misc", "萬事屋門口"],
+    ["/cabinet", "收藏櫃"],
+    ["/life", "小龍的今天"],
+    ["/life/cabinet", "生活收藏"],
+    ["/tries", "接下"],
+    ["/steps", "一步"],
+    ["/steps/new", "第一步"],
+    ["/connect", "會說話的朋友"],
+    ["/me", "設定"],
+    ["/notifications", "通知"],
   ]) {
     await page.goto(path!);
     await expect(page.locator("main")).toContainText(text!);
     await page.reload();
     await expect(page.locator("main")).toContainText(text!);
-    await page.screenshot({ path: `docs/uat/evidence/${test.info().project.name}-B4-${path === "/" ? "home" : path!.slice(1).replaceAll("/", "-")}.png` });
+    await page.screenshot({
+      path: `docs/uat/evidence/${test.info().project.name}-B4-${path === "/" ? "home" : path!.slice(1).replaceAll("/", "-")}.png`,
+    });
   }
   const after = await json(page.request.get("/api/me"));
   const lifeAfter = await json(page.request.get("/api/me/life"));

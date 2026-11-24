@@ -12,13 +12,24 @@ export default defineConfig({
   workers: 1,
   retries: 0,
   reporter: [["list"], ["html", { open: "never", outputFolder: "playwright-report" }]],
-  use: { channel: process.env.PW_CHANNEL || undefined, baseURL, trace: "retain-on-failure", screenshot: "only-on-failure", locale: "zh-TW", timezoneId: "Asia/Taipei" },
+  use: {
+    channel: process.env.PW_CHANNEL || undefined,
+    baseURL,
+    trace: "retain-on-failure",
+    screenshot: "only-on-failure",
+    locale: "zh-TW",
+    timezoneId: "Asia/Taipei",
+  },
   projects: [
     { name: "desktop", use: { viewport: { width: 1280, height: 800 } } },
-    { name: "mobile", use: { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } },
+    {
+      name: "mobile",
+      use: { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true },
+    },
   ],
   webServer: {
-    command: "node e2e/reset-db.mjs && pnpm --filter @lj/web build && pnpm --filter @lj/server exec tsx src/index.ts",
+    command:
+      "node e2e/reset-db.mjs && pnpm --filter @lj/web build && pnpm --filter @lj/server exec tsx src/index.ts",
     url: `${baseURL}/healthz`,
     reuseExistingServer: false,
     timeout: 180_000,
@@ -27,7 +38,9 @@ export default defineConfig({
       NODE_ENV: "development",
       PORT: String(PORT),
       BASE_URL: baseURL,
-      DATABASE_URL: process.env.E2E_DATABASE_URL ?? "postgres://postgres:postgres@127.0.0.1:5433/longjiao_laned_e2e",
+      DATABASE_URL:
+        process.env.E2E_DATABASE_URL ??
+        "postgres://postgres:postgres@127.0.0.1:5433/longjiao_laned_e2e",
       AUTH_DEV_LOGIN: "true",
       GOOGLE_CLIENT_ID: "",
       GOOGLE_CLIENT_SECRET: "",

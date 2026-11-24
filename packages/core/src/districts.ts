@@ -7,10 +7,26 @@ export interface District {
   publicPlaceName: string;
 }
 
-export const DISTRICT_KEYS = ["music", "sports", "crafts", "food", "learning", "outdoors", "social", "volunteer", "misc"] as const;
+export const DISTRICT_KEYS = [
+  "music",
+  "sports",
+  "crafts",
+  "food",
+  "learning",
+  "outdoors",
+  "social",
+  "volunteer",
+  "misc",
+] as const;
 export type DistrictKey = (typeof DISTRICT_KEYS)[number];
 
-const d = (key: DistrictKey, name: string, theme: string, color: string, publicPlaceName: string): District => ({
+const d = (
+  key: DistrictKey,
+  name: string,
+  theme: string,
+  color: string,
+  publicPlaceName: string,
+): District => ({
   key,
   name,
   theme,
@@ -32,10 +48,9 @@ export const DISTRICTS: District[] = [
   d("misc", "萬事屋", "其他", "#D8C8B0", "萬事屋門口"),
 ];
 
-export const DISTRICT_BY_KEY: Record<DistrictKey, District> = Object.fromEntries(DISTRICTS.map((x) => [x.key, x])) as Record<
-  DistrictKey,
-  District
->;
+export const DISTRICT_BY_KEY: Record<DistrictKey, District> = Object.fromEntries(
+  DISTRICTS.map((x) => [x.key, x]),
+) as Record<DistrictKey, District>;
 
 export function isDistrictKey(v: string): v is DistrictKey {
   return (DISTRICT_KEYS as readonly string[]).includes(v);

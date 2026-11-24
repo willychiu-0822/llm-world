@@ -31,7 +31,9 @@ export function useFetch<T>(path: string | null) {
     setError(null);
     setLoading(Boolean(path));
     void reload();
-    return () => { latest.current++; };
+    return () => {
+      latest.current++;
+    };
   }, [path, reload]);
 
   return { data, error, loading, reload, setData };

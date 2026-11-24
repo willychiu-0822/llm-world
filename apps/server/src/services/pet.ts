@@ -1,4 +1,13 @@
-import { growthStage, keepsakeFor, nextGrowthAt, petPatchInput, TOWN_SIGHTS, townSightFor, warmLine, type Sticker } from "@lj/core";
+import {
+  growthStage,
+  keepsakeFor,
+  nextGrowthAt,
+  petPatchInput,
+  TOWN_SIGHTS,
+  townSightFor,
+  warmLine,
+  type Sticker,
+} from "@lj/core";
 import { characters, deeds, firstSteps, places } from "@lj/db";
 import { and, count, desc, eq, inArray, ne, sql } from "drizzle-orm";
 import type { AppContext } from "../context";
@@ -19,8 +28,12 @@ export function readPet(sharing: unknown): PetState {
   const s = (sharing ?? {}) as Record<string, unknown>;
   const moods = s.moods && typeof s.moods === "object" ? (s.moods as Record<string, string>) : {};
   return {
-    collectedDeedIds: Array.isArray(s.collectedDeedIds) ? s.collectedDeedIds.filter((x): x is string => typeof x === "string") : [],
-    earnedAccessories: Array.isArray(s.earnedAccessories) ? s.earnedAccessories.filter((x): x is string => typeof x === "string") : [],
+    collectedDeedIds: Array.isArray(s.collectedDeedIds)
+      ? s.collectedDeedIds.filter((x): x is string => typeof x === "string")
+      : [],
+    earnedAccessories: Array.isArray(s.earnedAccessories)
+      ? s.earnedAccessories.filter((x): x is string => typeof x === "string")
+      : [],
     lastWalkOn: typeof s.lastWalkOn === "string" ? s.lastWalkOn : null,
     lastKeepsakeId: typeof s.lastKeepsakeId === "string" ? s.lastKeepsakeId : null,
     letterDismissed: s.letterDismissed === true,
@@ -30,7 +43,12 @@ export function readPet(sharing: unknown): PetState {
 }
 
 export function taipeiDay(d: Date): string {
-  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Taipei", year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Taipei",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
 }
 
 function sharingWith(current: unknown, pet: PetState) {
@@ -53,7 +71,10 @@ async function ownCharacter(ctx: AppContext, userId: string) {
 }
 
 async function countStars(ctx: AppContext, userId: string) {
-  const [row] = await ctx.db.select({ c: count() }).from(firstSteps).where(and(eq(firstSteps.userId, userId), eq(firstSteps.status, "done")));
+  const [row] = await ctx.db
+    .select({ c: count() })
+    .from(firstSteps)
+    .where(and(eq(firstSteps.userId, userId), eq(firstSteps.status, "done")));
   return Number(row?.c ?? 0);
 }
 
@@ -67,7 +88,10 @@ async function countCollected(ctx: AppContext, userId: string, ids: string[]) {
 }
 
 async function countOthers(ctx: AppContext, userId: string) {
-  const [row] = await ctx.db.select({ c: count() }).from(deeds).where(and(visibleDeed(), ne(deeds.userId, userId)));
+  const [row] = await ctx.db
+    .select({ c: count() })
+    .from(deeds)
+    .where(and(visibleDeed(), ne(deeds.userId, userId)));
   return Number(row?.c ?? 0);
 }
 
@@ -101,7 +125,8 @@ async function pendingKeepsake(ctx: AppContext, userId: string, pet: PetState) {
     .select({ sourceDeedIds: firstSteps.sourceDeedIds, status: firstSteps.status })
     .from(firstSteps)
     .where(eq(firstSteps.userId, userId));
-  if (steps.some((s) => s.status !== "dropped" && s.sourceDeedIds.includes(pet.lastKeepsakeId!))) return null;
+  if (steps.some((s) => s.status !== "dropped" && s.sourceDeedIds.includes(pet.lastKeepsakeId!)))
+    return null;
   const [row] = await ctx.db
     .select({ deed: deeds, characterName: characters.name, placeName: places.name })
     .from(deeds)
@@ -143,7 +168,13 @@ function present(row: KeepsakeRow, collected: boolean, mood: string | null) {
   };
   if (!collected) return base;
   const who = row.characterName ?? "一位鎮民";
-  return { ...base, who, title: row.deed.title, warmLine: warmLine({ name: who, title: row.deed.title, districtKey: row.deed.districtKey }), mood };
+  return {
+    ...base,
+    who,
+    title: row.deed.title,
+    warmLine: warmLine({ name: who, title: row.deed.title, districtKey: row.deed.districtKey }),
+    mood,
+  };
 }
 
 export async function listKeepsakes(ctx: AppContext, userId: string) {
@@ -151,7 +182,9 @@ export async function listKeepsakes(ctx: AppContext, userId: string) {
   const pet = readPet(character.sharing);
   const rows = await otherDeeds(ctx, userId);
   const have = new Set(pet.collectedDeedIds);
-  const items = rows.map((row) => present(row, have.has(row.deed.id), pet.moods[row.deed.id] ?? null));
+  const items = rows.map((row) =>
+    present(row, have.has(row.deed.id), pet.moods[row.deed.id] ?? null),
+  );
   const collected = items.filter((i) => i.collected).length;
   return { collected, total: items.length, items };
 }
@@ -177,10 +210,18 @@ export async function walkOut(ctx: AppContext, userId: string) {
     if (first) pet.earnedAccessories = [...pet.earnedAccessories, "backpack"];
     await ctx.db
       .update(characters)
-      .set({ sharing: sql`${characters.sharing} || ${JSON.stringify(sharingWith({}, pet))}::jsonb`, lastActiveAt: ctx.now() })
+      .set({
+        sharing: sql`${characters.sharing} || ${JSON.stringify(sharingWith({}, pet))}::jsonb`,
+        lastActiveAt: ctx.now(),
+      })
       .where(eq(characters.id, character.id));
     const summary = await getPetSummary(ctx, userId, sharingWith(character.sharing, pet));
-    return { keepsake: null, sight: townSightFor(pickIndex(`${userId}:${today}`, TOWN_SIGHTS.length)), reward: first ? "backpack" : null, pet: summary };
+    return {
+      keepsake: null,
+      sight: townSightFor(pickIndex(`${userId}:${today}`, TOWN_SIGHTS.length)),
+      reward: first ? "backpack" : null,
+      pet: summary,
+    };
   }
   const row = fresh[pickIndex(`${userId}:${today}:${ctx.now().getTime()}`, fresh.length)]!;
   const first = !pet.earnedAccessories.includes("backpack");
@@ -190,10 +231,19 @@ export async function walkOut(ctx: AppContext, userId: string) {
   if (first) pet.earnedAccessories = [...pet.earnedAccessories, "backpack"];
   await ctx.db
     .update(characters)
-    .set({ sharing: sql`${characters.sharing} || ${JSON.stringify(sharingWith({}, pet))}::jsonb`, lastActivePlaceId: row.deed.placeId, lastActiveAt: ctx.now() })
+    .set({
+      sharing: sql`${characters.sharing} || ${JSON.stringify(sharingWith({}, pet))}::jsonb`,
+      lastActivePlaceId: row.deed.placeId,
+      lastActiveAt: ctx.now(),
+    })
     .where(eq(characters.id, character.id));
   const summary = await getPetSummary(ctx, userId, sharingWith(character.sharing, pet));
-  return { keepsake: present(row, true, null), sight: null, reward: first ? "backpack" : null, pet: summary };
+  return {
+    keepsake: present(row, true, null),
+    sight: null,
+    reward: first ? "backpack" : null,
+    pet: summary,
+  };
 }
 
 export async function patchPet(ctx: AppContext, userId: string, raw: unknown) {
@@ -203,10 +253,14 @@ export async function patchPet(ctx: AppContext, userId: string, raw: unknown) {
   if (input.notify !== undefined) pet.notify = input.notify;
   if (input.letterDismissed) pet.letterDismissed = true;
   if (input.mood) {
-    if (!pet.collectedDeedIds.includes(input.mood.deedId)) throw new AppError("invalid_input", "這顆信物還沒撿到");
+    if (!pet.collectedDeedIds.includes(input.mood.deedId))
+      throw new AppError("invalid_input", "這顆信物還沒撿到");
     pet.moods = { ...pet.moods, [input.mood.deedId]: input.mood.sticker };
   }
   const sharing = sharingWith(character.sharing, pet);
-  await ctx.db.update(characters).set({ sharing: sql`${characters.sharing} || ${JSON.stringify(sharingWith({}, pet))}::jsonb` }).where(eq(characters.id, character.id));
+  await ctx.db
+    .update(characters)
+    .set({ sharing: sql`${characters.sharing} || ${JSON.stringify(sharingWith({}, pet))}::jsonb` })
+    .where(eq(characters.id, character.id));
   return getPetSummary(ctx, userId, sharing);
 }
