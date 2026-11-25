@@ -1,10 +1,19 @@
-import { LIFE_ACTIVITIES } from "../packages/core/src/life";
+import { mkdir } from "node:fs/promises";
+import path from "node:path";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page } from "@playwright/test";
-import { mkdir } from "node:fs/promises";
 import pg from "pg";
+import { LIFE_ACTIVITIES } from "../packages/core/src/life";
 import { assertE2eDatabase } from "./assert-e2e-database.mjs";
-import { test, json, look, panToPlace, growToStageTwo } from "./helpers";
+import {
+  growToStageTwo,
+  json,
+  look,
+  panToPlace,
+  saveScreenshot,
+  test,
+  uatArtifactDir,
+} from "./helpers";
 
 const BANNED = [
   "AI",
@@ -29,9 +38,9 @@ test("隱私權頁首屏有回家按鈕", async ({ page }) => {
 });
 
 async function shot(page: Page, id: string) {
-  const dir = process.env.VERIFY_SHOTS ?? "docs/uat/evidence/uiux-audit/after";
+  const dir = process.env.VERIFY_SHOTS ?? uatArtifactDir("uiux-audit", "after");
   await mkdir(dir, { recursive: true });
-  await page.screenshot({ path: `${dir}/${test.info().project.name}-${id}.png` });
+  await page.screenshot({ path: path.join(dir, `${test.info().project.name}-${id}.png`) });
 }
 
 async function textOf(page: Page) {
@@ -558,9 +567,8 @@ test("B4 重新整理常用頁面保留角色與生活資料", async ({ page }) 
     await expect(page.locator("main")).toContainText(text!);
     await page.reload();
     await expect(page.locator("main")).toContainText(text!);
-    await page.screenshot({
-      path: `docs/uat/evidence/${test.info().project.name}-B4-${path === "/" ? "home" : path!.slice(1).replaceAll("/", "-")}.png`,
-    });
+    const shotName = path === "/" ? "home" : path!.slice(1).replaceAll("/", "-");
+    await saveScreenshot(page, `${test.info().project.name}-B4-${shotName}.png`);
   }
   const after = await json(page.request.get("/api/me"));
   const lifeAfter = await json(page.request.get("/api/me/life"));

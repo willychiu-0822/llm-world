@@ -1,11 +1,14 @@
 import { createRequire } from "node:module";
 import { writeFile, mkdir } from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 const require = createRequire(new URL("../../../package.json", import.meta.url));
 const { chromium } = require("@playwright/test");
 
 const BASE = process.env.VERIFY_BASE ?? "http://localhost:4132";
-const OUT = process.env.VERIFY_OUT ?? "docs/uat/verify-codex/baseline-1105";
+// Screenshots stay outside the repo unless VERIFY_OUT is set.
+const OUT =
+  process.env.VERIFY_OUT ?? path.join(os.tmpdir(), "llm-world-uat", "verify-codex", "baseline-1105");
 const BANNED = ["AI", "MCP", "token", "agent", "provider", "事蹟", "鏡子", "許可證", "發現匣", "隨筆", "你應該", "越小越好", "映照", "可能的自己", "點旁邊", "點任意處", "先不要", "圖鑑", "ChatGPT"];
 const VIEWPORTS = [
   { name: "mobile", width: 390, height: 844, isMobile: true, hasTouch: true },

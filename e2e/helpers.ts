@@ -1,17 +1,25 @@
+import { createHash, randomBytes } from "node:crypto";
+import { mkdir } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import {
-  expect,
-  request,
-  test as base,
   type APIRequestContext,
   type Browser,
+  test as base,
+  expect,
   type Page,
+  request,
 } from "@playwright/test";
 import pg from "pg";
-import { mkdir } from "node:fs/promises";
-import { createHash, randomBytes } from "node:crypto";
 import { assertE2eDatabase } from "./assert-e2e-database.mjs";
+
+/** UAT screenshots. Outside the repo unless UAT_EVIDENCE_DIR is set explicitly. */
+export function uatArtifactDir(...parts: string[]): string {
+  const root = process.env.UAT_EVIDENCE_DIR ?? path.join(tmpdir(), "llm-world-uat");
+  return parts.length ? path.join(root, ...parts) : root;
+}
 
 export const BASE = `http://localhost:${process.env.E2E_PORT ?? 4131}`;
 // An auto fixture applies to every importing spec, even when Playwright reuses a worker.
@@ -46,11 +54,15 @@ export const test = base.extend<{ isolateUat: void }>({
 });
 
 export async function evidence(page: Page, name: string) {
-  await mkdir("docs/uat/evidence", { recursive: true });
-  await page.screenshot({
-    path: `docs/uat/evidence/${test.info().project.name}-${name}.png`,
-    fullPage: true,
-  });
+  const file = uatArtifactDir(`${test.info().project.name}-${name}.png`);
+  await mkdir(path.dirname(file), { recursive: true });
+  await page.screenshot({ path: file, fullPage: true });
+}
+
+export async function saveScreenshot(page: Page, filename: string) {
+  const file = uatArtifactDir(filename);
+  await mkdir(path.dirname(file), { recursive: true });
+  await page.screenshot({ path: file });
 }
 
 // Nothing listens here; the consent redirect is captured before the browser follows it.

@@ -1,9 +1,12 @@
 import { createRequire } from 'node:module';
 import { mkdir, writeFile } from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
 import assert from 'node:assert/strict';
 const require = createRequire(new URL('../../../package.json', import.meta.url));
 const { chromium } = require('@playwright/test');
-const out = process.env.VERIFY_OUT ?? 'docs/uat/verify-codex/independent-life-final2';
+// Screenshots stay outside the repo unless VERIFY_OUT is set.
+const out = process.env.VERIFY_OUT ?? path.join(os.tmpdir(), 'llm-world-uat', 'verify-codex', 'independent-life-final2');
 await mkdir(out, {recursive:true});
 const browser = await chromium.launch({channel:'chrome',headless:true});
 const results = {};
