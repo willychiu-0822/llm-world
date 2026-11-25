@@ -1,5 +1,5 @@
 import { expect, type Locator, type Page } from "@playwright/test";
-import { test, json, growToStageTwo, apiAs, look } from "./helpers";
+import { apiAs, growToStageTwo, json, look, test } from "./helpers";
 
 // Exercise the browser's actual sequential focus order, including mobile layout.
 async function checkKeyboard(page: Page, path: string) {
@@ -142,7 +142,7 @@ test("F2 生活活動和收藏對話框可用鍵盤操作", async ({ page }) => 
   const result = page.getByRole("dialog", { name: "帶回小驚喜" });
   await expect(result).toBeVisible();
   await keyboardActivate(page, result.getByRole("button", { name: "收好紀念品" }));
-  await keyboardActivate(page, page.getByRole("link", { name: "打開生活收藏" }));
+  await keyboardActivate(page, page.getByRole("link", { name: "打開收藏櫃" }));
   const owned = page.getByRole("button", { name: /已收集/ }).first();
   await keyboardActivate(page, owned);
   const detail = page.getByRole("dialog");

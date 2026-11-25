@@ -965,7 +965,15 @@ th {
   text-align: center;
 }
 .cabinet h2 {
-  font-size: 1rem;
+  font-size: 1.25rem;
+}
+.cabinet-layer {
+  scroll-margin-top: 84px;
+}
+.cabinet-layer + .cabinet-layer {
+  border-top: 2px dashed var(--line);
+  margin-top: 96px;
+  padding-top: 16px;
 }
 .veil {
   position: fixed;

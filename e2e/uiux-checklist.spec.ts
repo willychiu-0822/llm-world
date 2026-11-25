@@ -452,7 +452,7 @@ test("檢核 G1–G8：小龍有自己的今天、七種生活與四類收藏", 
   }
   expect((await json(page.request.get("/api/me"))).pet.stars).toBe(0);
   await page.getByRole("link", { name: "看看今天帶回來的" }).click();
-  await expect(page.getByLabel("生活收藏進度")).toHaveText(`${openToday.length}/7`);
+  await expect(page.getByLabel("小龍帶回來的進度")).toHaveText(`${openToday.length}/7`);
   // The other keepsakes come on other days; hand them over directly so the cabinet can be checked in full.
   const dbUrl =
     process.env.E2E_DATABASE_URL ??
@@ -474,7 +474,7 @@ test("檢核 G1–G8：小龍有自己的今天、七種生活與四類收藏", 
     await db.end();
   }
   await page.reload();
-  await expect(page.getByLabel("生活收藏進度")).toHaveText("7/7");
+  await expect(page.getByLabel("小龍帶回來的進度")).toHaveText("7/7");
   await checkState(page, "G07-life-cabinet");
   for (const a of LIFE_ACTIVITIES) {
     await page.getByRole("button", { name: `${a.reward}，已收集`, exact: true }).click();
@@ -523,7 +523,7 @@ test("檢核 G8：新頁未領養、斷網重試、未收集與鍵盤返回", as
   await page.getByRole("button", { name: "再看一次" }).click();
   await expect(page.getByRole("button", { name: "陪牠去玩" })).toBeVisible();
   await page.goto("/life/cabinet");
-  await expect(page.getByLabel("生活收藏進度")).toHaveText("0/7");
+  await expect(page.getByLabel("小龍帶回來的進度")).toHaveText("0/7");
   await checkState(page, "G12-empty-cabinet");
   await page.getByRole("button", { name: "雲朵圍巾，還沒帶回家", exact: true }).click();
   await checkState(page, "G13-missing-item");
@@ -555,7 +555,7 @@ test("B4 重新整理常用頁面保留角色與生活資料", async ({ page }) 
     ["/places/pub_misc", "萬事屋門口"],
     ["/cabinet", "收藏櫃"],
     ["/life", "小龍的今天"],
-    ["/life/cabinet", "生活收藏"],
+    ["/life/cabinet", "小龍帶回來的"],
     ["/tries", "接下"],
     ["/steps", "一步"],
     ["/steps/new", "第一步"],

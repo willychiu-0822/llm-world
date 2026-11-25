@@ -3,6 +3,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
+import { LifeShelf } from "../components/LifeShelf";
 import { LifePage } from "./Life";
 
 const life = vi.hoisted(() => {
@@ -97,7 +98,7 @@ describe("life pictures", () => {
   it("shows the seven souvenirs as drawings, and the day's choices too", async () => {
     const { unmount } = render(
       <MemoryRouter>
-        <LifePage cabinet />
+        <LifeShelf />
       </MemoryRouter>,
     );
     expect(document.querySelectorAll(".life-shelf [data-mark]")).toHaveLength(7);
@@ -137,7 +138,7 @@ describe("life pictures", () => {
 
       render(
         <MemoryRouter>
-          <LifePage cabinet />
+          <LifeShelf />
         </MemoryRouter>,
       );
       await userEvent.click(screen.getByRole("button", { name: "雲朵圍巾，已收集" }));
