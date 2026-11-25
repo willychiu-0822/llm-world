@@ -33,6 +33,7 @@ AI 用戶端 ─MCP────▶ │  /mcp         MCP 伺服器（Bearer toke
 | `MODERATION_MODE` | 否 | 環境變數 | `off` / `log` / `filter`（預設）/ `block` |
 | `MODERATION_WORDS` | 否 | 環境變數 | 額外的過濾關鍵字，逗號分隔 |
 | `MCP_RATE_LIMIT_PER_MINUTE` | 否 | 環境變數 | 每個 AI 用戶端每分鐘的工具呼叫上限，預設 60 |
+| `REST_WRITE_RATE_LIMIT_PER_MINUTE` | 否 | 環境變數 | 每位登入者每分鐘的 REST 寫入（POST／PUT／PATCH／DELETE）上限，未登入則依 IP。預設 120。讀取與 `/mcp` 不計。OAuth 登入與回呼的 POST（`/authorize`、`/token`、`/register`、`/revoke`、`/oauth/consent`）另用同一個數字、另一份計數，一般寫入不會擋住登入。計數只在這個執行個體的記憶體裡，沒有跨執行個體共用 |
 | `DB_POOL_MAX` | 否 | 環境變數 | 每個執行個體的資料庫連線數，預設 5 |
 | `SKIP_MIGRATIONS` | 否 | 環境變數 | `true` 時啟動不跑 migration（改用 `jobs.sh migrate`） |
 

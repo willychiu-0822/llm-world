@@ -1,28 +1,36 @@
+import { APP_NAME } from "@lj/core";
 import express from "express";
 import helmet from "helmet";
-import { getMe } from "./services/characters";
-import { h } from "./http/errors";
 import { loadSession } from "./auth/session";
 import type { AppContext } from "./context";
-import { errorHandler } from "./http/errors";
-import { serveWeb } from "./web";
-import { APP_NAME } from "@lj/core";
-import { authRoutes } from "./routes/auth";
+import { contentSecurityPolicyDirectives } from "./http/csp";
+import { errorHandler, h } from "./http/errors";
+import { oauthSignInLimiter, restWriteLimiter } from "./http/write-limit";
 import { mcpRoutes } from "./mcp/route";
 import { oauthRoutes } from "./oauth/routes";
+import { authRoutes } from "./routes/auth";
 import { meRoutes } from "./routes/me";
 import { deedRoutes, discoveryRoutes, notificationRoutes, stepRoutes } from "./routes/steps";
 import { adminRoutes, providerRoutes, worldRoutes } from "./routes/world";
+import { getMe } from "./services/characters";
+import { serveWeb } from "./web";
 
 export function createApp(ctx: AppContext) {
   const app = express();
   app.set("trust proxy", 1);
   app.disable("x-powered-by");
-  app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
+  app.use(
+    helmet({
+      contentSecurityPolicy: { useDefaults: false, directives: contentSecurityPolicyDirectives() },
+      crossOriginEmbedderPolicy: false,
+    }),
+  );
   app.get("/healthz", (_req, res) => res.json({ ok: true }));
   app.use(express.json({ limit: "100kb" }));
   app.use(express.urlencoded({ extended: false }));
   app.use(loadSession(ctx));
+  app.use(restWriteLimiter(ctx));
+  app.use(oauthSignInLimiter(ctx));
   app.get("/api/config", (_req, res) =>
     res.json({
       appName: APP_NAME,

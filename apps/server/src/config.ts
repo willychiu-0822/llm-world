@@ -14,6 +14,8 @@ export interface Config {
   moderationWords: string[];
   webDist?: string;
   mcpRateLimitPerMinute: number;
+  /** Authenticated REST writes per user per minute. Unauthenticated writes use the client IP. */
+  restWriteRateLimitPerMinute: number;
 }
 
 export function loadConfig(env: Record<string, string | undefined> = process.env): Config {
@@ -50,5 +52,17 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     ],
     webDist: env.WEB_DIST,
     mcpRateLimitPerMinute: Number(env.MCP_RATE_LIMIT_PER_MINUTE ?? 60),
+    restWriteRateLimitPerMinute: positiveInt(
+      env.REST_WRITE_RATE_LIMIT_PER_MINUTE,
+      120,
+      "REST_WRITE_RATE_LIMIT_PER_MINUTE",
+    ),
   };
+}
+
+function positiveInt(raw: string | undefined, fallback: number, name: string): number {
+  if (raw === undefined || raw.trim() === "") return fallback;
+  const n = Number(raw);
+  if (!Number.isInteger(n) || n < 1) throw new Error(`${name} must be a positive integer`);
+  return n;
 }
