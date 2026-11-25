@@ -1,5 +1,5 @@
 import { expect } from "@playwright/test";
-import { test, json } from "./helpers";
+import { json, saveScreenshot, test } from "./helpers";
 
 test("領養配色時操作列不遮住畫面內的顏色選項", async ({ page }) => {
   await json(
@@ -12,9 +12,7 @@ test("領養配色時操作列不遮住畫面內的顏色選項", async ({ page 
   await page.getByRole("button", { name: "下一步" }).click();
   await expect(page.getByRole("heading", { name: "頭上要長什麼？" })).toBeVisible();
   await expect(page.getByRole("button", { name: "下一步" })).toBeInViewport({ ratio: 1 });
-  await page.screenshot({
-    path: `docs/uat/evidence/${test.info().project.name}-adopt-colors-initial.png`,
-  });
+  await saveScreenshot(page, `${test.info().project.name}-adopt-colors-initial.png`);
   const overlaps = await page.evaluate(() => {
     const controls = document.querySelector(".adopt-actions")!.getBoundingClientRect();
     const section = document.querySelector(".adopt > section")!.getBoundingClientRect();

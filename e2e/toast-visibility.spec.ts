@@ -1,5 +1,5 @@
 import { expect } from "@playwright/test";
-import { test, json, growToStageTwo } from "./helpers";
+import { growToStageTwo, json, saveScreenshot, test } from "./helpers";
 
 test("A6 提示可關閉且不遮住操作", async ({ page }) => {
   await json(
@@ -38,7 +38,7 @@ test("A6 提示可關閉且不遮住操作", async ({ page }) => {
       });
   });
   expect(covered).toEqual([]);
-  await page.screenshot({ path: `docs/uat/evidence/${test.info().project.name}-A6-notice.png` });
+  await saveScreenshot(page, `${test.info().project.name}-A6-notice.png`);
   await page.locator(".toast").getByRole("button", { name: "關閉提示" }).click();
   await expect(page.locator(".toast")).toHaveCount(0);
 });
@@ -96,9 +96,10 @@ test("A6 連接頁複製提示可見、不遮擋按鈕", async ({ page, context 
           .map((target) => target.textContent?.trim() || target.tagName);
       }),
     ).toEqual([]);
-    await page.screenshot({
-      path: `docs/uat/evidence/${test.info().project.name}-A6-${name === "複製網址" ? "copy-url" : "copy-codex"}.png`,
-    });
+    await saveScreenshot(
+      page,
+      `${test.info().project.name}-A6-${name === "複製網址" ? "copy-url" : "copy-codex"}.png`,
+    );
     await notice.getByRole("button", { name: "關閉提示" }).click();
     await expect(notice).toHaveCount(0);
   }

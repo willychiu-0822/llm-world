@@ -9,3 +9,8 @@ test-results/
 playwright-report/
 apps/web/dist/
 deploy/gcp/config.local.sh
+docs/uat/evidence/
+docs/uat/**/*.png
+docs/uat/**/*.jpg
+docs/uat/**/*.jpeg
+docs/uat/**/*.log

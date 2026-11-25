@@ -1,5 +1,5 @@
 import { expect } from "@playwright/test";
-import { test, json, growToStageTwo } from "./helpers";
+import { growToStageTwo, json, saveScreenshot, test } from "./helpers";
 
 test("A6 長頁下方完成時也能看見並關閉提示", async ({ page }) => {
   await json(
@@ -30,9 +30,7 @@ test("A6 長頁下方完成時也能看見並關閉提示", async ({ page }) => 
     );
   });
   expect(unobscured).toBe(true);
-  await page.screenshot({
-    path: `docs/uat/evidence/${test.info().project.name}-A6-long-page-notice.png`,
-  });
+  await saveScreenshot(page, `${test.info().project.name}-A6-long-page-notice.png`);
   await page.locator(".toast").getByRole("button", { name: "關閉提示" }).click();
   await expect(page.locator(".toast")).toHaveCount(0);
 });
