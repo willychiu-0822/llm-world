@@ -26,11 +26,17 @@ function describe(n: N): { text: string; to?: string } {
       return { text: `有人參考你的「${p.deedTitle}」，也做到了！`, to: `/deeds/${p.deedId}` };
     case "step_proposed":
       if (p.outcome === "confirmed")
-        return { text: `你已確認 AI 建議的第一步：「${p.text}」。`, to: "/steps?tab=confirmed" };
+        return {
+          text: `你已確認會說話的朋友建議的第一步：「${p.text}」。`,
+          to: "/steps?tab=confirmed",
+        };
       if (p.outcome === "dropped")
-        return { text: `你已放下 AI 建議的第一步：「${p.text}」。`, to: "/steps?tab=draft" };
+        return {
+          text: `你已放下會說話的朋友建議的第一步：「${p.text}」。`,
+          to: "/steps?tab=draft",
+        };
       return {
-        text: `你的 AI 角色建議了一個第一步：「${p.text}」，等你確認。`,
+        text: `會說話的朋友建議了一個第一步：「${p.text}」，等你確認。`,
         to: "/steps?tab=draft",
       };
     case "ai_step_done":
@@ -41,16 +47,16 @@ function describe(n: N): { text: string; to?: string } {
         };
       if (p.pending !== false && p.outcome !== "published")
         return {
-          text: `你的 AI 角色帶回了「${p.text}」的結果，等你看過再決定要不要公開。`,
+          text: `會說話的朋友帶回了「${p.text}」的結果，等你看過再決定要不要公開。`,
           to: "/steps?tab=review",
         };
       return {
-        text: `你的 AI 角色完成了「${p.text}」。`,
+        text: `會說話的朋友完成了「${p.text}」。`,
         to: typeof p.deedId === "string" ? `/deeds/${p.deedId}` : "/steps?tab=done",
       };
     case "question_answered":
       return {
-        text: `「${p.trialTitle}」回答了你的 AI 問的問題：「${p.question}」→ ${p.answer}`,
+        text: `「${p.trialTitle}」回答了會說話的朋友問的問題：「${p.question}」→ ${p.answer}`,
         to: `/trials/${p.trialId}`,
       };
     case "attendance_confirmed":
@@ -61,7 +67,7 @@ function describe(n: N): { text: string; to?: string } {
     case "provider_approved":
       return { text: `你的提供者申請「${p.name}」通過了，可以在鎮上開店了。`, to: "/provider" };
     case "new_question":
-      return { text: `有人的 AI 問了一個問題：「${p.question}」`, to: "/provider" };
+      return { text: `有人的會說話的朋友問了一個問題：「${p.question}」`, to: "/provider" };
     default:
       return { text: "你有一則新通知。" };
   }

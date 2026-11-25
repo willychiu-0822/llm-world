@@ -1,6 +1,5 @@
 import { expect } from "@playwright/test";
-import { test } from "./helpers";
-import { apiAs, evidence, json, look } from "./helpers";
+import { apiAs, evidence, json, look, test } from "./helpers";
 
 const BANNED = [
   "AI",
@@ -35,6 +34,8 @@ const BANNED = [
   "試著",
   "記得",
   "反思",
+  "寶寶",
+  "角色",
 ];
 
 async function expectClean(page: import("@playwright/test").Page) {
@@ -73,7 +74,7 @@ test("新手：領養、出門、信物、做到了、收藏", async ({ page }) 
   await evidence(page, "novice-01-guest");
 
   await page.getByRole("link", { name: "把牠撿回家" }).click();
-  await expect(page.getByRole("heading", { name: "登入後就能把寶寶帶回家" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "登入後就能把小龍帶回家" })).toBeVisible();
   await expectClean(page);
   await page.getByLabel("Email").fill("novice@e2e.test");
   await page.getByLabel("名字", { exact: true }).fill("新手小安");
@@ -85,7 +86,7 @@ test("新手：領養、出門、信物、做到了、收藏", async ({ page }) 
   await page.getByRole("button", { name: "下一步" }).click();
   await expect(page.getByText("頭上要長什麼？")).toBeVisible();
   await page.getByRole("button", { name: "下一步" }).click();
-  await page.getByLabel("角色名字").fill("小龍");
+  await page.getByLabel("小龍名字").fill("小龍");
   await expectClean(page);
   await page.getByRole("button", { name: "帶牠回家" }).click();
   await expect(page.getByText("嗨！我是小龍。")).toBeVisible();

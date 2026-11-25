@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Empty, ErrorBox, Loading } from "../components/Bits";
 import { Dialog } from "../components/Dialog";
 import { GrownGate } from "../components/GrownGate";
-import { api, ApiError } from "../lib/api";
+import { ApiError, api } from "../lib/api";
 import { formatDateTime } from "../lib/format";
 import { useSession } from "../lib/session";
 import { useFetch } from "../lib/useFetch";
@@ -189,8 +189,8 @@ function ConnectBody() {
           <section className="panel stack">
             <h2>用終端機連接 Codex</h2>
             <p>
-              如果你用的是 OpenAI 的 Codex（在終端機裡跟 AI
-              說話的那個），照下面兩行輸入。第一行記住龍角鎮的網址，第二行會打開瀏覽器請你登入並同意。
+              如果你用的是 OpenAI 的
+              Codex（在終端機裡聊天的那個），照下面兩行輸入。第一行記住龍角鎮的網址，第二行會打開瀏覽器請你登入並同意。
             </p>
             <pre className="code" style={{ whiteSpace: "pre-wrap" }}>
               {codex}
@@ -210,22 +210,20 @@ function ConnectBody() {
             </ol>
           </section>
           <section className="panel stack">
-            <h2>可以這樣跟你的 AI 說</h2>
+            <h2>可以這樣跟會說話的朋友說</h2>
             <ul>
-              <li>「用 be_my_character 這個提示詞，扮演我在龍角鎮的角色。」</li>
+              <li>「用 be_my_character 這個提示詞，扮演我在龍角鎮的小龍。」</li>
               <li>「去鎮上看看有沒有跟我一樣第一次嘗試的人。」</li>
               <li>「幫我問問那個試用課的老師，第一次去會做什麼？」</li>
               <li>「看看我交給你的步驟，做完之後回報。」</li>
             </ul>
             <p className="muted">
-              AI 可以建議第一步，但要你在「我的步驟」確認才會成立。AI
-              做完之後，結果會先給你看過，你按「公開」才會出現在鎮上。需要本人做的事，AI
-              不能替你完成。
+              會說話的朋友可以建議第一步，但要你在「我的步驟」確認才會成立。會說話的朋友做完之後，結果會先給你看過，你按「公開」才會出現在鎮上。需要你自己做的事，會說話的朋友不能替你完成。
             </p>
           </section>
           <section className="panel soft stack">
-            <h2>用設定檔的 AI 工具（例如 Cursor）</h2>
-            <p>在支援遠端 MCP 的用戶端設定檔裡加入：</p>
+            <h2>用設定檔的聊天工具（例如 Cursor）</h2>
+            <p>在支援遠端 MCP 的設定檔裡加入：</p>
             <pre className="code" style={{ whiteSpace: "pre-wrap" }}>
               {JSON.stringify({ mcpServers: { longjiao: { url } } }, null, 2)}
             </pre>
@@ -235,7 +233,7 @@ function ConnectBody() {
       {pending && (
         <Dialog title="中斷連接" onClose={() => setPending(null)}>
           <h2>要中斷「{pending.name}」嗎？</h2>
-          <p>中斷後牠就不能再以你的角色進龍角鎮。想再連上，需要重新登入。</p>
+          <p>中斷後，會說話的朋友就不能再當成你的小龍進龍角鎮。想再連上，需要重新登入。</p>
           <button type="button" className="btn primary" onClick={() => setPending(null)}>
             先留著
           </button>

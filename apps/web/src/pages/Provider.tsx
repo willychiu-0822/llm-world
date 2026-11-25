@@ -1,5 +1,5 @@
 import { DISTRICTS, PALETTE } from "@lj/core";
-import { useState, type FormEvent } from "react";
+import { type FormEvent, useState } from "react";
 import { Link } from "react-router-dom";
 import { DistrictTag, Empty, ErrorBox, Loading } from "../components/Bits";
 import { api } from "../lib/api";
@@ -344,12 +344,12 @@ function TrialForm({
       </label>
       <div className="row wrap">
         <label className="field grow">
-          <span>建議的 AI 第一步</span>
+          <span>建議會說話的朋友的第一步</span>
           <input
-            aria-label="建議的 AI 第一步"
+            aria-label="建議會說話的朋友的第一步"
             value={f.aiFirstStepHint}
             onChange={t("aiFirstStepHint")}
-            placeholder="來問我的 agent 任何問題"
+            placeholder="來問我第一次會做什麼"
             maxLength={200}
           />
         </label>
@@ -592,7 +592,7 @@ function Questions({ reloadDash }: { reloadDash(): void }) {
   const pending = data?.filter((q) => !q.answer) ?? [];
   return (
     <section className="panel stack">
-      <h2>大家的 AI 問的問題</h2>
+      <h2>大家的會說話的朋友問的問題</h2>
       {!pending.length ? (
         <Empty>
           目前沒有待回答的問題。可以先到<a href="#provider-trials">試用機會</a>
@@ -668,7 +668,7 @@ function Signals() {
         <article key={s.trialId} className="panel soft stack" style={{ gap: 6 }}>
           <strong>{s.title}</strong>
           <div className="chips">
-            <span className="chip">AI 來看過 {s.aiViews} 次</span>
+            <span className="chip">會說話的朋友來看過 {s.aiViews} 次</span>
             <span className="chip">被問了 {s.questions} 個問題</span>
             <span className="chip">報名 {s.bookings}</span>
             <span className="chip">出席 {s.attended}</span>

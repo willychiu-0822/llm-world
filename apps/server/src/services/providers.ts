@@ -269,7 +269,7 @@ export async function listBookings(ctx: AppContext, provider: ProviderRow, sessi
     .leftJoin(characters, eq(characters.userId, bookings.userId))
     .where(eq(bookings.sessionId, sessionId))
     .orderBy(asc(bookings.createdAt));
-  return rows.map((r) => ({ ...r, characterName: r.characterName ?? "（尚未設定角色）" }));
+  return rows.map((r) => ({ ...r, characterName: r.characterName ?? "（還沒取名的小龍）" }));
 }
 
 export async function attendBooking(ctx: AppContext, provider: ProviderRow, bookingId: string) {

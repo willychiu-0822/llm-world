@@ -30,6 +30,8 @@ const BANNED = [
   "越小越好",
   "映照",
   "可能的自己",
+  "寶寶",
+  "角色",
 ];
 
 test("隱私權頁首屏有回家按鈕", async ({ page }) => {
@@ -179,7 +181,7 @@ test("檢核 A1–A5、B1–B3、C1–C3、F1–F2、D3", async ({ page }) => {
   await page.goto("/");
 
   await page.getByRole("link", { name: "把牠撿回家" }).click();
-  await expect(page.getByRole("heading", { name: "登入後就能把寶寶帶回家" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "登入後就能把小龍帶回家" })).toBeVisible();
   await checkState(page, "02-login");
 
   let logins = 0;
@@ -206,7 +208,7 @@ test("檢核 A1–A5、B1–B3、C1–C3、F1–F2、D3", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "圓圓的，還是高高的？" })).toBeVisible();
   await page.getByRole("button", { name: "下一步" }).click();
   await page.getByRole("button", { name: "下一步" }).click();
-  await page.getByLabel("角色名字").fill("小龍");
+  await page.getByLabel("小龍名字").fill("小龍");
   await checkState(page, "05-adopt-name");
   await page.getByRole("button", { name: "帶牠回家" }).click();
   await expect(page.getByRole("button", { name: "去找牠" })).toBeVisible();
@@ -338,7 +340,7 @@ test("檢核 A1–A5、B1–B3、C1–C3、F1–F2、D3", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "設定" })).toBeVisible();
   await checkState(page, "17-settings");
   await page.locator("details.advanced summary").click();
-  await expect(page.getByRole("link", { name: "幫手" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "會說話的朋友" })).toHaveCount(0);
   await page.getByRole("link", { name: "服務條款" }).click();
   let legal = await textOf(page);
   for (const word of BANNED) expect(legal, `terms ${word}`).not.toContain(word);

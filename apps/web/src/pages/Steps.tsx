@@ -1,8 +1,8 @@
-import { useRef, useState, type FormEvent } from "react";
+import { type FormEvent, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Empty, ErrorBox, ExecutorTag, Loading } from "../components/Bits";
 import { GrownGate } from "../components/GrownGate";
-import { api, ApiError } from "../lib/api";
+import { ApiError, api } from "../lib/api";
 import { formatDateTime } from "../lib/format";
 import { useSession } from "../lib/session";
 import type { Step } from "../lib/types";
@@ -10,7 +10,7 @@ import { useFetch } from "../lib/useFetch";
 
 type Tab = "draft" | "confirmed" | "review" | "done";
 const TABS: { key: Tab; label: string }[] = [
-  { key: "draft", label: "朋友的建議" },
+  { key: "draft", label: "會說話的朋友的建議" },
   { key: "confirmed", label: "進行中" },
   { key: "review", label: "等你看過" },
   { key: "done", label: "完成了" },
@@ -150,8 +150,8 @@ function ReviewForm({
     }
   };
   return (
-    <div className="panel soft stack" aria-label="看過 AI 的結果">
-      <strong>AI 帶回的結果，公開前先看過</strong>
+    <div className="panel soft stack" aria-label="看過帶回的結果">
+      <strong>會說話的朋友帶回的結果，公開前先看過</strong>
       <p className="muted">公開之後，鎮上的人會看到這段話。可以先改成你想分享的版本。</p>
       <label className="field">
         <span>要留下的內容</span>
@@ -192,7 +192,7 @@ function ReviewForm({
           disabled={saving}
           onClick={() => send("reject")}
         >
-          退回，請 AI 重做
+          退回，請會說話的朋友重做
         </button>
       </div>
     </div>
@@ -330,11 +330,11 @@ function StepItem({
         {highlighted && <strong className="notice">剛剛完成的這一步</strong>}
         <div className="row wrap" style={{ gap: 6 }}>
           <ExecutorTag executor={step.executor} />
-          {step.proposedBy === "ai" && <span className="tag tag-ai">AI 建議</span>}
+          {step.proposedBy === "ai" && <span className="tag tag-ai">會說話的朋友建議</span>}
           {step.attended && <span className="tag tag-self">提供者已確認出席</span>}
         </div>
         <h3 style={{ margin: 0 }}>「{step.text}」</h3>
-        {step.proposalReason && <p className="muted">AI 的理由：{step.proposalReason}</p>}
+        {step.proposalReason && <p className="muted">會說話的朋友的理由：{step.proposalReason}</p>}
         {step.trial && (
           <p>
             試用機會：
@@ -351,7 +351,7 @@ function StepItem({
         )}
         {step.result && step.status !== "review" && (
           <div className="bubble">
-            <small>AI 角色帶回的結果</small>
+            <small>會說話的朋友帶回的結果</small>
             <p style={{ whiteSpace: "pre-wrap" }}>{step.result}</p>
           </div>
         )}
@@ -391,8 +391,7 @@ function StepItem({
           )}
           {step.status === "confirmed" && step.executor === "ai" && (
             <p className="muted grow">
-              等你的 AI 角色完成。可以在 AI
-              用戶端說：「看看我交給你的步驟。」做完之後會先給你看過，你決定要不要公開。
+              等會說話的朋友完成。可以跟會說話的朋友說：「看看我交給你的步驟。」做完之後會先給你看過，你決定要不要公開。
             </p>
           )}
           {step.status === "confirmed" && when && (
@@ -522,7 +521,7 @@ function StepsBody() {
         <Empty>
           {tab === "draft" ? (
             <>
-              AI 角色還沒有建議。先
+              會說話的朋友還沒有建議。先
               <Link className="btn ghost" to="/connect">
                 找會說話的朋友
               </Link>
@@ -534,7 +533,7 @@ function StepsBody() {
               <button className="text-link" onClick={() => setTab("confirmed")}>
                 進行中
               </button>
-              看交給 AI 的步驟，做完之後會先放在這裡。
+              看交給會說話的朋友的步驟，做完之後會先放在這裡。
             </>
           ) : tab === "confirmed" ? (
             <>

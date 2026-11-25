@@ -51,9 +51,9 @@ function DiscoveriesBody() {
       <ErrorBox error={error} />
       {!data?.length && (
         <Empty>
-          <p>還沒有發現。請朋友去鎮上逛逛，或到地圖上看看大家做過的事。</p>
+          <p>還沒有發現。請會說話的朋友去鎮上逛逛，或到地圖上看看大家做過的事。</p>
           <Link to="/connect" className="btn ghost">
-            請朋友去逛逛
+            請會說話的朋友去逛逛
           </Link>
           <Link to="/map" className="btn primary">
             去地圖看看
@@ -64,12 +64,12 @@ function DiscoveriesBody() {
         <article key={d.id} className="who">
           <Avatar
             appearance={me?.character?.appearance}
-            name={me?.character?.name ?? "我的角色"}
+            name={me?.character?.name ?? "我的小龍"}
             size={52}
           />
           <div className="bubble grow stack" style={{ gap: 8 }}>
             <div className="row">
-              <strong className="grow">{me?.character?.name ?? "我的角色"}</strong>
+              <strong className="grow">{me?.character?.name ?? "我的小龍"}</strong>
               {!d.readAt && <span className="badge">新</span>}
               <small>{timeAgo(d.createdAt)}</small>
             </div>

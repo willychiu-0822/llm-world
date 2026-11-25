@@ -66,7 +66,7 @@ function NewStepBody() {
     try {
       await api("/api/first-steps", { method: "POST", body: p });
       await reload();
-      toast(p.executor === "ai" ? "交給 AI 角色了" : "第一步定好了");
+      toast(p.executor === "ai" ? "交給會說話的朋友了" : "第一步定好了");
       nav("/steps");
     } catch (e) {
       setError(e as Error);
@@ -85,11 +85,11 @@ function NewStepBody() {
         )}
         {trial.data && <p>想試試「{trial.data.title}」。</p>}
         <p className="muted">
-          第一步越小越好：一次就能完成、清楚知道何時何地。可以交給 AI 角色，也可以本人去做。
+          第一步越小越好：一次就能完成、清楚知道何時何地。可以交給會說話的朋友，也可以自己去做。
         </p>
         {me && me.wants.length === 0 && (
           <p className="notice">
-            你還沒有寫下想做的事，<Link to="/me/character">去寫一件</Link>會讓角色更懂你。
+            你還沒有寫下想做的事，<Link to="/me/character">去寫一件</Link>會讓小龍更懂你。
           </p>
         )}
       </section>

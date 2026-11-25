@@ -26,7 +26,7 @@ export async function listConnections(ctx: AppContext, userId: string): Promise<
   const byClient = new Map<string, ConnectionView>();
   for (const g of grants) {
     const info = (g.info ?? {}) as { client_name?: string };
-    const name = info.client_name?.trim() || "AI 用戶端";
+    const name = info.client_name?.trim() || "會說話的朋友";
     const cur = byClient.get(g.clientId);
     if (!cur) {
       byClient.set(g.clientId, {

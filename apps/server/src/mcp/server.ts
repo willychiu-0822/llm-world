@@ -1,26 +1,26 @@
-import { ACCESSORY_LABELS, DISTRICTS, executor, type Appearance } from "@lj/core";
+import { ACCESSORY_LABELS, type Appearance, DISTRICTS, executor } from "@lj/core";
 import { characters, newId, trialEvents } from "@lj/db";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { eq } from "drizzle-orm";
-import { z, ZodError } from "zod";
+import { ZodError, z } from "zod";
 import type { AppContext } from "../context";
 import { AppError } from "../http/errors";
 import { getCharacter, listWants } from "../services/characters";
 import { getDeedView } from "../services/deeds";
-import { getLifeForFriend } from "../services/life";
 import { bringBack, discover } from "../services/discover";
+import { getLifeForFriend } from "../services/life";
 import { askProvider } from "../services/questions";
 import { completeAiStep, listSteps, proposeStep } from "../services/steps";
 import { getPlace } from "../services/town";
 import { getTrialView } from "../services/trials";
 
 const RULES = `龍角鎮的規則：
-- 鎮上的「事蹟」都是真人的真實經驗（執行者可能是本人，或是真人交給 AI 角色做的事）。不要捏造事蹟、人或試用機會；只帶回你從工具裡真正讀到的內容，並保留來源。
+- 鎮上的「事蹟」都是真人的真實經驗（執行者可能是本人，或是真人交給會說話的朋友做的事）。不要捏造事蹟、人或試用機會；只帶回你從工具裡真正讀到的內容，並保留來源。
 - 標示「示範」的內容是範例，不是真人；提到時要說明它是示範。
 - 優先介紹跟對方相似的人的「第一次」，而不是高手的精彩片段。
-- 你可以建議第一步，但第一步要由對方在龍角鎮確認才成立；需要本人執行的步驟，你不能替對方完成或承諾。
+- 你可以建議第一步，但第一步要由對方在龍角鎮確認才成立；需要對方自己去做的步驟，你不能替對方完成或承諾。
 - 對方隨時可以停下或退回，不要催促、不要用罪惡感說服。
-- 用繁體中文、以角色的口吻說話，用「你」稱呼對方，不要叫「主人」。
+- 用繁體中文、以小龍的口吻說話，用「你」稱呼對方，不要叫「主人」。
 - 小龍「今天的生活」（逛街、運動、串門子等）是虛構的小故事，不是真人做過的事；不要把它說成真人經驗，也不要當成鎮上的事蹟帶回。
 - 回報結果時不要寫內部編號（例如 pq_、stp_、want_），也不要寫只有對方知道的私事。對方會先看過、可以修改，公開之後別人才看得到。`;
 
@@ -94,7 +94,7 @@ export function buildMcpServer(ctx: AppContext, userId: string) {
           character: c
             ? { name: c.name, appearance: c.appearance, personality: c.personality }
             : null,
-          note: c ? undefined : "你還沒有設定角色，請先到龍角鎮設定角色。",
+          note: c ? undefined : "你還沒有設定小龍，請先到龍角鎮設定小龍。",
           wants: wants.map((w) => ({ id: w.id, text: w.text, districtKey: w.districtKey })),
           pendingAiSteps: pending.length,
           districts: DISTRICTS.map((d) => ({
@@ -300,15 +300,15 @@ export function buildMcpServer(ctx: AppContext, userId: string) {
       const wants = (await listWants(ctx, userId)).filter((w) => w.status === "active");
       const a = c?.appearance as Appearance | undefined;
       const text = c
-        ? `請你扮演我在龍角鎮的角色「${c.name}」。
+        ? `請你扮演我在龍角鎮的小龍「${c.name}」。
 外觀：${a?.description || ""}（配件：${a ? ACCESSORY_LABELS[a.accessory] : ""}）
 個性：${c.personality || "（未設定）"}
 我想做的事：${wants.map((w) => `「${w.text}」`).join("、") || "（還沒有）"}
 
 ${RULES}
 
-請先用 character_get 和 world_discover 去鎮上逛逛，挑出跟我相似的人的真實事蹟或試用機會，用 discovery_bring_back 帶回來，並用角色的口吻告訴我你發現了什麼。`
-        : `我還沒有在龍角鎮設定角色。請提醒我先到龍角鎮設定角色和想做的事。\n\n${RULES}`;
+請先用 character_get 和 world_discover 去鎮上逛逛，挑出跟我相似的人的真實事蹟或試用機會，用 discovery_bring_back 帶回來，並用小龍的口吻告訴我你發現了什麼。`
+        : `我還沒有在龍角鎮設定小龍。請提醒我先到龍角鎮設定小龍和想做的事。\n\n${RULES}`;
       return { messages: [{ role: "user", content: { type: "text", text } }] };
     },
   );

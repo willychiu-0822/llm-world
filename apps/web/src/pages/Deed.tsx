@@ -11,7 +11,7 @@ import { useFetch } from "../lib/useFetch";
 const SOURCE: Record<string, string> = {
   provider_confirmed: "店家確認出席",
   self: "自己記下",
-  ai: "朋友帶回",
+  ai: "會說話的朋友帶回",
 };
 
 export function DeedPage() {
@@ -63,7 +63,7 @@ function DeedBody() {
         </div>
         {data.summary && (
           <div className="bubble">
-            <small>{data.executor === "ai" ? "AI 角色帶回的結果" : "紀錄"}</small>
+            <small>{data.executor === "ai" ? "會說話的朋友帶回的結果" : "紀錄"}</small>
             <p style={{ whiteSpace: "pre-wrap" }}>{data.summary}</p>
           </div>
         )}

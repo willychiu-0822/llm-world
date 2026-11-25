@@ -8,7 +8,7 @@ import { Avatar } from "./Avatar";
 
 export function ExecutorTag({ executor }: { executor: string }) {
   return executor === "ai" ? (
-    <span className="tag tag-ai">朋友做的</span>
+    <span className="tag tag-ai">會說話的朋友</span>
   ) : (
     <span className="tag tag-self">自己做的</span>
   );

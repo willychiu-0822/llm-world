@@ -109,9 +109,9 @@ export function MePage() {
             </div>
           </div>
           <label className="field">
-            <span>寶寶名字</span>
+            <span>小龍名字</span>
             <input
-              aria-label="寶寶名字"
+              aria-label="小龍名字"
               value={name}
               maxLength={20}
               onChange={(e) => setName(e.target.value)}
@@ -162,7 +162,7 @@ export function MePage() {
       <details className="panel advanced">
         <summary>進階</summary>
         <div className="stack">
-          {(me.pet?.stage ?? 0) >= 2 && <Link to="/connect">幫手</Link>}
+          {(me.pet?.stage ?? 0) >= 2 && <Link to="/connect">會說話的朋友</Link>}
           {me.character && (
             <>
               <Link to="/me/character">換個造型</Link>

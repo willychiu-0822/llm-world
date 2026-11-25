@@ -1,6 +1,5 @@
 import { expect } from "@playwright/test";
-import { test } from "./helpers";
-import { evidence, json } from "./helpers";
+import { evidence, json, test } from "./helpers";
 
 test("UAT-04 領養每一步的選項至少三欄，下一步在兩點五個螢幕內", async ({ page }) => {
   await json(
@@ -25,7 +24,7 @@ test("UAT-04 領養每一步的選項至少三欄，下一步在兩點五個螢�
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.getByRole("button", { name: "下一步" }).click();
   await page.getByRole("button", { name: "下一步" }).click();
-  await expect(page.getByLabel("角色名字")).toBeVisible();
+  await expect(page.getByLabel("小龍名字")).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await evidence(page, "UAT-04-character-layout");
 });
