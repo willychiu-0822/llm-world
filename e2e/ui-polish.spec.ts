@@ -1,5 +1,5 @@
 import { expect, type Page } from "@playwright/test";
-import { test, evidence, growToStageTwo, json } from "./helpers";
+import { evidence, growToStageTwo, json, test } from "./helpers";
 
 async function signIn(page: Page) {
   await json(
@@ -42,7 +42,7 @@ test("UAT-14a 空狀態都能直接走到下一步", async ({ page }) => {
     await layoutAndEvidence(page, `UAT-14a-${route.slice(1)}`);
   }
   await page.goto("/steps");
-  for (const tab of [/朋友的建議/, /完成了/]) {
+  for (const tab of [/會說話的朋友的建議/, /完成了/]) {
     await page.getByRole("tab", { name: tab }).click();
     await expect(page.locator("main .empty").locator("a, button").first()).toBeVisible();
     await evidence(page, `UAT-14a-steps-${tab.source === "完成了" ? "done" : "ai"}`);
@@ -82,7 +82,7 @@ test("UAT-14c 測試登入說明可照做且寫下願望後可去地圖", async 
   await page.goto("/me/character");
   await page.getByRole("button", { name: "下一步" }).click();
   await page.getByRole("button", { name: "下一步" }).click();
-  await page.getByLabel("角色名字").fill("新來的小龍");
+  await page.getByLabel("小龍名字").fill("新來的小龍");
   await expect(page.locator("main .btn.primary:visible")).toHaveCount(1);
   await page.getByRole("button", { name: "帶牠回家" }).click();
   await page.getByRole("button", { name: "去找牠" }).click();

@@ -1,5 +1,4 @@
 import { expect } from "@playwright/test";
-import { test } from "./helpers";
 import {
   apiAs,
   approvedProvider,
@@ -8,6 +7,7 @@ import {
   loginPage,
   look,
   mcpConnect,
+  test,
   tool,
 } from "./helpers";
 
@@ -52,7 +52,7 @@ test("Xiaoan's loop: AI step first, then going to the trial in person", async ({
       title: "第一次聲樂試用課",
       whenText: "每週六 10:00",
       processInfo: "前十分鐘練呼吸，接著唱音階，最後選一首熟悉的歌。",
-      aiFirstStepHint: "請角色來問老師任何問題",
+      aiFirstStepHint: "請會說話的朋友來問老師任何問題",
       selfFirstStepHint: "報名這週六的試用課",
     },
     [{ question: "完全不會唱也可以嗎？", answer: "可以，大部分人第一次都會破音。" }],
@@ -119,8 +119,8 @@ test("Xiaoan's loop: AI step first, then going to the trial in person", async ({
     reason: "先知道會發生什麼，比較不怕",
   });
   await page.goto("/steps");
-  await page.getByRole("tab", { name: /朋友的建議/ }).click();
-  await expect(page.getByText("AI 的理由：先知道會發生什麼，比較不怕")).toBeVisible();
+  await page.getByRole("tab", { name: /會說話的朋友的建議/ }).click();
+  await expect(page.getByText("會說話的朋友的理由：先知道會發生什麼，比較不怕")).toBeVisible();
   await page.getByRole("button", { name: "確認這一步" }).click();
   await expect(page.getByText("這一步成立了")).toBeVisible();
 
@@ -160,7 +160,7 @@ test("Xiaoan's loop: AI step first, then going to the trial in person", async ({
     .getByRole("link", { name: "看看這件事" })
     .click();
   await expect(page).toHaveURL(/\/deeds\/deed_/);
-  await expect(page.getByText("朋友做的", { exact: true })).toBeVisible();
+  await expect(page.getByText("會說話的朋友", { exact: true })).toBeVisible();
   await expect(page.getByText("真人做過", { exact: true })).toHaveCount(0);
   await expect(page.getByText(/前十分鐘練呼吸/)).toBeVisible();
 
@@ -172,7 +172,7 @@ test("Xiaoan's loop: AI step first, then going to the trial in person", async ({
     }),
   );
   await page.goto("/notifications");
-  await expect(page.getByText(/回答了你的 AI 問的問題/)).toBeVisible();
+  await expect(page.getByText(/回答了會說話的朋友問的問題/)).toBeVisible();
 
   // ⑨ → ⑤ 第二輪：本人報名試用課
   await page.goto(`/trials/${voice.trial.id}`);

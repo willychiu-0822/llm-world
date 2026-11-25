@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Empty, ErrorBox, Loading } from "../components/Bits";
 import { Dialog } from "../components/Dialog";
 import { api } from "../lib/api";
@@ -80,7 +80,7 @@ export function AdminPage() {
           <div className="grid">
             <div>
               <div className="stat">{m.users}</div>
-              <small>真人用戶（{m.characters} 個角色）</small>
+              <small>真人用戶（{m.characters} 隻小龍）</small>
             </div>
             <div>
               <div className="stat">{m.steps.total}</div>
@@ -93,7 +93,7 @@ export function AdminPage() {
               <div className="stat">
                 {m.steps.byExecutor.ai} / {m.steps.byExecutor.self}
               </div>
-              <small>AI 執行 / 本人執行</small>
+              <small>會說話的朋友做的 / 自己做的</small>
             </div>
             <div>
               <div className="stat">{m.deeds.real}</div>

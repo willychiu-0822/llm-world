@@ -1,5 +1,5 @@
-import { mcpAuthRouter } from "@modelcontextprotocol/sdk/server/auth/router.js";
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { mcpAuthRouter } from "@modelcontextprotocol/sdk/server/auth/router.js";
 import type { OAuthClientInformationFull } from "@modelcontextprotocol/sdk/shared/auth.js";
 import { Router } from "express";
 import type { AppContext } from "../context";
@@ -32,16 +32,16 @@ function consentPage(o: {
   req: string;
   csrf: string;
 }) {
-  const who = o.characterName ? `「${esc(o.characterName)}」` : "還沒取名的寶寶";
+  const who = o.characterName ? `「${esc(o.characterName)}」` : "還沒取名的小龍";
   return `<!doctype html>
 <html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>連接 AI · 龍角鎮</title>
+<title>連接會說話的朋友 · 龍角鎮</title>
 <style>${CONSENT_STYLE}</style></head><body><main class="card">
-<h1>讓這個幫手進龍角鎮</h1>
+<h1>讓這位會說話的朋友進龍角鎮</h1>
 <p><strong>${esc(o.clientName)}</strong> 想進龍角鎮，幫${who}去逛逛。</p>
-<p>同意後，這個 AI 可以：</p>
-<ul><li>讀取你的角色設定與想做的事</li><li>在鎮上探索真人的做過的事與試用機會</li><li>把發現帶回你的小信箱、向提供者發問</li><li>建議第一步（需要你在龍角鎮確認）、完成你交給它的 AI 步驟（結果要你看過才會公開）</li></ul>
-<p>它看不到你的 Email、私人紀錄，也不能替你做出需要本人執行的承諾。</p>
+<p>同意後，這位會說話的朋友可以：</p>
+<ul><li>讀取你的小龍設定與想做的事</li><li>在鎮上探索真人的做過的事與試用機會</li><li>把發現帶回你的小信箱、向提供者發問</li><li>建議第一步（需要你在龍角鎮確認）、完成你交給會說話的朋友的步驟（結果要你看過才會公開）</li></ul>
+<p>牠看不到你的 Email、私人紀錄，也不能替你答應需要你自己去做的事。</p>
 <form method="post" action="/oauth/consent"><input type="hidden" name="req" value="${esc(o.req)}"><input type="hidden" name="csrf" value="${esc(o.csrf)}">
 <div class="row"><button class="no" name="decision" value="deny">不要</button><button class="ok" name="decision" value="approve">同意連接</button></div></form>
 </main></body></html>`;
@@ -77,7 +77,10 @@ export function oauthRoutes(ctx: AppContext) {
       }
       const pending = await provider.pendingRequest(reqId).catch(() => null);
       if (!pending) {
-        res.status(400).type("html").send("<p>這個連接請求已過期，請回到 AI 用戶端重新連接。</p>");
+        res
+          .status(400)
+          .type("html")
+          .send("<p>這個連接請求已過期，請回到會說話的朋友那裡重新連接。</p>");
         return;
       }
       const client = (await provider.clientsStore.getClient(
@@ -87,7 +90,7 @@ export function oauthRoutes(ctx: AppContext) {
       res.setHeader("Cache-Control", "no-store");
       res.type("html").send(
         consentPage({
-          clientName: client.client_name ?? "AI 用戶端",
+          clientName: client.client_name ?? "會說話的朋友",
           characterName: character?.name ?? null,
           req: reqId,
           csrf: csrfFor(ctx, reqId, req.user.id),

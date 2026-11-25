@@ -1,5 +1,5 @@
 import { DISTRICT_BY_KEY, type DistrictKey } from "@lj/core";
-import { useState, type FormEvent } from "react";
+import { type FormEvent, useState } from "react";
 import { formatDateTime } from "../lib/format";
 import type { Predecessor, Session, Want } from "../lib/types";
 
@@ -80,7 +80,7 @@ export function StepForm(props: {
             {props.predecessors.map((p) => (
               <li key={p.deedId} className="predecessor">
                 <span className={`tag ${p.executor === "ai" ? "tag-ai" : "tag-self"}`}>
-                  {p.executor === "ai" ? "AI 執行" : "本人執行"}
+                  {p.executor === "ai" ? "會說話的朋友" : "自己做的"}
                 </span>
                 {p.isDemo && <span className="tag tag-demo">示範</span>}
                 <span className="grow">
@@ -104,7 +104,7 @@ export function StepForm(props: {
           <h3>提供者建議的第一步</h3>
           {props.hints.ai && (
             <p>
-              <span className="tag tag-ai">AI</span> {props.hints.ai}{" "}
+              <span className="tag tag-ai">會說話的朋友</span> {props.hints.ai}{" "}
               <button
                 type="button"
                 className="btn small ghost"
@@ -145,7 +145,7 @@ export function StepForm(props: {
             checked={executor === "ai"}
             onChange={() => setExecutor("ai")}
           />
-          <strong>交給 AI 角色</strong>
+          <strong>交給會說話的朋友</strong>
           <small>在鎮上先試做、打聽、研究</small>
         </label>
         <label className={`choice-card ${executor === "self" ? "on" : ""}`}>

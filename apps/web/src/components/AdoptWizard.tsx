@@ -1,10 +1,10 @@
 import {
   ACCESSORIES,
   ACCESSORY_LABELS,
+  type Appearance,
   BODY_LABELS,
   BODY_SHAPES,
   PALETTE,
-  type Appearance,
 } from "@lj/core";
 import { useEffect, useState } from "react";
 import { ApiError, NAME_MODERATION_HINT } from "../lib/api";
@@ -151,9 +151,9 @@ export function AdoptWizard({
         <section className="stack">
           <h1>叫什麼名字？</h1>
           <label className="field">
-            <span>名字</span>
+            <span>小龍名字</span>
             <input
-              aria-label="角色名字"
+              aria-label="小龍名字"
               value={name}
               onChange={(e) => setName(e.target.value)}
               maxLength={20}

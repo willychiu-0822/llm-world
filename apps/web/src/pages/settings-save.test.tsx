@@ -1,10 +1,10 @@
+import { DEFAULT_APPEARANCE } from "@lj/core";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { DEFAULT_APPEARANCE } from "@lj/core";
-import { MePage } from "./Me";
 import type { Me } from "../lib/types";
+import { MePage } from "./Me";
 
 const apiMock = vi.hoisted(() => vi.fn());
 vi.mock("../lib/api", () => ({ api: (...args: unknown[]) => apiMock(...args) }));
@@ -67,8 +67,8 @@ describe("LW-10 settings save", () => {
     expect(screen.getByRole("button", { name: "存起來" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "儲存名字" })).toBeNull();
 
-    await userEvent.clear(screen.getByLabelText("寶寶名字"));
-    await userEvent.type(screen.getByLabelText("寶寶名字"), "還沒存的名字");
+    await userEvent.clear(screen.getByLabelText("小龍名字"));
+    await userEvent.type(screen.getByLabelText("小龍名字"), "還沒存的名字");
 
     const advanced = document.querySelector("details.advanced") as HTMLDetailsElement;
     advanced.open = true;

@@ -1,16 +1,16 @@
-import { DEFAULT_APPEARANCE, bannedHits } from "@lj/core";
+import { bannedHits, DEFAULT_APPEARANCE } from "@lj/core";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Layout } from "../components/Layout";
 import { AdoptWizard } from "../components/AdoptWizard";
 import { CabinetView } from "../components/CabinetView";
 import { Celebrate } from "../components/Celebrate";
-import { HomePage } from "./Home";
-import { MePage } from "./Me";
+import { Layout } from "../components/Layout";
 import { ApiError, NAME_MODERATION_HINT } from "../lib/api";
 import type { Me } from "../lib/types";
+import { HomePage } from "./Home";
+import { MePage } from "./Me";
 
 const look = { ...DEFAULT_APPEARANCE, description: "" };
 
@@ -144,7 +144,7 @@ describe("novice loop", () => {
     await userEvent.click(screen.getByRole("button", { name: "下一步" }));
     expect(screen.getByRole("heading", { name: "頭上要長什麼？" })).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "下一步" }));
-    await userEvent.type(screen.getByLabelText("角色名字"), "小龍");
+    await userEvent.type(screen.getByLabelText("小龍名字"), "小龍");
     await userEvent.click(screen.getByRole("button", { name: "帶牠回家" }));
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ name: "小龍" }));
     expect(bannedHits(document.body.textContent ?? "")).toEqual([]);
@@ -159,7 +159,7 @@ describe("novice loop", () => {
     render(<AdoptWizard initial={{ name: "", appearance: look }} onSave={onSave} />);
     await userEvent.click(screen.getByRole("button", { name: "下一步" }));
     await userEvent.click(screen.getByRole("button", { name: "下一步" }));
-    await userEvent.type(screen.getByLabelText("角色名字"), "禁字");
+    await userEvent.type(screen.getByLabelText("小龍名字"), "禁字");
     await userEvent.click(screen.getByRole("button", { name: "帶牠回家" }));
     const alert = await screen.findByRole("alert");
     expect(alert).toHaveTextContent(NAME_MODERATION_HINT);
@@ -228,7 +228,7 @@ describe("novice loop", () => {
     );
     const advanced = document.querySelector("details.advanced") as HTMLDetailsElement | null;
     expect(advanced?.open).toBe(false);
-    expect(advanced?.textContent).not.toContain("幫手");
+    expect(advanced?.textContent).not.toContain("會說話的朋友");
     expect(advanced?.textContent).toContain("刪除帳號");
     expect(advanced?.textContent).toContain("開一間小店");
     expect(

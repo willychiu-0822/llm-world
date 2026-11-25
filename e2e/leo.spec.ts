@@ -1,6 +1,5 @@
 import { expect } from "@playwright/test";
-import { test } from "./helpers";
-import { growToStageTwo, json, loginPage, look } from "./helpers";
+import { growToStageTwo, json, loginPage, look, test } from "./helpers";
 
 /**
  * 情境 B：活動推廣者 Leo
@@ -39,7 +38,7 @@ test("Leo opens a shop, publishes a trial, confirms attendance and sees thanks",
   await leo
     .getByLabel("過程資訊")
     .fill("前 10 分鐘只做暖身；大約一半的人是第一次跑；最慢的人由我陪跑。");
-  await leo.getByLabel("建議的 AI 第一步").fill("來問 Leo 的 agent 任何問題");
+  await leo.getByLabel("建議會說話的朋友的第一步").fill("來問我第一次會做什麼");
   await leo.getByLabel("建議的本人第一步").fill("報名這週日的慢跑");
   await leo.getByRole("button", { name: "上架" }).click();
   await expect(leo.getByRole("heading", { name: "新手 5K 慢跑" })).toBeVisible();

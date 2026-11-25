@@ -65,7 +65,7 @@ function MirrorBody() {
           <p>這裡記的是你真的做過的事。</p>
           <p>
             你做了 <strong>{data.stats.deeds}</strong> 件（自己 {data.stats.byExecutor.self}
-            、朋友幫忙 {data.stats.byExecutor.ai}）。
+            、會說話的朋友幫忙 {data.stats.byExecutor.ai}）。
             {data.stats.followed.referenced > 0 && (
               <>
                 {" "}
@@ -78,7 +78,7 @@ function MirrorBody() {
       </section>
 
       <section className="panel stack">
-        <h2>角色和你的重疊</h2>
+        <h2>小龍和你的重疊</h2>
         {data.overlap.length === 0 ? (
           <Empty>
             <p>還沒有想做的事。</p>

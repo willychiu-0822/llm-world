@@ -76,14 +76,14 @@ function TrialBody() {
               ))}
             </ul>
           ) : (
-            <p className="muted">目前沒有排定的場次，可以先請 AI 角色去問問看。</p>
+            <p className="muted">目前沒有排定的場次，可以先請會說話的朋友去問問看。</p>
           )}
         </section>
         <div className="row wrap">
           <Link className="btn primary" to={me ? next : `/login?next=${encodeURIComponent(next)}`}>
             我也想試試
           </Link>
-          <small className="muted">可以交給 AI 先打聽，也可以直接報名</small>
+          <small className="muted">可以交給會說話的朋友先打聽，也可以直接報名</small>
         </div>
       </article>
     </div>

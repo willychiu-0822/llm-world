@@ -211,6 +211,8 @@ export const NOVICE_BANNED = [
   "試著",
   "記得",
   "反思",
+  "寶寶",
+  "角色",
 ] as const;
 
 export function bannedHits(text: string): string[] {

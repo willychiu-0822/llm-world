@@ -17,7 +17,7 @@ const KNOWN: Record<string, string> = {
   "cannot reference your own deed": "不能參考自己做過的事",
   "source deed not available": "這件參考已經看不到了",
   "step must be confirmed and not done": "這一步已經完成，或還沒確認",
-  "AI steps are completed by your AI": "AI 步驟要由你的 AI 角色完成",
+  "AI steps are completed by your AI": "這一步要由會說話的朋友完成",
   "this step has no planned time": "這一步沒有設定時間",
   "step is not a draft": "這一步已經確認過了",
   "approved provider required": "需要先成為核准的提供者",

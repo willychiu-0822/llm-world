@@ -1,4 +1,4 @@
-import { useRef, useState, type FormEvent } from "react";
+import { type FormEvent, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { api } from "../lib/api";
 import { useSession } from "../lib/session";
@@ -40,9 +40,9 @@ export function LoginPage() {
   return (
     <div className="stack" style={{ maxWidth: 440, margin: "24px auto" }}>
       <section className="panel stack">
-        <h1>登入後就能把寶寶帶回家</h1>
+        <h1>登入後就能把小龍帶回家</h1>
         {next.startsWith("/oauth/") && (
-          <p className="notice">你的 AI 用戶端想連接龍角鎮，登入後會請你確認。</p>
+          <p className="notice">會說話的朋友想連接龍角鎮，登入後會請你確認。</p>
         )}
         {closed && (
           <div className="stack">

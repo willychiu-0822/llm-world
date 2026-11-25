@@ -1,20 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { LIFE_ACTIVITIES } from "./life";
 import {
   BABY_LINES,
-  GROWTH_AT,
-  KEEPSAKES,
-  TOWN_FOLK,
-  TOWN_SIGHTS,
   bannedHits,
   dedupeKeepsakes,
+  GROWTH_AT,
   growthLine,
   growthStage,
+  KEEPSAKES,
   keepsakeFor,
   nextGrowthAt,
   starLine,
+  TOWN_FOLK,
+  TOWN_SIGHTS,
   warmLine,
 } from "./keepsake";
+import { LIFE_ACTIVITIES } from "./life";
 
 const chrome = [
   ...BABY_LINES,
@@ -35,7 +35,7 @@ const chrome = [
   "小背包背好了。",
   "有一顆蛋在龍角鎮門口滾來滾去。好像在等你。",
   "把牠撿回家",
-  "登入後就能把寶寶帶回家。",
+  "登入後就能把小龍帶回家。",
   "頭上要長什麼？角？葉子？還是一頂貝雷帽？",
   "嗨！我是小龍。",
   "寫你要做的就好，我幫你記著。",

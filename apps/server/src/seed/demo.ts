@@ -2,7 +2,7 @@ import { characters, newId, providers, users } from "@lj/db";
 import { eq } from "drizzle-orm";
 import type { AppContext } from "../context";
 import { setProviderStatus } from "../services/admin";
-import { saveCharacter, addWant } from "../services/characters";
+import { addWant, saveCharacter } from "../services/characters";
 import {
   addFaq,
   addSession,
@@ -57,7 +57,7 @@ const PEOPLE: DemoPerson[] = [
     steps: [
       {
         executor: "ai",
-        text: "請角色先問清楚聲樂試用課會做什麼",
+        text: "請會說話的朋友先問清楚聲樂試用課會做什麼",
         result:
           "老師說：前十分鐘練呼吸，接著唱音階，最後選一首熟悉的歌。不會要你一個人在大家面前唱。",
       },
@@ -146,7 +146,7 @@ const PEOPLE: DemoPerson[] = [
     steps: [
       {
         executor: "ai",
-        text: "請角色找找有沒有新手友善的讀書會",
+        text: "請會說話的朋友找找有沒有新手友善的讀書會",
         result: "找到每月一次的社區讀書會，第一次參加可以只聽不發言。",
       },
       {
@@ -278,7 +278,7 @@ const PROVIDERS: DemoProvider[] = [
       whenText: "每週六 10:00",
       description: "給從來沒學過唱歌的人。",
       processInfo: "前十分鐘練呼吸，接著唱音階，最後選一首熟悉的歌。不會要你一個人在大家面前唱。",
-      aiFirstStepHint: "請你的角色來問老師任何問題",
+      aiFirstStepHint: "請會說話的朋友來問老師任何問題",
       selfFirstStepHint: "報名這週六的試用課",
     },
     faqs: [
@@ -321,7 +321,7 @@ const PROVIDERS: DemoProvider[] = [
       whenText: "每週三晚上",
       description: "做歪了也很好看。",
       processInfo: "老師示範 15 分鐘，接著每個人捏一個杯子，燒好後一個月寄給你。",
-      aiFirstStepHint: "請角色先問問會不會弄髒衣服",
+      aiFirstStepHint: "請會說話的朋友先問問會不會弄髒衣服",
       selfFirstStepHint: "報名一次體驗課",
     },
     faqs: [{ question: "會弄髒衣服嗎？", answer: "現場有圍裙可以借。" }],

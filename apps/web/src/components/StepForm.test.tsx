@@ -56,7 +56,7 @@ describe("StepForm", () => {
     const onSubmit = vi.fn();
     render(<StepForm wants={wants} predecessors={[]} onSubmit={onSubmit} />);
     const u = userEvent.setup();
-    await u.click(screen.getByRole("radio", { name: /AI 角色/ }));
+    await u.click(screen.getByRole("radio", { name: /會說話的朋友/ }));
     expect(screen.queryByLabelText("什麼時候")).toBeNull();
     await u.type(screen.getByLabelText("第一步"), "幫我問老師流程");
     await u.click(screen.getByRole("button", { name: "確定這一步" }));
