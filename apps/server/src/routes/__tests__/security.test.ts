@@ -1,4 +1,4 @@
-import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import request from "supertest";
@@ -90,6 +90,51 @@ describe("REST write rate limit", () => {
     expect(blocked.status).toBe(429);
     expect(blocked.body.error).toEqual({ code: "rate_limited", message: REST_WRITE_LIMIT_MESSAGE });
     expect((await send("203.0.113.11", 1)).status).toBe(200);
+  });
+});
+
+describe("OAuth sign-in has its own write budget", () => {
+  const env = useTestApp({ restWriteRateLimitPerMinute: 2 });
+
+  it("still accepts sign-in POSTs after ordinary writes are used up", async () => {
+    const ip = "198.51.100.20";
+    const write = (n: number) =>
+      request(env.app)
+        .post("/api/auth/dev-login")
+        .set("X-Forwarded-For", ip)
+        .send({ email: `writes-${n}@example.com`, name: "小安" });
+    const token = () =>
+      request(env.app)
+        .post("/token")
+        .set("X-Forwarded-For", ip)
+        .type("form")
+        .send({ grant_type: "authorization_code" });
+
+    expect((await write(1)).status).toBe(200);
+    expect((await token()).status).not.toBe(429);
+    expect((await write(2)).status).toBe(200);
+    const blockedWrite = await write(3);
+    expect(blockedWrite.status).toBe(429);
+    expect(blockedWrite.body.error).toEqual({
+      code: "rate_limited",
+      message: REST_WRITE_LIMIT_MESSAGE,
+    });
+
+    const callback = await token();
+    expect(callback.status).not.toBe(429);
+    const blockedSignIn = await token();
+    expect(blockedSignIn.status).toBe(429);
+    expect(blockedSignIn.body.error).toEqual({
+      code: "rate_limited",
+      message: REST_WRITE_LIMIT_MESSAGE,
+    });
+
+    const user = await login(env.app, "signer@example.com", "小安");
+    expect((await user.put("/api/me/character").send(nova)).status).toBe(200);
+    expect((await user.put("/api/me/character").send(nova)).status).toBe(200);
+    expect((await user.put("/api/me/character").send(nova)).status).toBe(429);
+    const consent = await user.post("/oauth/consent").type("form").send({ decision: "deny" });
+    expect(consent.status).not.toBe(429);
   });
 });
 
