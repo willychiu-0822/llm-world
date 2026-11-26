@@ -1,10 +1,10 @@
-import { DISTRICT_KEYS, KEEPSAKES, keepsakeFor, type DistrictKey } from "@lj/core";
+import { DISTRICT_KEYS, type DistrictKey, KEEPSAKES, keepsakeFor } from "@lj/core";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Dialog } from "./Dialog";
-import { TownMark } from "./TownMark";
 import { formatDate } from "../lib/format";
 import type { KeepsakeItem } from "../lib/types";
+import { Dialog } from "./Dialog";
+import { TownMark } from "./TownMark";
 
 export function CabinetView({
   total,
@@ -44,75 +44,67 @@ export function CabinetView({
     setPile(slotGot);
     setIndex(at);
   };
+  const note = newest
+    ? `收到了${newest.object}。還有 ${left} 件沒撿到。`
+    : total
+      ? "都撿齊了。"
+      : "櫃裡還沒有東西。小龍說牠今天想去原野。";
   return (
-    <div className="stack cabinet">
-      <header className="stack" style={{ gap: 4 }}>
-        <div className="row" style={{ justifyContent: "space-between" }}>
-          <h1>收藏櫃</h1>
-          <Link to="/" className="btn ghost">
-            回小龍身邊
-          </Link>
-        </div>
-        {newest ? (
-          <button
-            type="button"
-            className="btn primary"
-            onClick={() =>
-              show(
-                slots.find((s) => s.got.some((i) => i.deedId === newest.deedId))?.got ?? [newest],
-              )
-            }
-          >
-            看看剛撿到的
-          </button>
-        ) : total === 0 ? (
-          <Link to="/life" className="btn primary">
-            小龍的今天
-          </Link>
-        ) : (
-          <Link to="/" className="btn primary">
-            去找一顆信物
-          </Link>
-        )}
+    <>
+      {newest ? (
+        <button
+          type="button"
+          className="btn primary"
+          onClick={() =>
+            show(slots.find((s) => s.got.some((i) => i.deedId === newest.deedId))?.got ?? [newest])
+          }
+        >
+          看看剛撿到的
+        </button>
+      ) : total === 0 ? (
+        <Link to="/life" className="btn primary">
+          小龍的今天
+        </Link>
+      ) : (
+        <Link to="/" className="btn primary">
+          去找一顆信物
+        </Link>
+      )}
+      <section id="keepsakes" className="stack cabinet-layer" aria-labelledby="town-keepsakes">
+        <h2 id="town-keepsakes">鎮民的信物</h2>
         <p className="stat" aria-label="收藏進度">
           {kinds}/{catalog}
         </p>
-        <p className="muted">
-          {newest
-            ? `收到了${newest.object}。還有 ${left} 件沒撿到。`
-            : total
-              ? "都撿齊了。"
-              : "櫃裡還沒有東西。小龍說牠今天想去原野。"}
-        </p>
-      </header>
-      <div className="keepsake-grid" aria-label="九種信物">
-        {slots.map((slot) => {
-          const got = slot.got.length > 0;
-          const top = slot.got[0];
-          return (
-            <button
-              type="button"
-              key={slot.key}
-              className={
-                got
-                  ? `keepsake-cell${top?.deedId === newest?.deedId ? " is-new" : ""}`
-                  : "keepsake-cell is-missing"
-              }
-              disabled={!got}
-              aria-label={
-                got
-                  ? `${slot.kind.name}${slot.got.length > 1 ? ` ${slot.got.length} 顆` : ""}`
-                  : `還沒撿到的${slot.kind.name}`
-              }
-              onClick={() => got && show(slot.got)}
-            >
-              <TownMark name={slot.kind.key} size={36} />
-              <small>{slot.kind.name}</small>
-              {slot.got.length > 1 && <span className="keepsake-count">{slot.got.length}</span>}
-            </button>
-          );
-        })}
-      </div>
+        <p className="muted">{note}</p>
+        <div className="keepsake-grid" aria-label="九種信物">
+          {slots.map((slot) => {
+            const got = slot.got.length > 0;
+            const top = slot.got[0];
+            return (
+              <button
+                type="button"
+                key={slot.key}
+                className={
+                  got
+                    ? `keepsake-cell${top?.deedId === newest?.deedId ? " is-new" : ""}`
+                    : "keepsake-cell is-missing"
+                }
+                disabled={!got}
+                aria-label={
+                  got
+                    ? `${slot.kind.name}${slot.got.length > 1 ? ` ${slot.got.length} 顆` : ""}`
+                    : `還沒撿到的${slot.kind.name}`
+                }
+                onClick={() => got && show(slot.got)}
+              >
+                <TownMark name={slot.kind.key} size={36} />
+                <small>{slot.kind.name}</small>
+                {slot.got.length > 1 && <span className="keepsake-count">{slot.got.length}</span>}
+              </button>
+            );
+          })}
+        </div>
+      </section>
       {open && pile && (
         <Dialog
           title={open.object}
@@ -165,6 +157,6 @@ export function CabinetView({
           )}
         </Dialog>
       )}
-    </div>
+    </>
   );
 }

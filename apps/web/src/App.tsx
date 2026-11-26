@@ -1,5 +1,5 @@
-import { lazy, Suspense, type ReactElement } from "react";
-import { Link, Route, Routes } from "react-router-dom";
+import { lazy, type ReactElement, Suspense } from "react";
+import { Link, Navigate, Route, Routes } from "react-router-dom";
 import { Loading, RequireLogin } from "./components/Bits";
 import { Layout } from "./components/Layout";
 import { HomePage } from "./pages/Home";
@@ -49,7 +49,7 @@ export function App() {
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/life" element={guard(<LifePage />)} />
-          <Route path="/life/cabinet" element={guard(<LifePage cabinet />)} />
+          <Route path="/life/cabinet" element={guard(<Navigate to="/cabinet#life" replace />)} />
           <Route path="/me" element={guard(<MePage />)} />
           <Route path="/me/character" element={guard(<CharacterPage />)} />
           <Route path="/connect" element={guard(<ConnectPage />)} />

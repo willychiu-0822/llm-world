@@ -137,7 +137,7 @@ test("新手：領養、出門、信物、做到了、收藏", async ({ page }) 
   await expect(page.getByRole("heading", { name: "收藏櫃" })).toBeVisible();
   await expect(page.getByLabel("收藏進度")).toHaveText("1/9");
   await expect(page.locator(".keepsake-cell")).toHaveCount(9);
-  await expect(page.locator(".is-missing")).toHaveCount(8);
+  await expect(page.locator(".keepsake-cell.is-missing")).toHaveCount(8);
   await expectClean(page);
   await evidence(page, "novice-06-cabinet");
 
